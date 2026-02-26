@@ -54,7 +54,7 @@ const AddTaskModal = ({ onClose, defaultDept, isTopMgmt, isManager, currentUser 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
@@ -150,7 +150,7 @@ const AddTaskModal = ({ onClose, defaultDept, isTopMgmt, isManager, currentUser 
           )}
 
           {/* Priority + Deadline */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="label">Приоритет</label>
               <select

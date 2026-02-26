@@ -199,7 +199,7 @@ const PODetail = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top bar */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 flex-wrap">
         <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-gray-700">
           <ArrowLeft size={18} />
         </button>
@@ -237,10 +237,10 @@ const PODetail = () => {
       </div>
 
       {/* Body */}
-      <div className="max-w-6xl mx-auto p-6 flex gap-6">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 flex flex-col lg:flex-row gap-6">
 
         {/* Left — Overview */}
-        <div className="w-72 flex-shrink-0 space-y-4">
+        <div className="w-full lg:w-72 lg:flex-shrink-0 space-y-4">
           <div className="bg-white border border-gray-200 rounded-2xl p-5">
             <h3 className="text-sm font-bold text-gray-700 mb-4">Overview</h3>
 
@@ -297,7 +297,7 @@ const PODetail = () => {
           <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
             {/* Tab bar */}
             {visibleTabs.length > 1 && (
-              <div className="flex border-b border-gray-100">
+              <div className="flex border-b border-gray-100 overflow-x-auto">
                 {visibleTabs.map((t) => {
                   const openCount = po.questions.filter(
                     (q) => q.targetDepartment === t.value && !q.resolved
@@ -306,7 +306,7 @@ const PODetail = () => {
                     <button
                       key={t.value}
                       onClick={() => setActiveTab(t.value)}
-                      className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+                      className={`flex-shrink-0 px-5 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
                         activeTab === t.value
                           ? 'border-blue-600 text-blue-700'
                           : 'border-transparent text-gray-500 hover:text-gray-800'

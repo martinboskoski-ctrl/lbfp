@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { PlusCircle, ShieldCheck } from 'lucide-react';
 import KanbanBoard from '../components/tasks/KanbanBoard.jsx';
@@ -68,6 +69,7 @@ const EmployeeList = ({ dept }) => {
 };
 
 const Dashboard = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const dept = searchParams.get('dept') || '';
   const tab  = searchParams.get('tab')  || 'projects';
@@ -86,18 +88,19 @@ const Dashboard = () => {
     const next = new URLSearchParams(searchParams);
     next.set('tab', val);
     setSearchParams(next);
+    setSidebarOpen(false);
   };
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Topbar title={title} />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="flex-1 flex flex-col min-w-0">
+        <Topbar title={title} onMenuClick={() => setSidebarOpen(true)} />
 
         {/* Department sub-tabs — only shown when a specific dept is selected */}
         {dept && (
-          <div className="border-b border-gray-200 bg-white px-6">
-            <nav className="flex gap-1">
+          <div className="border-b border-gray-200 bg-white px-4">
+            <nav className="flex gap-1 overflow-x-auto">
               {[
                 ...DEPT_TABS,
                 ...(PO_DEPTS.includes(dept) ? [{ value: 'po', label: 'Purchase Order' }] : []),
@@ -105,7 +108,7 @@ const Dashboard = () => {
                 <button
                   key={t.value}
                   onClick={() => switchTab(t.value)}
-                  className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  className={`flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                     tab === t.value
                       ? 'border-blue-600 text-blue-700'
                       : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'

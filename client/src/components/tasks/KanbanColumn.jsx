@@ -42,7 +42,7 @@ const KanbanColumn = ({ status, tasks, currentUser, isManager }) => {
       {tasks.length > VISIBLE_DEFAULT && (
         <button
           onClick={() => setExpanded((x) => !x)}
-          className="mt-2 text-xs text-gray-400 hover:text-gray-700 py-1.5 rounded-lg border border-dashed border-gray-200 hover:border-gray-400 transition-colors w-full"
+          className="mt-2 text-xs text-gray-400 hover:text-gray-700 py-2.5 rounded-lg border border-dashed border-gray-200 hover:border-gray-400 transition-colors w-full"
         >
           {expanded
             ? 'Прикажи помалку ↑'

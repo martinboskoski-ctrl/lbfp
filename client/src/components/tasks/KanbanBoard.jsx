@@ -49,7 +49,7 @@ const KanbanBoard = ({ dept }) => {
       </div>
 
       {/* Kanban — 4 columns side by side, full width */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {STATUSES.map((status) => (
           <KanbanColumn
             key={status}

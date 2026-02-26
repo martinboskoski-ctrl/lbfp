@@ -39,65 +39,87 @@ const NavItem = ({ to, icon: Icon, label, end }) => (
   </NavLink>
 );
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
 
+  const handleNavClick = () => {
+    if (onClose) onClose();
+  };
+
   return (
-    <aside className="w-52 min-h-screen bg-white border-r border-gray-200 flex flex-col">
-      <div className="px-4 py-4 border-b border-gray-200">
-        <span className="text-base font-bold text-blue-700 leading-tight">ЛБФП ДОО<br />Битола</span>
-      </div>
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-30 bg-black/40"
+          onClick={onClose}
+        />
+      )}
 
-      <nav className="flex-1 p-2 overflow-y-auto space-y-0.5">
-        <div className="pt-2 pb-1 px-3">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-            Одделенија
-          </span>
+      <aside className={`
+        fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 flex flex-col
+        transform transition-transform duration-200 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:relative md:translate-x-0 md:w-52 md:z-auto md:transition-none
+      `}>
+        <div className="px-4 py-4 border-b border-gray-200">
+          <span className="text-base font-bold text-blue-700 leading-tight">ЛБФП ДОО<br />Битола</span>
         </div>
 
-        {(isTopManagement(user)
-          ? DEPARTMENTS
-          : DEPARTMENTS.filter((d) => d.value === user?.department)
-        ).map((dept) => (
-          <NavItem
-            key={dept.value}
-            to={`/dashboard?dept=${dept.value}`}
-            icon={dept.icon}
-            label={dept.label}
-          />
-        ))}
-
-        {user?.role === 'admin' && (
-          <>
-            <div className="pt-3 pb-1 px-3">
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Администрација
-              </span>
-            </div>
-            <NavItem to="/admin/users" icon={Users} label="Корисници" />
-          </>
-        )}
-      </nav>
-
-      <div className="p-3 border-t border-gray-200">
-        <div className="px-2 py-1.5 text-xs mb-1">
-          <div className="font-medium text-gray-700">{user?.name}</div>
-          <div className="text-gray-400">
-            {DEPARTMENTS.find((d) => d.value === user?.department)?.label || user?.department}
+        <nav className="flex-1 p-2 overflow-y-auto space-y-0.5">
+          <div className="pt-2 pb-1 px-3">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Одделенија
+            </span>
           </div>
-          {user?.isManager && (
-            <div className="text-blue-500 font-medium mt-0.5">Менаџер</div>
+
+          {(isTopManagement(user)
+            ? DEPARTMENTS
+            : DEPARTMENTS.filter((d) => d.value === user?.department)
+          ).map((dept) => (
+            <div key={dept.value} onClick={handleNavClick}>
+              <NavItem
+                to={`/dashboard?dept=${dept.value}`}
+                icon={dept.icon}
+                label={dept.label}
+              />
+            </div>
+          ))}
+
+          {user?.role === 'admin' && (
+            <>
+              <div className="pt-3 pb-1 px-3">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  Администрација
+                </span>
+              </div>
+              <div onClick={handleNavClick}>
+                <NavItem to="/admin/users" icon={Users} label="Корисници" />
+              </div>
+            </>
           )}
+        </nav>
+
+        <div className="p-3 border-t border-gray-200">
+          <div className="px-2 py-1.5 text-xs mb-1">
+            <div className="font-medium text-gray-700">{user?.name}</div>
+            <div className="text-gray-400">
+              {DEPARTMENTS.find((d) => d.value === user?.department)?.label || user?.department}
+            </div>
+            {user?.isManager && (
+              <div className="text-blue-500 font-medium mt-0.5">Менаџер</div>
+            )}
+          </div>
+          <button
+            onClick={logout}
+            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <LogOut size={14} />
+            Одјави се
+          </button>
         </div>
-        <button
-          onClick={logout}
-          className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-        >
-          <LogOut size={14} />
-          Одјави се
-        </button>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 };
 

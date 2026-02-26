@@ -92,7 +92,7 @@ const TaskCard = ({ task, currentUser, isManager }) => {
         <button
           onClick={() => updateStatus.mutate({ id: task._id, direction: 'backward' })}
           disabled={!canGoBack || updateStatus.isPending}
-          className={`p-1 rounded transition-colors ${
+          className={`p-2 rounded transition-colors ${
             canGoBack ? 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' : 'text-gray-200 cursor-not-allowed'
           }`}
           title="Назад"
@@ -104,7 +104,7 @@ const TaskCard = ({ task, currentUser, isManager }) => {
           <button
             onClick={() => approveTask.mutate(task._id)}
             disabled={approveTask.isPending}
-            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 text-xs font-medium transition-colors"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 text-xs font-medium transition-colors"
             title="Одобри задача"
           >
             <CheckCircle2 size={13} />
@@ -115,7 +115,7 @@ const TaskCard = ({ task, currentUser, isManager }) => {
         <button
           onClick={() => updateStatus.mutate({ id: task._id, direction: 'forward' })}
           disabled={!canGoForward || updateStatus.isPending}
-          className={`p-1 rounded transition-colors ${
+          className={`p-2 rounded transition-colors ${
             canGoForward ? 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' : 'text-gray-200 cursor-not-allowed'
           }`}
           title="Напред"
