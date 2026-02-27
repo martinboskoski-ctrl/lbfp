@@ -4,6 +4,7 @@ import { PlusCircle, ShieldCheck } from 'lucide-react';
 import KanbanBoard from '../components/tasks/KanbanBoard.jsx';
 import Whiteboard from '../components/Whiteboard.jsx';
 import POList from '../components/po/POList.jsx';
+import TerkoviGallery from '../components/terkovi/TerkoviGallery.jsx';
 import { useProjects } from '../hooks/useProjects.js';
 import { useDirectory } from '../hooks/useUsers.js';
 import ProjectCard from '../components/project/ProjectCard.jsx';
@@ -87,6 +88,7 @@ const Dashboard = () => {
   const switchTab = (val) => {
     const next = new URLSearchParams(searchParams);
     next.set('tab', val);
+    next.delete('template');
     setSearchParams(next);
     setSidebarOpen(false);
   };
@@ -191,9 +193,7 @@ const Dashboard = () => {
               )}
 
               {dept && tab === 'terkovi' && (
-                <div className="text-center py-16 text-gray-400 text-sm">
-                  Теркови — наскоро
-                </div>
+                <TerkoviGallery />
               )}
 
               {dept && tab === 'nabavki' && (

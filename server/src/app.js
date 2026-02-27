@@ -10,6 +10,7 @@ import fileRoutes from './routes/file.routes.js';
 import userRoutes from './routes/user.routes.js';
 import announcementRoutes from './routes/announcement.routes.js';
 import poRoutes from './routes/po.routes.js';
+import terkoviRoutes from './routes/terkovi.routes.js';
 
 // Validate required environment variables
 const REQUIRED_ENV = ['MONGO_URI', 'JWT_SECRET'];
@@ -31,6 +32,7 @@ app.use('/api/files',         fileRoutes);
 app.use('/api/users',         userRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/po',            poRoutes);
+app.use('/api/terkovi',       terkoviRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
