@@ -5,6 +5,7 @@ import KanbanBoard from '../components/tasks/KanbanBoard.jsx';
 import Whiteboard from '../components/Whiteboard.jsx';
 import POList from '../components/po/POList.jsx';
 import TerkoviGallery from '../components/terkovi/TerkoviGallery.jsx';
+import AgreementsPage from '../components/agreements/AgreementsPage.jsx';
 import { useProjects } from '../hooks/useProjects.js';
 import { useDirectory } from '../hooks/useUsers.js';
 import ProjectCard from '../components/project/ProjectCard.jsx';
@@ -18,6 +19,7 @@ const DEPT_TABS = [
   { value: 'projects',   label: 'Проекти' },
   { value: 'tasks',      label: 'Тековни задачи' },
   { value: 'nabavki',    label: 'Набавки' },
+  { value: 'dogovori',   label: 'Договори' },
   { value: 'vraboteni',  label: 'Вработени' },
 ];
 
@@ -200,6 +202,10 @@ const Dashboard = () => {
                 <div className="text-center py-16 text-gray-400 text-sm">
                   Набавки — наскоро
                 </div>
+              )}
+
+              {dept && tab === 'dogovori' && (
+                <AgreementsPage dept={dept} />
               )}
 
               {dept && tab === 'vraboteni' && (
