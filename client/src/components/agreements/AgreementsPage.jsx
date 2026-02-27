@@ -316,6 +316,7 @@ export default function AgreementsPage({ dept }) {
         <AddAgreementModal
           mode={modal.mode}
           initial={modal.initial}
+          dept={dept}
           onClose={() => setModal(null)}
         />
       )}

@@ -22,7 +22,7 @@ const Field = ({ label, error, children }) => (
 );
 
 // mode: 'create' | 'edit' | 'renew'
-export default function AddAgreementModal({ onClose, initial = null, mode = 'create' }) {
+export default function AddAgreementModal({ onClose, initial = null, mode = 'create', dept = null }) {
   const isRenew  = mode === 'renew';
   const isEdit   = mode === 'edit';
 
@@ -71,9 +71,11 @@ export default function AddAgreementModal({ onClose, initial = null, mode = 'cre
   const onSubmit = async (data) => {
     const payload = {
       ...data,
-      endDate:  openEnded ? null : (data.endDate || null),
-      value:    data.value ? Number(data.value) : null,
+      endDate:    openEnded ? null : (data.endDate || null),
+      value:      data.value ? Number(data.value) : null,
       reminderDays: Number(data.reminderDays),
+      // Pass the currently-viewed department so agreements are saved under the right dept
+      ...(dept && { department: dept }),
     };
 
     if (isRenew) {
