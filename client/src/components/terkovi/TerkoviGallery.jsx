@@ -1,6 +1,8 @@
 import { useSearchParams } from 'react-router-dom';
-import { FileText, ArrowLeft } from 'lucide-react';
+import { FileText, ArrowLeft, ClipboardList } from 'lucide-react';
 import NDAForm from './NDAForm.jsx';
+import PLAgreementForm from './PLAgreementForm.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 const TEMPLATES = [
   {
@@ -10,6 +12,16 @@ const TEMPLATES = [
     sublabelMk: 'Договор за доверливост',
     icon: FileText,
     color: 'bg-blue-50 text-blue-600',
+    depts: ['top_management', 'sales'],
+  },
+  {
+    id: 'pl-agreement',
+    label: 'PL Agreement',
+    sublabel: 'Private Label Agreement',
+    sublabelMk: 'Договор за приватна етикета',
+    icon: ClipboardList,
+    color: 'bg-green-50 text-green-600',
+    depts: ['top_management', 'sales'],
   },
 ];
 
@@ -32,8 +44,10 @@ const TemplateIcon = ({ template, onClick }) => {
 };
 
 const TerkoviGallery = () => {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTemplate = searchParams.get('template');
+  const userDept = user?.department;
 
   const openTemplate = (id) => {
     const next = new URLSearchParams(searchParams);
@@ -62,6 +76,21 @@ const TerkoviGallery = () => {
     );
   }
 
+  if (activeTemplate === 'pl-agreement') {
+    return (
+      <div>
+        <button
+          onClick={closeTemplate}
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          Назад кон теркови
+        </button>
+        <PLAgreementForm />
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-6">
@@ -70,7 +99,7 @@ const TerkoviGallery = () => {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {TEMPLATES.map((t) => (
+        {TEMPLATES.filter((t) => !t.depts || t.depts.includes(userDept)).map((t) => (
           <TemplateIcon key={t.id} template={t} onClick={() => openTemplate(t.id)} />
         ))}
       </div>

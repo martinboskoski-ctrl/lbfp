@@ -11,6 +11,9 @@ const require = createRequire(import.meta.url);
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
 
+// Deposit → balance map
+const BALANCE_MAP = { '70': '30', '60': '40', '50': '50' };
+
 /**
  * POST /api/terkovi/nda/generate
  * Generates a filled NDA .docx and streams it to the client.
@@ -108,5 +111,100 @@ export const generateNDA = async (req, res) => {
       : error?.message ?? 'Unknown error';
     console.error('NDA generation error:', details);
     res.status(500).json({ message: 'Failed to generate NDA document', error: details });
+  }
+};
+
+/**
+ * POST /api/terkovi/pl-agreement/generate
+ * Generates a filled Private Label Agreement .docx and streams it to the client.
+ */
+export const generatePLAgreement = async (req, res) => {
+  try {
+    const {
+      effectiveDate,
+      companyName,
+      companyAddress,
+      companyCRN,
+      companyCEO,
+      customerEmail,
+      customerSignatoryName,
+      MOQamount,
+      depositPercent,
+    } = req.body;
+
+    // Basic server-side guard — Zod handles full validation on the client
+    if (!effectiveDate || !companyName || !companyCRN) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const templatePath = path.join(
+      __dirname,
+      '../templates/terkovi/pl-agreement.docx'
+    );
+
+    if (!fs.existsSync(templatePath)) {
+      console.error('PL Agreement template not found at:', templatePath);
+      return res.status(500).json({ message: 'PL Agreement template file not found on server' });
+    }
+
+    const templateContent = fs.readFileSync(templatePath, 'binary');
+    const zip = new PizZip(templateContent);
+
+    const doc = new Docxtemplater(zip, {
+      paragraphLoop: true,
+      linebreaks:    true,
+      nullGetter:    () => '', // prevent crash on unknown/unused tags
+    });
+
+    // Format date as English long form
+    const parsedDate = new Date(effectiveDate + 'T00:00:00');
+    const formattedDate = parsedDate.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+
+    const deposit = String(depositPercent ?? '70');
+    const balance = BALANCE_MAP[deposit] ?? '30';
+
+    doc.render({
+      effectiveDate:         formattedDate,
+      companyName:           (companyName    ?? '').trim(),
+      companyAddress:        (companyAddress ?? '').trim(),
+      companyCRN:            (companyCRN     ?? '').trim(),
+      companyCEO:            (companyCEO     ?? '').trim(),
+      customerEmail:         (customerEmail  ?? '').trim(),
+      customerSignatoryName: (customerSignatoryName ?? '').trim(),
+      MOQamount:             String(MOQamount ?? ''),
+      depositPercent:        deposit,
+      balancePercent:        balance,
+    });
+
+    const buffer = doc.getZip().generate({
+      type:        'nodebuffer',
+      compression: 'DEFLATE',
+    });
+
+    // Build a safe filename
+    const dateStr   = effectiveDate.replace(/-/g, '');
+    const partySlug = (companyName ?? '')
+      .trim()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-zA-Z0-9_]/g, '')
+      .substring(0, 30);
+    const filename = `PLAgreement_${partySlug}_${dateStr}.docx`;
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    );
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  } catch (error) {
+    const details = error?.properties?.errors
+      ? error.properties.errors.map((e) => e.message).join('; ')
+      : error?.message ?? 'Unknown error';
+    console.error('PL Agreement generation error:', details);
+    res.status(500).json({ message: 'Failed to generate PL Agreement document', error: details });
   }
 };
