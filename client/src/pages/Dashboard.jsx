@@ -6,6 +6,7 @@ import Whiteboard from '../components/Whiteboard.jsx';
 import POList from '../components/po/POList.jsx';
 import TerkoviGallery from '../components/terkovi/TerkoviGallery.jsx';
 import AgreementsPage from '../components/agreements/AgreementsPage.jsx';
+import LeadsPage from '../components/leads/LeadsPage.jsx';
 import { useProjects } from '../hooks/useProjects.js';
 import { useDirectory } from '../hooks/useUsers.js';
 import ProjectCard from '../components/project/ProjectCard.jsx';
@@ -25,6 +26,9 @@ const DEPT_TABS = [
 
 // Departments that have the Purchase Order tab
 const PO_DEPTS = ['sales', 'quality_assurance', 'r_and_d', 'nabavki'];
+
+// Departments that have the Leads (Потенцијални клиенти) tab
+const LEADS_DEPTS = ['sales', 'top_management'];
 
 const EmployeeList = ({ dept }) => {
   const { data: users = [], isLoading } = useDirectory(dept);
@@ -108,6 +112,7 @@ const Dashboard = () => {
               {[
                 ...DEPT_TABS,
                 ...(PO_DEPTS.includes(dept) ? [{ value: 'po', label: 'Purchase Order' }] : []),
+                ...(LEADS_DEPTS.includes(dept) ? [{ value: 'leads', label: 'Потенцијални клиенти' }] : []),
               ].map((t) => (
                 <button
                   key={t.value}
@@ -206,6 +211,10 @@ const Dashboard = () => {
 
               {dept && tab === 'dogovori' && (
                 <AgreementsPage dept={dept} />
+              )}
+
+              {dept && tab === 'leads' && (
+                <LeadsPage />
               )}
 
               {dept && tab === 'vraboteni' && (
