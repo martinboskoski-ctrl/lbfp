@@ -99,7 +99,7 @@ const DeptPanel = ({ dept, po, isSales, userDept }) => {
   const addQuestion = useAddQuestion(po._id);
 
   const questions = po.questions.filter((q) => q.targetDepartment === dept);
-  const canAnswer = userDept === dept;
+  const canAnswer = userDept === dept || userDept === 'top_management';
   const isClosed  = po.status === 'closed';
 
   const handleAddQuestion = async () => {
@@ -162,7 +162,7 @@ const PODetail = () => {
   const toggleStatus = useToggleStatus(id);
   const deletePO     = useDeletePO();
 
-  const isSales   = user?.department === 'sales';
+  const isSales   = user?.department === 'sales' || user?.department === 'top_management';
   const userDept  = user?.department;
 
   // Which dept tabs to show

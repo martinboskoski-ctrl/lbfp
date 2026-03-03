@@ -4,8 +4,10 @@ import PurchaseOrder, { PO_DEPARTMENTS, Q_TARGET_DEPTS } from '../models/Purchas
 const ASCII_RE = /^[\x20-\x7E]*$/;
 const isEnglish = (str) => !str || ASCII_RE.test(str);
 
+const isTopMgmt = (u) => u.department === 'top_management';
 const isSales   = (u) => u.department === 'sales';
-const isPODept  = (u) => PO_DEPARTMENTS.includes(u.department);
+const canActAsSales = (u) => isSales(u) || isTopMgmt(u);
+const isPODept  = (u) => PO_DEPARTMENTS.includes(u.department) || isTopMgmt(u);
 
 const POPULATE = [
   { path: 'createdBy',           select: 'name' },
@@ -26,7 +28,7 @@ export const listPOs = async (req, res) => {
 
 // ── Create ────────────────────────────────────────────────────────────────────
 export const createPO = async (req, res) => {
-  if (!isSales(req.user)) {
+  if (!canActAsSales(req.user)) {
     return res.status(403).json({ message: 'Only Sales can create Purchase Orders' });
   }
 
@@ -66,7 +68,7 @@ export const getPO = async (req, res) => {
 
 // ── Update overview (sales only) ──────────────────────────────────────────────
 export const updatePO = async (req, res) => {
-  if (!isSales(req.user)) return res.status(403).json({ message: 'Only Sales can edit POs' });
+  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can edit POs' });
 
   const po = await PurchaseOrder.findById(req.params.id);
   if (!po) return res.status(404).json({ message: 'Purchase Order not found' });
@@ -91,7 +93,7 @@ export const updatePO = async (req, res) => {
 
 // ── Toggle status (sales only) ────────────────────────────────────────────────
 export const toggleStatus = async (req, res) => {
-  if (!isSales(req.user)) return res.status(403).json({ message: 'Only Sales can change PO status' });
+  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can change PO status' });
 
   const po = await PurchaseOrder.findById(req.params.id);
   if (!po) return res.status(404).json({ message: 'Purchase Order not found' });
@@ -104,7 +106,7 @@ export const toggleStatus = async (req, res) => {
 
 // ── Add question (sales only, to QA/R&D/Набавки) ─────────────────────────────
 export const addQuestion = async (req, res) => {
-  if (!isSales(req.user)) return res.status(403).json({ message: 'Only Sales can add questions' });
+  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can add questions' });
 
   const po = await PurchaseOrder.findById(req.params.id);
   if (!po) return res.status(404).json({ message: 'Purchase Order not found' });
@@ -137,7 +139,7 @@ export const answerQuestion = async (req, res) => {
 
   const question = po.questions.id(req.params.qid);
   if (!question) return res.status(404).json({ message: 'Question not found' });
-  if (question.targetDepartment !== req.user.department) {
+  if (!isTopMgmt(req.user) && question.targetDepartment !== req.user.department) {
     return res.status(403).json({ message: 'This question is not directed at your department' });
   }
 
@@ -156,7 +158,7 @@ export const answerQuestion = async (req, res) => {
 
 // ── Resolve question (sales only) ─────────────────────────────────────────────
 export const resolveQuestion = async (req, res) => {
-  if (!isSales(req.user)) return res.status(403).json({ message: 'Only Sales can resolve questions' });
+  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can resolve questions' });
 
   const po = await PurchaseOrder.findById(req.params.id);
   if (!po) return res.status(404).json({ message: 'Purchase Order not found' });
@@ -175,7 +177,7 @@ export const resolveQuestion = async (req, res) => {
 
 // ── Delete PO (sales only) ────────────────────────────────────────────────────
 export const deletePO = async (req, res) => {
-  if (!isSales(req.user)) return res.status(403).json({ message: 'Only Sales can delete POs' });
+  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can delete POs' });
 
   const po = await PurchaseOrder.findById(req.params.id);
   if (!po) return res.status(404).json({ message: 'Purchase Order not found' });

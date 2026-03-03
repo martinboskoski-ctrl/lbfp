@@ -12,7 +12,7 @@ const POList = () => {
   const { data: pos = [], isLoading } = usePOs();
   const [showModal, setShowModal]     = useState(false);
   const navigate = useNavigate();
-  const isSales  = user?.department === 'sales';
+  const isSales  = user?.department === 'sales' || user?.department === 'top_management';
 
   if (isLoading) {
     return (

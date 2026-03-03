@@ -25,7 +25,7 @@ const DEPT_TABS = [
 ];
 
 // Departments that have the Purchase Order tab
-const PO_DEPTS = ['sales', 'quality_assurance', 'r_and_d', 'nabavki'];
+const PO_DEPTS = ['sales', 'quality_assurance', 'r_and_d', 'nabavki', 'top_management'];
 
 // Departments that have the Leads (Потенцијални клиенти) tab
 const LEADS_DEPTS = ['sales', 'top_management'];
