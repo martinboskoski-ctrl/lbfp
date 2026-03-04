@@ -1,0 +1,75 @@
+{
+  "title": "Templates",
+  "subtitle": "Select a template to generate a document",
+  "backToTemplates": "Back to templates",
+
+  "template": {
+    "nda": {
+      "label": "NDA",
+      "sublabel": "Non-Disclosure Agreement"
+    },
+    "pl": {
+      "label": "PL Agreement",
+      "sublabel": "Private Label Agreement"
+    }
+  },
+
+  "nda": {
+    "heading": "Non-Disclosure Agreement (NDA)",
+    "description": "Generate an agreement between LBFP DOO Bitola and the second party",
+    "documentVersion": "Document Version",
+    "langMkOnly": "Macedonian only",
+    "langEnOnly": "English only",
+    "langBilingual": "Macedonian – English",
+    "agreementDateSection": "Agreement Date",
+    "dateLabel": "Date",
+    "secondPartySection": "Second Contracting Party",
+    "generateError": "Generation failed. Please try again.",
+    "generating": "Generating…",
+    "generateButton": "Generate Agreement (.docx)"
+  },
+
+  "pl": {
+    "heading": "Private Label Agreement",
+    "description": "Generate a PL Agreement between LBFP DOO Bitola (Supplier) and the Customer",
+    "agreementDateSection": "Agreement Date",
+    "effectiveDateLabel": "Effective Date",
+    "customerSection": "Customer (Second Party)",
+    "companyNameLabel": "Company Name",
+    "companyNamePlaceholder": "e.g. ACME Foods Ltd",
+    "addressLabel": "Registered Address",
+    "addressPlaceholder": "e.g. 1 Commerce Street, London, EC1A 1BB",
+    "crnLabel": "Organisation Number (CRN)",
+    "crnPlaceholder": "e.g. 12345678",
+    "ceoLabel": "CEO / Authorised Person",
+    "ceoPlaceholder": "e.g. Jane Smith",
+    "communicationSection": "Communication (Article 15)",
+    "customerEmailLabel": "Customer Email Address",
+    "customerEmailPlaceholder": "e.g. procurement@customer.com",
+    "commercialSection": "Commercial Terms",
+    "moqLabel": "MOQ — Minimum Order Quantity (units)",
+    "moqPlaceholder": "e.g. 5000",
+    "moqHint": "Minimum production order potential required for product development acceptance",
+    "depositLabel": "Deposit / Balance Payment Split",
+    "depositHint": "Supplier issues pro-forma invoice for <strong>{{deposit}}%</strong> deposit; remaining <strong>{{balance}}%</strong> must be paid before shipment.",
+    "signatorySection": "Customer Signatory",
+    "signatoryNameLabel": "Full Name (for signature block)",
+    "signatoryNamePlaceholder": "e.g. Jane Smith",
+    "generateError": "Document generation failed. Please try again.",
+    "generating": "Generating…",
+    "generateButton": "Generate PL Agreement (.docx)"
+  },
+
+  "companyFields": {
+    "crnLabel": "Registration Number",
+    "crnPlaceholder": "e.g. 1234567890",
+    "mkdSection": "Macedonian details",
+    "engSection": "English details",
+    "nameLabel": "Company Name",
+    "namePlaceholder": "Company name",
+    "addressLabel": "Address",
+    "addressPlaceholder": "Registered address",
+    "managerLabel": "Manager",
+    "managerPlaceholder": "Full name"
+  }
+}

@@ -1,26 +1,30 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight, Calendar, Users } from 'lucide-react';
-import { DEPARTMENTS } from '../layout/Sidebar.jsx';
-
-const STATUS_CONFIG = {
-  draft:      { label: 'Нацрт',     color: 'bg-gray-100 text-gray-600' },
-  active:     { label: 'Активен',   color: 'bg-blue-100 text-blue-700' },
-  on_hold:    { label: 'Пауза',     color: 'bg-yellow-100 text-yellow-700' },
-  completed:  { label: 'Завршен',   color: 'bg-green-100 text-green-700' },
-  cancelled:  { label: 'Откажан',   color: 'bg-red-100 text-red-600' },
-};
-
-const PRIORITY_CONFIG = {
-  low:    { label: 'Ниска',  color: 'bg-gray-100 text-gray-500' },
-  medium: { label: 'Средна', color: 'bg-blue-50 text-blue-600' },
-  high:   { label: 'Висока', color: 'bg-orange-50 text-orange-600' },
-  urgent: { label: 'Итна',   color: 'bg-red-50 text-red-600' },
-};
+import { fmtDateShort } from '../../utils/formatDate.js';
 
 const ProjectCard = ({ project }) => {
+  const { t } = useTranslation('projects');
+  const { t: tc } = useTranslation('common');
+
+  const STATUS_CONFIG = {
+    draft:      { label: t('projectStatus.draft'),     color: 'bg-gray-100 text-gray-600' },
+    active:     { label: t('projectStatus.active'),   color: 'bg-blue-100 text-blue-700' },
+    on_hold:    { label: t('projectStatus.on_hold'),     color: 'bg-yellow-100 text-yellow-700' },
+    completed:  { label: t('projectStatus.completed'),   color: 'bg-green-100 text-green-700' },
+    cancelled:  { label: t('projectStatus.cancelled'),   color: 'bg-red-100 text-red-600' },
+  };
+
+  const PRIORITY_CONFIG = {
+    low:    { label: tc('priority.low'),  color: 'bg-gray-100 text-gray-500' },
+    medium: { label: tc('priority.medium'), color: 'bg-blue-50 text-blue-600' },
+    high:   { label: tc('priority.high'), color: 'bg-orange-50 text-orange-600' },
+    urgent: { label: tc('priority.urgent'),   color: 'bg-red-50 text-red-600' },
+  };
+
   const status   = STATUS_CONFIG[project.status]   || STATUS_CONFIG.draft;
   const priority = PRIORITY_CONFIG[project.priority] || PRIORITY_CONFIG.medium;
-  const deptLabel = DEPARTMENTS.find((d) => d.value === project.department)?.label || project.department;
+  const deptLabel = tc(`dept.${project.department}`, { defaultValue: project.department });
 
   const doneTasks  = project.tasks?.filter((t) => t.status === 'done').length ?? 0;
   const totalTasks = project.tasks?.length ?? 0;
@@ -51,7 +55,7 @@ const ProjectCard = ({ project }) => {
           {project.endDate && (
             <span className="flex items-center gap-1">
               <Calendar size={11} />
-              {new Date(project.endDate).toLocaleDateString('mk-MK')}
+              {fmtDateShort(project.endDate)}
             </span>
           )}
 
@@ -63,10 +67,10 @@ const ProjectCard = ({ project }) => {
           )}
 
           {totalTasks > 0 && (
-            <span>{doneTasks}/{totalTasks} задачи</span>
+            <span>{doneTasks}/{totalTasks} {t('tasksLabel')}</span>
           )}
 
-          {project.owner?.name && <span>од {project.owner.name}</span>}
+          {project.owner?.name && <span>{t('by', { name: project.owner.name })}</span>}
         </div>
       </div>
       <ChevronRight size={18} className="text-gray-400 group-hover:text-gray-600 flex-shrink-0 ml-4" />

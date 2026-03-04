@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Plus, FileText, ChevronRight } from 'lucide-react';
 import { usePOs } from '../../hooks/usePO.js';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { fmtDateShort } from '../../utils/formatDate.js';
 import CreatePOModal from './CreatePOModal.jsx';
 
 const shortId = (id) => String(id).slice(-6).toUpperCase();
 
 const POList = () => {
+  const { t } = useTranslation('po');
   const { user }          = useAuth();
   const { data: pos = [], isLoading } = usePOs();
   const [showModal, setShowModal]     = useState(false);
@@ -27,8 +30,8 @@ const POList = () => {
       {/* Toolbar */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Purchase Orders</h2>
-          <p className="text-xs text-gray-400 mt-0.5">{pos.length} total</p>
+          <h2 className="text-lg font-bold text-gray-900">{t('title')}</h2>
+          <p className="text-xs text-gray-400 mt-0.5">{t('totalCount', { count: pos.length })}</p>
         </div>
         {isSales && (
           <button
@@ -36,7 +39,7 @@ const POList = () => {
             className="btn-primary flex items-center gap-2"
           >
             <Plus size={15} />
-            New Purchase Order
+            {t('newPO')}
           </button>
         )}
       </div>
@@ -45,7 +48,7 @@ const POList = () => {
       {pos.length === 0 ? (
         <div className="text-center py-20 text-gray-300">
           <FileText size={40} className="mx-auto mb-3 opacity-40" />
-          <p className="text-sm">No purchase orders yet</p>
+          <p className="text-sm">{t('noPOs')}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -66,16 +69,16 @@ const POList = () => {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">{po.clientName}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    Expected: {new Date(po.dateExpected).toLocaleDateString('en-GB')}
-                    {' · '}MOQ: {po.moq}
-                    {po.products?.length > 0 && ` · ${po.products.length} product${po.products.length !== 1 ? 's' : ''}`}
+                    {t('expected', { date: fmtDateShort(po.dateExpected) })}
+                    {' · '}{t('moqShort', { value: po.moq })}
+                    {po.products?.length > 0 && ` · ${t('productCount', { count: po.products.length })}`}
                   </p>
                 </div>
 
                 {/* Open questions badge */}
                 {openQ > 0 && (
                   <span className="text-xs font-medium bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full flex-shrink-0">
-                    {openQ} open
+                    {t('openQuestions', { count: openQ })}
                   </span>
                 )}
 
@@ -85,7 +88,7 @@ const POList = () => {
                     ? 'bg-green-50 text-green-700'
                     : 'bg-gray-100 text-gray-500'
                 }`}>
-                  {po.status}
+                  {t(`status.${po.status}`)}
                 </span>
 
                 <ChevronRight size={16} className="text-gray-300 flex-shrink-0" />

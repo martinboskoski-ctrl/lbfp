@@ -1,0 +1,104 @@
+{
+  "title": "Leads",
+  "leadCount_one": "{{count}} lead",
+  "leadCount_other": "{{count}} leads",
+  "newLead": "New Lead",
+  "addFirstLead": "Add the first lead",
+  "noLeads": "No leads recorded.",
+  "noFilterMatch": "No leads match the filter.",
+  "searchPlaceholder": "Search by company or contact…",
+  "allStages": "All stages",
+  "allPriorities": "All priorities",
+
+  "stage": {
+    "new": "New",
+    "contacted": "Contacted",
+    "qualified": "Qualified",
+    "proposal": "Proposal",
+    "negotiation": "Negotiation",
+    "won": "Won",
+    "lost": "Lost"
+  },
+
+  "source": {
+    "referral": "Referral",
+    "website": "Website",
+    "cold_call": "Cold Call",
+    "exhibition": "Exhibition",
+    "linkedin": "LinkedIn",
+    "existing_client": "Existing Client",
+    "other": "Other"
+  },
+
+  "leadPriority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+
+  "stat": {
+    "total": "Total",
+    "new": "New",
+    "inNegotiation": "In Negotiation",
+    "overdue": "Overdue"
+  },
+
+  "funnel": {
+    "title": "Sales Funnel",
+    "totalValue": "Total value:",
+    "hideFunnel": "Hide funnel",
+    "showFunnel": "Show sales funnel"
+  },
+
+  "nextFollowUp": "Next contact: {{date}}",
+  "overdueTag": "(overdue!)",
+  "details": "Details",
+
+  "modal": {
+    "createTitle": "New Lead",
+    "editTitle": "Edit Lead",
+    "contactNameLabel": "Contact person *",
+    "contactNamePlaceholder": "Full name",
+    "companyLabel": "Company *",
+    "companyPlaceholder": "Company name",
+    "emailLabel": "Email",
+    "phoneLabel": "Phone",
+    "stageLabel": "Stage",
+    "sourceLabel": "Source",
+    "priorityLabel": "Priority",
+    "estimatedValueLabel": "Estimated value",
+    "estimatedValuePlaceholder": "e.g. 50000",
+    "currencyLabel": "Currency",
+    "currencyEUR": "EUR — Euro",
+    "currencyMKD": "MKD — Denar",
+    "currencyUSD": "USD — Dollar",
+    "productInterestLabel": "Product interest",
+    "productInterestPlaceholder": "Which packaging products are they looking for…",
+    "nextFollowUpLabel": "Next follow-up",
+    "assignedToLabel": "Assigned to",
+    "lostReasonLabel": "Reason for losing",
+    "lostReasonPlaceholder": "Why was the lead lost…",
+    "submitCreate": "Add Lead",
+    "submitEdit": "Save"
+  },
+
+  "detail": {
+    "assignedTo": "Assigned to: {{name}}",
+    "estimatedValue": "Estimated value",
+    "productInterest": "Product interest",
+    "lostReason": "Reason for losing",
+    "wonDate": "Won on: {{date}}",
+    "lostDate": "Lost on: {{date}}",
+    "activities": "Activities",
+    "addActivityPlaceholder": "Add activity…",
+    "noActivities": "No recorded activities."
+  },
+
+  "activityType": {
+    "note": "Note",
+    "call": "Call",
+    "email": "Email",
+    "meeting": "Meeting",
+    "other": "Other"
+  }
+}

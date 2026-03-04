@@ -1,0 +1,120 @@
+{
+  "save": "Зачувај",
+  "cancel": "Откажи",
+  "delete": "Избриши",
+  "edit": "Уреди",
+  "close": "Затвори",
+  "add": "Додај",
+  "create": "Креирај",
+  "submit": "Поднеси",
+  "confirm": "Потврди",
+  "back": "Назад",
+  "forward": "Напред",
+  "search": "Пребарај",
+  "loading": "Вчитување…",
+  "required": "Задолжително поле",
+  "noResults": "Нема резултати",
+  "error": "Грешка",
+  "success": "Успешно",
+  "yes": "Да",
+  "no": "Не",
+  "all": "Сите",
+  "none": "Ништо",
+  "total": "вкупно",
+  "showing": "Прикажување",
+  "of": "од",
+  "comingSoon": "наскоро",
+
+  "companyName": "ЛБФП ДОО Битола",
+  "departments": "Одделенија",
+  "administration": "Администрација",
+  "users": "Корисници",
+  "manager": "Менаџер",
+  "employee": "Вработен",
+  "logout": "Одјави се",
+  "language": "Јазик",
+
+  "dept": {
+    "top_management": "Топ менаџмент",
+    "sales": "Продажба",
+    "finance": "Финансии",
+    "administration": "Администрација",
+    "hr": "Човечки ресурси",
+    "quality_assurance": "Обезбедување квалитет",
+    "facility": "Објект",
+    "machines": "Машини",
+    "r_and_d": "Истражување и развој",
+    "production": "Производство",
+    "carina": "Царина",
+    "nabavki": "Набавки (суровини и амбалажа)"
+  },
+
+  "priority": {
+    "low": "Ниска",
+    "medium": "Средна",
+    "high": "Висока",
+    "urgent": "Итна"
+  },
+
+  "status": {
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "pending": "Во чекање",
+    "completed": "Завршено",
+    "cancelled": "Откажано"
+  },
+
+  "validation": {
+    "required": "Задолжително поле",
+    "invalidEmail": "Невалидна е-пошта адреса",
+    "minLength": "Мора да содржи најмалку {{count}} знаци",
+    "maxLength": "Максимум {{count}} знаци",
+    "passwordMismatch": "Лозинките не се совпаѓаат",
+    "selectDepartment": "Изберете одделение",
+    "selectPerson": "Изберете лице"
+  },
+
+  "currency": {
+    "MKD": "МКД",
+    "EUR": "ЕУР",
+    "USD": "УСД"
+  },
+
+  "files": {
+    "title": "Датотеки",
+    "uploadTitle": "Прикачи датотека",
+    "uploading": "Прикачување…",
+    "uploaded": "Прикачено: {{name}}",
+    "uploadMore": "Кликнете за да прикачите уште",
+    "dropzone": "Повлечете датотека овде или кликнете за да изберете",
+    "allTypesSupported": "Поддржани се сите типови датотеки",
+    "uploadSuccess": "{{version}} прикачена",
+    "uploadError": "Прикачувањето не успеа. Проверете ја S3 конфигурацијата.",
+    "downloadError": "Не успеа да се добие линкот за преземање",
+    "noFiles": "Сè уште нема прикачени датотеки.",
+    "latest": "Најнова",
+    "gate": "Порта {{number}}",
+    "download": "Преземи"
+  },
+
+  "comments": {
+    "title": "Коментари",
+    "noComments": "Сè уште нема коментари.",
+    "unknown": "Непознат",
+    "placeholder": "Додади коментар…"
+  },
+
+  "approve": {
+    "approving": "Одобрување…",
+    "approve": "Одобри",
+    "reject": "Одбиј",
+    "rejectReason": "Причина за одбивање",
+    "rejectPlaceholder": "Опишете што треба да се промени…",
+    "rejecting": "Одбивање…",
+    "confirmReject": "Потврди одбивање"
+  },
+
+  "admin": {
+    "allUsers": "Сите корисници"
+  }
+}

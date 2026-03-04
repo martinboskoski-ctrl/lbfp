@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { CheckCircle2, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useApproveGate, useRejectGate } from '../../hooks/useProjects.js';
 
 const ApproveRejectBar = ({ projectId, gateNumber }) => {
+  const { t } = useTranslation('common');
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [reason, setReason] = useState('');
 
@@ -29,38 +31,38 @@ const ApproveRejectBar = ({ projectId, gateNumber }) => {
             className="btn-primary flex items-center gap-2"
           >
             <CheckCircle2 size={16} />
-            {approve.isPending ? 'Одобрување…' : 'Одобри'}
+            {approve.isPending ? t('approve.approving') : t('approve.approve')}
           </button>
           <button
             onClick={() => setShowRejectForm(true)}
             className="btn-danger flex items-center gap-2"
           >
             <XCircle size={16} />
-            Одбиј
+            {t('approve.reject')}
           </button>
         </div>
       ) : (
         <form onSubmit={handleReject} className="space-y-3">
           <div>
-            <label className="label text-red-600">Причина за одбивање</label>
+            <label className="label text-red-600">{t('approve.rejectReason')}</label>
             <textarea
               className="input resize-none"
               rows={3}
-              placeholder="Опишете што треба да се промени…"
+              placeholder={t('approve.rejectPlaceholder')}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
           </div>
           <div className="flex gap-2">
             <button type="submit" disabled={!reason.trim() || reject.isPending} className="btn-danger">
-              {reject.isPending ? 'Одбивање…' : 'Потврди одбивање'}
+              {reject.isPending ? t('approve.rejecting') : t('approve.confirmReject')}
             </button>
             <button
               type="button"
               onClick={() => { setShowRejectForm(false); setReason(''); }}
               className="btn-secondary"
             >
-              Откажи
+              {t('cancel')}
             </button>
           </div>
         </form>

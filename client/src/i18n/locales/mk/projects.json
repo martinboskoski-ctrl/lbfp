@@ -1,0 +1,122 @@
+{
+  "notFound": "Проектот не е пронајден.",
+  "noPermission": "Немате дозвола за креирање проекти.",
+  "newProject": "Нов проект",
+
+  "projectStatus": {
+    "draft": "Нацрт",
+    "active": "Активен",
+    "on_hold": "Пауза",
+    "completed": "Завршен",
+    "cancelled": "Откажан"
+  },
+
+  "taskStatus": {
+    "todo": "На чекање",
+    "in_progress": "Во тек",
+    "done": "Завршено"
+  },
+
+  "priority": "Приоритет: {{value}}",
+  "owner": "Носител: {{name}}",
+  "tasksProgress": "{{done}}/{{total}} завршени",
+  "tasksLabel": "задачи",
+  "noTasks": "Нема задачи.",
+  "subtasksCount": "{{done}}/{{total}} подзадачи",
+  "by": "од {{name}}",
+
+  "section": {
+    "info": "Информации",
+    "description": "Опис",
+    "startDate": "Почеток",
+    "deadline": "Рок",
+    "budget": "Буџет",
+    "goals": "Цели",
+    "team": "Тим",
+    "involvedDepts": "Вклучени одделенија",
+    "tasks": "Задачи",
+    "reason": "Причина: ",
+    "expectations": "Очекувања: ",
+    "deadlineLabel": "Рок: {{date}}"
+  },
+
+  "create": {
+    "steps": ["Основни информации", "Тим и цели", "Задачи", "Вклучени одделенија"],
+    "titleLabel": "Наслов *",
+    "titlePlaceholder": "Наслов на проектот",
+    "titleRequired": "Насловот е задолжителен",
+    "descriptionLabel": "Опис",
+    "descriptionPlaceholder": "Опишете го проектот…",
+    "priorityLabel": "Приоритет",
+    "statusLabel": "Статус",
+    "departmentLabel": "Одделение *",
+    "departmentPlaceholder": "Изберете одделение…",
+    "departmentRequired": "Одделението е задолжително",
+    "startDateLabel": "Почеток",
+    "endDateLabel": "Рок / Крај",
+    "budgetLabel": "Буџет (МКД)",
+    "goalsLabel": "Цели на проектот",
+    "addGoalPlaceholder": "Додај цел…",
+    "noGoals": "Сè уште нема цели.",
+    "teamLabel": "Членови на тимот",
+    "noUsersInDept": "Нема регистрирани корисници во ова одделение.",
+    "selectedCount": "{{count}} избрани",
+    "noTasks": "Сè уште нема задачи. Можете и да го прескокнете овој чекор.",
+    "newTaskPlaceholder": "Нова задача",
+    "taskTitleLabel": "Наслов *",
+    "taskDescPlaceholder": "Опишете ја задачата…",
+    "taskDescLabel": "Опис",
+    "taskPriorityLabel": "Приоритет",
+    "taskDeadlineLabel": "Рок",
+    "taskAssigneesLabel": "Задолжени лица",
+    "subtasksLabel": "Подзадачи",
+    "subtaskPlaceholder": "Подзадача…",
+    "addSubtask": "Додај подзадача",
+    "addTask": "Додај задача",
+    "subtasksSuffix": "подзадачи",
+    "involvedDeptsLabel": "Одделенија (изберете за да тагирате)",
+    "involvedReasonLabel": "Зошто е вклучено ова одделение?",
+    "involvedReasonPlaceholder": "Причина за вклучување…",
+    "involvedExpectedLabel": "Што се очекува од нив?",
+    "involvedExpectedPlaceholder": "Очекувања…",
+    "involvedDeadlineLabel": "Рок за нивниот придонес",
+    "noInvolvedDepts": "Нема тагирани одделенија. Можете да го прескокнете овој чекор.",
+    "next": "Следно",
+    "creating": "Креирање…",
+    "createProject": "Креирај проект"
+  },
+
+  "gate": {
+    "activeGate": "Активна порта",
+    "labels": [
+      "Порта 0 — Поставување на проект",
+      "Порта 1 — Внатрешен преглед",
+      "Порта 2 — Регулаторен преглед",
+      "Порта 3 — Дизајн на пакување",
+      "Порта 4 — Одобрување од клиент"
+    ],
+    "workflowProgress": "Напредок на работниот тек",
+    "status": {
+      "pending": "На чекање",
+      "in_progress": "Активна",
+      "approved": "Одобрено",
+      "rejected": "Одбиена"
+    },
+    "submitDescription": "Пополнете ги сите задолжителни полиња, потоа поднесете го проектот за да го започнете процесот на преглед.",
+    "submitButton": "Поднеси проект → Порта 1",
+    "submitting": "Поднесување…",
+    "changeRequest": "Барање за промена:",
+    "resubmitDescription": "Адресирајте ги коментарите погоре и повторно поднесете за преглед.",
+    "resubmitButton": "Повторно поднеси",
+    "resubmitting": "Повторно поднесување…",
+    "dispatchDescription": "Соберете ги сите коментари од прегледувачите и испратете ги до клиентот за финално потврдување.",
+    "dispatchButton": "Испрати до клиент",
+    "dispatching": "Испраќање…",
+    "awaitingClient": "Се чека потврда од клиентот…",
+    "clientReviewDescription": "Прегледајте ги материјалите за пакување и потврдете го одобрувањето.",
+    "acknowledgeButton": "Потврди и одобри",
+    "acknowledging": "Потврдување…",
+    "allGatesApproved": "Сите порти се одобрени — проектот е завршен.",
+    "awaitingReviewer": "Се чека прегледувачот да ја одобри или одбие оваа порта."
+  }
+}

@@ -5,41 +5,34 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useTranslation } from 'react-i18next';
+import i18next from 'i18next';
 import toast from 'react-hot-toast';
 
-const DEPARTMENTS = [
-  { value: 'top_management',    label: 'Топ менаџмент' },
-  { value: 'sales',             label: 'Продажба' },
-  { value: 'finance',           label: 'Финансии' },
-  { value: 'administration',    label: 'Администрација' },
-  { value: 'hr',                label: 'Човечки ресурси' },
-  { value: 'quality_assurance', label: 'Обезбедување квалитет' },
-  { value: 'facility',          label: 'Објект' },
-  { value: 'machines',          label: 'Машини' },
-  { value: 'r_and_d',           label: 'Истражување и развој' },
-  { value: 'production',        label: 'Производство' },
-  { value: 'carina',            label: 'Царина' },
-  { value: 'nabavki',           label: 'Набавки (суровини и амбалажа)' },
+const DEPT_VALUES = [
+  'top_management', 'sales', 'finance', 'administration', 'hr',
+  'quality_assurance', 'facility', 'machines', 'r_and_d',
+  'production', 'carina', 'nabavki',
 ];
 
-const DEPT_VALUES = DEPARTMENTS.map((d) => d.value);
+const ta = (key) => i18next.t(key, { ns: 'auth' });
 
 const registerSchema = z
   .object({
-    name:            z.string().min(2, 'Името мора да содржи најмалку 2 знаци').max(80),
-    email:           z.string().min(1, 'Е-поштата е задолжителна').email('Невалидна е-пошта адреса'),
+    name:            z.string().min(2, ta('nameMin')).max(80),
+    email:           z.string().min(1, ta('emailRequired')).email(ta('emailInvalid')),
     password:        z
       .string()
-      .min(8, 'Најмалку 8 знаци')
-      .refine((v) => /[a-zA-Z]/.test(v), 'Мора да содржи барем една буква')
-      .refine((v) => /[0-9]/.test(v),    'Мора да содржи барем една цифра'),
-    confirmPassword: z.string().min(1, 'Потврдете ја лозинката'),
-    department:      z.string().refine((v) => DEPT_VALUES.includes(v), 'Изберете одделение'),
+      .min(8, ta('passwordMin'))
+      .refine((v) => /[a-zA-Z]/.test(v), ta('passwordLetter'))
+      .refine((v) => /[0-9]/.test(v),    ta('passwordDigit')),
+    confirmPassword: z.string().min(1, ta('confirmPasswordRequired')),
+    department:      z.string().refine((v) => DEPT_VALUES.includes(v), ta('departmentRequired')),
     isManager:       z.boolean().default(false),
   })
   .refine((d) => d.password === d.confirmPassword, {
     path:    ['confirmPassword'],
-    message: 'Лозинките не се совпаѓаат',
+    message: ta('passwordMismatch'),
   });
 
 // ── Password strength ─────────────────────────────────────────────────────
@@ -56,13 +49,14 @@ const calcStrength = (pw) => {
 
 const STRENGTH = [
   null,
-  { label: 'Слаба',    bars: 1, color: 'bg-red-500' },
-  { label: 'Слаба',    bars: 2, color: 'bg-orange-400' },
-  { label: 'Добра',    bars: 3, color: 'bg-yellow-400' },
-  { label: 'Силна',    bars: 4, color: 'bg-green-500' },
+  { label: 'strengthWeak',   bars: 1, color: 'bg-red-500' },
+  { label: 'strengthWeak',   bars: 2, color: 'bg-orange-400' },
+  { label: 'strengthFair',   bars: 3, color: 'bg-yellow-400' },
+  { label: 'strengthStrong', bars: 4, color: 'bg-green-500' },
 ];
 
 const StrengthBar = ({ password }) => {
+  const { t } = useTranslation('auth');
   const score = calcStrength(password);
   if (!password) return null;
   const cfg = STRENGTH[score];
@@ -80,7 +74,7 @@ const StrengthBar = ({ password }) => {
       </div>
       {cfg && (
         <p className={`text-xs mt-0.5 ${cfg.color.replace('bg-', 'text-')}`}>
-          {cfg.label}
+          {t(cfg.label)}
         </p>
       )}
     </div>
@@ -92,6 +86,8 @@ const StrengthBar = ({ password }) => {
 const Register = () => {
   const { register: registerUser, user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation('auth');
+  const { t: tc } = useTranslation('common');
   const [showPassword, setShowPassword]     = useState(false);
   const [showConfirm,  setShowConfirm]      = useState(false);
   const [loading, setLoading]               = useState(false);
@@ -99,6 +95,12 @@ const Register = () => {
   useEffect(() => {
     if (user) navigate('/dashboard', { replace: true });
   }, [user, navigate]);
+
+  const toggleLanguage = () => {
+    const newLang = i18next.language === 'mk' ? 'en' : 'mk';
+    i18next.changeLanguage(newLang);
+    localStorage.setItem('packflow_lang', newLang);
+  };
 
   const {
     register,
@@ -131,7 +133,7 @@ const Register = () => {
       } else if (res?.status === 429) {
         toast.error(res.data.message);
       } else {
-        toast.error(res?.data?.message || 'Регистрацијата не успеа');
+        toast.error(res?.data?.message || t('registerFailed'));
       }
     } finally {
       setLoading(false);
@@ -140,23 +142,32 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
-      <div className="card w-full max-w-sm p-8">
+      <div className="card w-full max-w-sm p-8 relative">
+
+        {/* Language toggle */}
+        <button
+          type="button"
+          onClick={toggleLanguage}
+          className="absolute top-4 right-4 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          {i18next.language === 'mk' ? 'EN' : 'MK'}
+        </button>
 
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-blue-700">ЛБФП ДОО Битола</h1>
-          <p className="text-gray-400 mt-1 text-sm">Креирај нов профил</p>
+          <h1 className="text-2xl font-bold text-blue-700">{tc('companyName')}</h1>
+          <p className="text-gray-400 mt-1 text-sm">{t('registerTitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
 
           {/* Name */}
           <div>
-            <label className="label">Целосно ime</label>
+            <label className="label">{t('nameLabel')}</label>
             <input
               className={`input ${errors.name ? 'border-red-400' : ''}`}
               autoComplete="name"
               autoFocus
-              placeholder="Јане Јанески"
+              placeholder={t('namePlaceholder')}
               {...register('name')}
             />
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
@@ -164,12 +175,12 @@ const Register = () => {
 
           {/* Email */}
           <div>
-            <label className="label">Е-пошта</label>
+            <label className="label">{t('emailLabel')}</label>
             <input
               type="email"
               autoComplete="email"
               className={`input ${errors.email ? 'border-red-400' : ''}`}
-              placeholder="vие@primer.com"
+              placeholder={t('emailPlaceholder')}
               {...register('email')}
             />
             {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
@@ -177,13 +188,13 @@ const Register = () => {
 
           {/* Password */}
           <div>
-            <label className="label">Лозинка</label>
+            <label className="label">{t('passwordLabel')}</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
                 className={`input pr-10 ${errors.password ? 'border-red-400' : ''}`}
-                placeholder="Мин. 8 знаци, буква и цифра"
+                placeholder={t('passwordPlaceholder')}
                 {...register('password')}
               />
               <button
@@ -201,13 +212,13 @@ const Register = () => {
 
           {/* Confirm password */}
           <div>
-            <label className="label">Потврди лозинка</label>
+            <label className="label">{t('confirmPasswordLabel')}</label>
             <div className="relative">
               <input
                 type={showConfirm ? 'text' : 'password'}
                 autoComplete="new-password"
                 className={`input pr-10 ${errors.confirmPassword ? 'border-red-400' : ''}`}
-                placeholder="Повторете ја лозинката"
+                placeholder={t('confirmPasswordPlaceholder')}
                 {...register('confirmPassword')}
               />
               <button
@@ -226,15 +237,15 @@ const Register = () => {
 
           {/* Department */}
           <div>
-            <label className="label">Одделение</label>
+            <label className="label">{t('departmentLabel')}</label>
             <select
               className={`input ${errors.department ? 'border-red-400' : ''}`}
               defaultValue=""
               {...register('department')}
             >
-              <option value="" disabled>Изберете одделение…</option>
-              {DEPARTMENTS.map((d) => (
-                <option key={d.value} value={d.value}>{d.label}</option>
+              <option value="" disabled>{t('departmentPlaceholder')}</option>
+              {DEPT_VALUES.map((val) => (
+                <option key={val} value={val}>{tc(`dept.${val}`)}</option>
               ))}
             </select>
             {errors.department && <p className="text-red-500 text-xs mt-1">{errors.department.message}</p>}
@@ -249,7 +260,7 @@ const Register = () => {
               {...register('isManager')}
             />
             <label htmlFor="isManager" className="text-sm text-gray-700 cursor-pointer select-none">
-              Јас сум менаџер
+              {t('isManagerLabel')}
             </label>
           </div>
 
@@ -259,14 +270,14 @@ const Register = () => {
             className="btn-primary w-full flex items-center justify-center gap-2 mt-2"
           >
             {loading && <Loader2 size={15} className="animate-spin" />}
-            {loading ? 'Креирање профил…' : 'Креирај профил'}
+            {loading ? t('registerLoading') : t('registerButton')}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
-          Веќе имате профил?{' '}
+          {t('hasAccount')}{' '}
           <Link to="/login" className="text-blue-600 hover:underline font-medium">
-            Најави се
+            {t('loginLink')}
           </Link>
         </p>
       </div>

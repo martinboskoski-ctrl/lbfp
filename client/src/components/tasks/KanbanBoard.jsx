@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus } from 'lucide-react';
 import { useTasks } from '../../hooks/useTasks.js';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -9,6 +10,7 @@ import AddTaskModal from './AddTaskModal.jsx';
 const STATUSES = ['todo', 'in_progress', 'done', 'approved'];
 
 const KanbanBoard = ({ dept }) => {
+  const { t }          = useTranslation('tasks');
   const { user }       = useAuth();
   const [showModal, setShowModal] = useState(false);
   const isManager      = canManage(user);
@@ -26,7 +28,7 @@ const KanbanBoard = ({ dept }) => {
   }
 
   if (error) {
-    return <p className="text-center py-16 text-red-500 text-sm">Грешка при вчитување на задачите.</p>;
+    return <p className="text-center py-16 text-red-500 text-sm">{t('loadError')}</p>;
   }
 
   const byStatus = (status) => tasks.filter((t) => t.status === status);
@@ -36,15 +38,15 @@ const KanbanBoard = ({ dept }) => {
       {/* Board toolbar */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Тековни задачи</h2>
-          <p className="text-xs text-gray-400 mt-0.5">{tasks.length} вкупно</p>
+          <h2 className="text-lg font-bold text-gray-900">{t('title')}</h2>
+          <p className="text-xs text-gray-400 mt-0.5">{t('totalCount', { count: tasks.length })}</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
           className="btn-primary flex items-center gap-2"
         >
           <Plus size={15} />
-          Нова задача
+          {t('newTask')}
         </button>
       </div>
 

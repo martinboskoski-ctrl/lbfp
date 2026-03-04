@@ -1,0 +1,110 @@
+{
+  "title": "Договори",
+  "agreementCount_one": "{{count}} договор",
+  "agreementCount_other": "{{count}} договори",
+  "newAgreement": "Нов договор",
+  "addFirstAgreement": "Додај го првиот договор",
+  "noAgreements": "Нема евидентирани договори.",
+  "noFilterMatch": "Нема договори кои одговараат на филтерот.",
+  "searchPlaceholder": "Пребарај по наслов или страна…",
+  "allStatuses": "Сите статуси",
+  "allCategories": "Сите категории",
+
+  "status": {
+    "active": "Активен",
+    "expiring_soon": "Истекува",
+    "expired": "Истечен",
+    "terminated": "Раскинат",
+    "renewed": "Обновен",
+    "draft": "Нацрт"
+  },
+
+  "statusFilter": {
+    "active": "Активни",
+    "expiring_soon": "Истекуваат",
+    "expired": "Истечени",
+    "terminated": "Раскинати",
+    "renewed": "Обновени",
+    "draft": "Нацрти"
+  },
+
+  "stat": {
+    "total": "Вкупно",
+    "active": "Активни",
+    "expiringSoon": "Истекуваат",
+    "expired": "Истечени"
+  },
+
+  "category": {
+    "nda": "НДА — Договор за доверливост",
+    "service": "Договор за услуги",
+    "supply": "Договор за набавка",
+    "lease": "Договор за закуп",
+    "employment": "Договор за вработување",
+    "partnership": "Договор за соработка",
+    "other": "Друго"
+  },
+  "categoryShort": {
+    "nda": "НДА",
+    "service": "Услуги",
+    "supply": "Набавка",
+    "lease": "Закуп",
+    "employment": "Вработување",
+    "partnership": "Соработка",
+    "other": "Друго"
+  },
+
+  "daysChip": {
+    "openEnded": "Неодреден",
+    "expiredAgo_one": "Истечен пред {{count}} ден",
+    "expiredAgo_other": "Истечен пред {{count}} дена",
+    "expiresToday": "Истекува денес",
+    "expiresIn_one": "Уште {{count}} ден",
+    "expiresIn_other": "Уште {{count}} дена",
+    "daysLeft": "{{count}} дена"
+  },
+
+  "autoRenew": "Авто-обнова",
+
+  "actions": {
+    "edit": "Уреди",
+    "renew": "Обнови",
+    "terminate": "Раскини",
+    "delete": "Избриши",
+    "confirmTerminate": "Потврди раскинување",
+    "terminateReasonPlaceholder": "Причина за раскинување (опционално)…"
+  },
+
+  "modal": {
+    "createTitle": "Додај договор",
+    "editTitle": "Уреди договор",
+    "renewTitle": "Обнови договор",
+    "renewNote": "Се создава нов договор. Претходниот ќе биде означен како обновен.",
+    "titleLabel": "Наслов на договорот *",
+    "titlePlaceholder": "пр. Договор за набавка суровини 2026",
+    "titleRequired": "Насловот е задолжителен",
+    "categoryLabel": "Категорија *",
+    "otherPartyLabel": "Друга договорна страна *",
+    "otherPartyPlaceholder": "Назив на компанијата",
+    "startDateLabel": "Датум на почеток *",
+    "endDateLabel": "Датум на истек",
+    "openEnded": "Неодреден",
+    "reminderLabel": "Потсетување (денови пред истек, тековно: {{days}})",
+    "reminderDays7": "7 дена",
+    "reminderDays90": "90 дена",
+    "autoRenewLabel": "Автоматско обновување",
+    "valueLabel": "Вредност (опционално)",
+    "valuePlaceholder": "пр. 50000",
+    "currencyLabel": "Валута",
+    "currencyMKD": "MKD — Денар",
+    "currencyEUR": "EUR — Евро",
+    "currencyUSD": "USD — Долар",
+    "descriptionLabel": "Опис (опционално)",
+    "descriptionPlaceholder": "Краток опис на договорот…",
+    "notesLabel": "Белешки (опционално)",
+    "notesPlaceholder": "Интерни белешки…",
+    "submitCreate": "Додај договор",
+    "submitEdit": "Зачувај",
+    "submitRenew": "Обнови"
+  }
+}

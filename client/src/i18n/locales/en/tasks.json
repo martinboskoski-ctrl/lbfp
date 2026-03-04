@@ -1,0 +1,45 @@
+{
+  "title": "Current Tasks",
+  "totalCount": "{{count}} total",
+  "newTask": "New Task",
+  "loadError": "Error loading tasks.",
+  "noTasks": "No tasks",
+
+  "column": {
+    "todo": "To Do",
+    "in_progress": "In Progress",
+    "done": "Done",
+    "approved": "Approved"
+  },
+
+  "showLess": "Show less ↑",
+  "showMore": "Show {{count}} more ↓",
+
+  "approvedBy": "Approved by {{name}}",
+  "approve": "Approve",
+  "deleteTooltip": "Delete",
+  "backTooltip": "Back",
+  "forwardTooltip": "Forward",
+  "approveTooltip": "Approve task",
+
+  "modal": {
+    "title": "New Task",
+    "selfAssign": "The task will be assigned to you",
+    "departmentLabel": "Department *",
+    "departmentPlaceholder": "Select a department…",
+    "titleLabel": "Title *",
+    "titlePlaceholder": "Describe the task…",
+    "titleRequired": "Title is required",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Additional details…",
+    "assigneeLabel": "Assignee *",
+    "assigneeRequired": "Select a person",
+    "deptRequired": "Select a department",
+    "noUsersInDept": "No registered users in this department.",
+    "selectDeptFirst": "Select a department first.",
+    "priorityLabel": "Priority",
+    "deadlineLabel": "Deadline",
+    "projectLabel": "Related project (optional)",
+    "submitButton": "Add Task"
+  }
+}

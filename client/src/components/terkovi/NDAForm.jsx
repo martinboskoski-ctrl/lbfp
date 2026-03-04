@@ -2,18 +2,20 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FileText, Download, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ndaSchema } from '../../schemas/terkovi/ndaSchema.js';
 import CompanyFieldsSection from '../common/CompanyFieldsSection.jsx';
 import api from '../../api/axios.js';
 
-const LANGUAGE_OPTIONS = [
-  { value: 'MKD',      label: 'Само македонски' },
-  { value: 'ENG',      label: 'Само англиски' },
-  { value: 'BILINGUAL', label: 'Македонски – Англиски' },
-];
-
 export default function NDAForm() {
+  const { t } = useTranslation('terkovi');
   const [generateError, setGenerateError] = useState('');
+
+  const LANGUAGE_OPTIONS = [
+    { value: 'MKD',      label: t('nda.langMkOnly') },
+    { value: 'ENG',      label: t('nda.langEnOnly') },
+    { value: 'BILINGUAL', label: t('nda.langBilingual') },
+  ];
 
   const {
     register,
@@ -61,7 +63,7 @@ export default function NDAForm() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('NDA generation failed:', err);
-      setGenerateError('Грешка при генерирање. Обидете се повторно.');
+      setGenerateError(t('nda.generateError'));
     }
   };
 
@@ -73,9 +75,9 @@ export default function NDAForm() {
           <FileText size={22} className="text-blue-600" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Договор за доверливост (NDA)</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t('nda.heading')}</h2>
           <p className="text-sm text-gray-500 mt-0.5">
-            Генерирај договор помеѓу ЛБФП ДОО Битола и втората страна
+            {t('nda.description')}
           </p>
         </div>
       </div>
@@ -87,7 +89,7 @@ export default function NDAForm() {
           <div className="flex items-center gap-2 mb-4">
             <Globe size={16} className="text-gray-500" />
             <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">
-              Верзија на документот
+              {t('nda.documentVersion')}
             </h3>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -118,10 +120,10 @@ export default function NDAForm() {
         {/* Agreement date */}
         <div className="card p-5">
           <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide mb-4">
-            Датум на договор
+            {t('nda.agreementDateSection')}
           </h3>
           <div>
-            <label className="label" htmlFor="nda-date">Датум</label>
+            <label className="label" htmlFor="nda-date">{t('nda.dateLabel')}</label>
             <input
               id="nda-date"
               type="date"
@@ -135,7 +137,7 @@ export default function NDAForm() {
         {/* Second party company fields */}
         <CompanyFieldsSection
           prefix="secondParty"
-          legend="Втора договорна страна"
+          legend={t('nda.secondPartySection')}
           language={language}
           register={register}
           errors={errors.secondParty}
@@ -153,7 +155,7 @@ export default function NDAForm() {
           className="btn-primary w-full gap-2"
         >
           <Download size={16} />
-          {isSubmitting ? 'Генерирање…' : 'Генерирај договор (.docx)'}
+          {isSubmitting ? t('nda.generating') : t('nda.generateButton')}
         </button>
       </form>
     </div>

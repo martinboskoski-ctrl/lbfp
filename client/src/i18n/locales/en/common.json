@@ -1,0 +1,120 @@
+{
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "close": "Close",
+  "add": "Add",
+  "create": "Create",
+  "submit": "Submit",
+  "confirm": "Confirm",
+  "back": "Back",
+  "forward": "Forward",
+  "search": "Search",
+  "loading": "Loading…",
+  "required": "Required field",
+  "noResults": "No results",
+  "error": "Error",
+  "success": "Success",
+  "yes": "Yes",
+  "no": "No",
+  "all": "All",
+  "none": "None",
+  "total": "total",
+  "showing": "Showing",
+  "of": "of",
+  "comingSoon": "coming soon",
+
+  "companyName": "LBFP DOO Bitola",
+  "departments": "Departments",
+  "administration": "Administration",
+  "users": "Users",
+  "manager": "Manager",
+  "employee": "Employee",
+  "logout": "Log out",
+  "language": "Language",
+
+  "dept": {
+    "top_management": "Top Management",
+    "sales": "Sales",
+    "finance": "Finance",
+    "administration": "Administration",
+    "hr": "Human Resources",
+    "quality_assurance": "Quality Assurance",
+    "facility": "Facility",
+    "machines": "Machines",
+    "r_and_d": "Research & Development",
+    "production": "Production",
+    "carina": "Customs",
+    "nabavki": "Procurement (raw materials & packaging)"
+  },
+
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+
+  "validation": {
+    "required": "Required field",
+    "invalidEmail": "Invalid email address",
+    "minLength": "Must contain at least {{count}} characters",
+    "maxLength": "Maximum {{count}} characters",
+    "passwordMismatch": "Passwords do not match",
+    "selectDepartment": "Select a department",
+    "selectPerson": "Select a person"
+  },
+
+  "currency": {
+    "MKD": "MKD",
+    "EUR": "EUR",
+    "USD": "USD"
+  },
+
+  "files": {
+    "title": "Files",
+    "uploadTitle": "Upload File",
+    "uploading": "Uploading…",
+    "uploaded": "Uploaded: {{name}}",
+    "uploadMore": "Click to upload another",
+    "dropzone": "Drag a file here or click to select",
+    "allTypesSupported": "All file types are supported",
+    "uploadSuccess": "{{version}} uploaded",
+    "uploadError": "Upload failed. Check the S3 configuration.",
+    "downloadError": "Failed to get the download link",
+    "noFiles": "No files uploaded yet.",
+    "latest": "Latest",
+    "gate": "Gate {{number}}",
+    "download": "Download"
+  },
+
+  "comments": {
+    "title": "Comments",
+    "noComments": "No comments yet.",
+    "unknown": "Unknown",
+    "placeholder": "Add a comment…"
+  },
+
+  "approve": {
+    "approving": "Approving…",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectReason": "Reason for rejection",
+    "rejectPlaceholder": "Describe what needs to change…",
+    "rejecting": "Rejecting…",
+    "confirmReject": "Confirm rejection"
+  },
+
+  "admin": {
+    "allUsers": "All Users"
+  }
+}

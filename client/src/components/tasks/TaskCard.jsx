@@ -1,16 +1,21 @@
 import { ChevronLeft, ChevronRight, CheckCircle2, Trash2, Calendar } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useUpdateTaskStatus, useApproveTask, useDeleteTask } from '../../hooks/useTasks.js';
+import { fmtDateShort } from '../../utils/formatDate.js';
 
-const PRIORITY_CFG = {
-  low:    { label: 'Ниска',  cls: 'bg-gray-100 text-gray-500' },
-  medium: { label: 'Средна', cls: 'bg-blue-50 text-blue-600' },
-  high:   { label: 'Висока', cls: 'bg-orange-50 text-orange-600' },
-  urgent: { label: 'Итна',   cls: 'bg-red-50 text-red-600 font-semibold' },
+const PRIORITY_CLS = {
+  low:    'bg-gray-100 text-gray-500',
+  medium: 'bg-blue-50 text-blue-600',
+  high:   'bg-orange-50 text-orange-600',
+  urgent: 'bg-red-50 text-red-600 font-semibold',
 };
 
 const STATUSES = ['todo', 'in_progress', 'done', 'approved'];
 
 const TaskCard = ({ task, currentUser, isManager }) => {
+  const { t } = useTranslation('tasks');
+  const { t: tc } = useTranslation('common');
+
   const updateStatus = useUpdateTaskStatus();
   const approveTask  = useApproveTask();
   const deleteTask   = useDeleteTask();
@@ -29,7 +34,8 @@ const TaskCard = ({ task, currentUser, isManager }) => {
   const canDelete  = isCreator || isTopMgmt;
 
   const isOverdue = task.deadline && new Date(task.deadline) < new Date() && task.status !== 'approved';
-  const priority  = PRIORITY_CFG[task.priority] || PRIORITY_CFG.medium;
+  const priorityCls = PRIORITY_CLS[task.priority] || PRIORITY_CLS.medium;
+  const priorityLabel = tc(`priority.${task.priority}`) || tc('priority.medium');
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
@@ -42,7 +48,7 @@ const TaskCard = ({ task, currentUser, isManager }) => {
             onClick={() => deleteTask.mutate(task._id)}
             disabled={deleteTask.isPending}
             className="flex-shrink-0 text-gray-300 hover:text-red-500 transition-colors mt-0.5"
-            title="Избриши"
+            title={t('deleteTooltip')}
           >
             <Trash2 size={13} />
           </button>
@@ -56,15 +62,15 @@ const TaskCard = ({ task, currentUser, isManager }) => {
 
       {/* Chips */}
       <div className="flex flex-wrap gap-1 mb-2">
-        <span className={`text-xs px-1.5 py-0.5 rounded-full ${priority.cls}`}>
-          {priority.label}
+        <span className={`text-xs px-1.5 py-0.5 rounded-full ${priorityCls}`}>
+          {priorityLabel}
         </span>
         {task.deadline && (
           <span className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full ${
             isOverdue ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-500'
           }`}>
             <Calendar size={10} />
-            {new Date(task.deadline).toLocaleDateString('mk-MK')}
+            {fmtDateShort(task.deadline)}
           </span>
         )}
         {task.project?.title && (
@@ -84,7 +90,7 @@ const TaskCard = ({ task, currentUser, isManager }) => {
 
       {/* Approved by */}
       {task.status === 'approved' && task.approvedBy && (
-        <p className="text-xs text-green-600 mb-2">✓ Одобрено од {task.approvedBy.name}</p>
+        <p className="text-xs text-green-600 mb-2">{'✓ ' + t('approvedBy', { name: task.approvedBy.name })}</p>
       )}
 
       {/* Actions row */}
@@ -95,7 +101,7 @@ const TaskCard = ({ task, currentUser, isManager }) => {
           className={`p-2 rounded transition-colors ${
             canGoBack ? 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' : 'text-gray-200 cursor-not-allowed'
           }`}
-          title="Назад"
+          title={t('backTooltip')}
         >
           <ChevronLeft size={16} />
         </button>
@@ -105,10 +111,10 @@ const TaskCard = ({ task, currentUser, isManager }) => {
             onClick={() => approveTask.mutate(task._id)}
             disabled={approveTask.isPending}
             className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 text-xs font-medium transition-colors"
-            title="Одобри задача"
+            title={t('approveTooltip')}
           >
             <CheckCircle2 size={13} />
-            Одобри
+            {t('approve')}
           </button>
         )}
 
@@ -118,7 +124,7 @@ const TaskCard = ({ task, currentUser, isManager }) => {
           className={`p-2 rounded transition-colors ${
             canGoForward ? 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' : 'text-gray-200 cursor-not-allowed'
           }`}
-          title="Напред"
+          title={t('forwardTooltip')}
         >
           <ChevronRight size={16} />
         </button>

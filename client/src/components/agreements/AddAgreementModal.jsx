@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { X, RefreshCw } from 'lucide-react';
 import { useCreateAgreement, useUpdateAgreement, useRenewAgreement } from '../../hooks/useAgreements.js';
 
 export const CATEGORIES = [
-  { value: 'nda',         label: 'НДА — Договор за доверливост' },
-  { value: 'service',     label: 'Договор за услуги' },
-  { value: 'supply',      label: 'Договор за набавка' },
-  { value: 'lease',       label: 'Договор за закуп' },
-  { value: 'employment',  label: 'Договор за вработување' },
-  { value: 'partnership', label: 'Договор за соработка' },
-  { value: 'other',       label: 'Друго' },
+  { value: 'nda' },
+  { value: 'service' },
+  { value: 'supply' },
+  { value: 'lease' },
+  { value: 'employment' },
+  { value: 'partnership' },
+  { value: 'other' },
 ];
 
 const Field = ({ label, error, children }) => (
@@ -23,6 +24,9 @@ const Field = ({ label, error, children }) => (
 
 // mode: 'create' | 'edit' | 'renew'
 export default function AddAgreementModal({ onClose, initial = null, mode = 'create', dept = null }) {
+  const { t } = useTranslation('agreements');
+  const { t: tc } = useTranslation('common');
+
   const isRenew  = mode === 'renew';
   const isEdit   = mode === 'edit';
 
@@ -88,7 +92,11 @@ export default function AddAgreementModal({ onClose, initial = null, mode = 'cre
     onClose();
   };
 
-  const titles = { create: 'Додај договор', edit: 'Уреди договор', renew: 'Обнови договор' };
+  const titles = {
+    create: t('modal.createTitle'),
+    edit:   t('modal.editTitle'),
+    renew:  t('modal.renewTitle'),
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
@@ -109,46 +117,46 @@ export default function AddAgreementModal({ onClose, initial = null, mode = 'cre
 
           {isRenew && (
             <div className="text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-              Се создава нов договор. Претходниот ќе биде означен како обновен.
+              {t('modal.renewNote')}
             </div>
           )}
 
-          <Field label="Наслов на договорот *" error={errors.title?.message}>
+          <Field label={t('modal.titleLabel')} error={errors.title?.message}>
             <input className={`input ${errors.title ? 'border-red-400' : ''}`}
-              placeholder="пр. Договор за набавка суровини 2026"
-              {...register('title', { required: 'Насловот е задолжителен' })} />
+              placeholder={t('modal.titlePlaceholder')}
+              {...register('title', { required: t('modal.titleRequired') })} />
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Категорија *" error={errors.category?.message}>
+            <Field label={t('modal.categoryLabel')} error={errors.category?.message}>
               <select className="input" {...register('category', { required: true })}>
                 {CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
+                  <option key={c.value} value={c.value}>{t(`category.${c.value}`)}</option>
                 ))}
               </select>
             </Field>
 
-            <Field label="Друга договорна страна *" error={errors.otherParty?.message}>
+            <Field label={t('modal.otherPartyLabel')} error={errors.otherParty?.message}>
               <input className={`input ${errors.otherParty ? 'border-red-400' : ''}`}
-                placeholder="Назив на компанијата"
-                {...register('otherParty', { required: 'Задолжително поле' })} />
+                placeholder={t('modal.otherPartyPlaceholder')}
+                {...register('otherParty', { required: tc('validation.required') })} />
             </Field>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Датум на почеток *" error={errors.startDate?.message}>
+            <Field label={t('modal.startDateLabel')} error={errors.startDate?.message}>
               <input type="date" className={`input ${errors.startDate ? 'border-red-400' : ''}`}
-                {...register('startDate', { required: 'Задолжително поле' })} />
+                {...register('startDate', { required: tc('validation.required') })} />
             </Field>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="label mb-0">Датум на истек</label>
+                <label className="label mb-0">{t('modal.endDateLabel')}</label>
                 <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
                   <input type="checkbox" className="rounded"
                     checked={openEnded}
                     onChange={(e) => { setOpenEnded(e.target.checked); if (e.target.checked) setValue('endDate', ''); }} />
-                  Неодреден
+                  {t('modal.openEnded')}
                 </label>
               </div>
               <input type="date" className="input disabled:opacity-40"
@@ -158,12 +166,12 @@ export default function AddAgreementModal({ onClose, initial = null, mode = 'cre
           </div>
 
           {!openEnded && (
-            <Field label={`Потсетување (денови пред истек, тековно: ${watch('reminderDays')})`}>
+            <Field label={t('modal.reminderLabel', { days: watch('reminderDays') })}>
               <input type="range" min={7} max={90} step={1}
                 className="w-full accent-blue-600"
                 {...register('reminderDays')} />
               <div className="flex justify-between text-xs text-gray-400 mt-0.5">
-                <span>7 дена</span><span>30</span><span>60</span><span>90 дена</span>
+                <span>{t('modal.reminderDays7')}</span><span>30</span><span>60</span><span>{t('modal.reminderDays90')}</span>
               </div>
             </Field>
           )}
@@ -171,46 +179,46 @@ export default function AddAgreementModal({ onClose, initial = null, mode = 'cre
           <div className="flex items-center gap-2">
             <input type="checkbox" id="autoRenew" className="rounded accent-blue-600" {...register('autoRenew')} />
             <label htmlFor="autoRenew" className="text-sm text-gray-700 cursor-pointer">
-              Автоматско обновување
+              {t('modal.autoRenewLabel')}
             </label>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Вредност (опционално)">
-              <input type="number" min={0} className="input" placeholder="пр. 50000"
+            <Field label={t('modal.valueLabel')}>
+              <input type="number" min={0} className="input" placeholder={t('modal.valuePlaceholder')}
                 {...register('value')} />
             </Field>
-            <Field label="Валута">
+            <Field label={t('modal.currencyLabel')}>
               <select className={`input ${!watchValue ? 'opacity-40' : ''}`}
                 disabled={!watchValue}
                 {...register('currency')}>
-                <option value="MKD">MKD — Денар</option>
-                <option value="EUR">EUR — Евро</option>
-                <option value="USD">USD — Долар</option>
+                <option value="MKD">{t('modal.currencyMKD')}</option>
+                <option value="EUR">{t('modal.currencyEUR')}</option>
+                <option value="USD">{t('modal.currencyUSD')}</option>
               </select>
             </Field>
           </div>
 
-          <Field label="Опис (опционално)">
-            <textarea rows={2} className="input resize-none" placeholder="Краток опис на договорот…"
+          <Field label={t('modal.descriptionLabel')}>
+            <textarea rows={2} className="input resize-none" placeholder={t('modal.descriptionPlaceholder')}
               {...register('description')} />
           </Field>
 
-          <Field label="Белешки (опционално)">
-            <textarea rows={2} className="input resize-none" placeholder="Интерни белешки…"
+          <Field label={t('modal.notesLabel')}>
+            <textarea rows={2} className="input resize-none" placeholder={t('modal.notesPlaceholder')}
               {...register('notes')} />
           </Field>
         </form>
 
         {/* Footer */}
         <div className="flex gap-3 px-6 py-4 border-t border-gray-100">
-          <button type="button" onClick={onClose} className="btn-secondary flex-1">Откажи</button>
+          <button type="button" onClick={onClose} className="btn-secondary flex-1">{tc('cancel')}</button>
           <button
             onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting || create.isPending || update.isPending || renew.isPending}
             className="btn-primary flex-1"
           >
-            {isRenew ? 'Обнови' : isEdit ? 'Зачувај' : 'Додај договор'}
+            {isRenew ? t('modal.submitRenew') : isEdit ? t('modal.submitEdit') : t('modal.submitCreate')}
           </button>
         </div>
       </div>

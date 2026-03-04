@@ -1,0 +1,75 @@
+{
+  "title": "Теркови",
+  "subtitle": "Изберете терк за генерирање на документ",
+  "backToTemplates": "Назад кон теркови",
+
+  "template": {
+    "nda": {
+      "label": "NDA",
+      "sublabel": "Договор за доверливост"
+    },
+    "pl": {
+      "label": "PL Agreement",
+      "sublabel": "Договор за приватна етикета"
+    }
+  },
+
+  "nda": {
+    "heading": "Договор за доверливост (NDA)",
+    "description": "Генерирај договор помеѓу ЛБФП ДОО Битола и втората страна",
+    "documentVersion": "Верзија на документот",
+    "langMkOnly": "Само македонски",
+    "langEnOnly": "Само англиски",
+    "langBilingual": "Македонски – Англиски",
+    "agreementDateSection": "Датум на договор",
+    "dateLabel": "Датум",
+    "secondPartySection": "Втора договорна страна",
+    "generateError": "Грешка при генерирање. Обидете се повторно.",
+    "generating": "Генерирање…",
+    "generateButton": "Генерирај договор (.docx)"
+  },
+
+  "pl": {
+    "heading": "Private Label Agreement",
+    "description": "Генерирај PL договор помеѓу ЛБФП ДОО Битола (Добавувач) и Клиентот",
+    "agreementDateSection": "Датум на договор",
+    "effectiveDateLabel": "Датум на стапување во сила",
+    "customerSection": "Клиент (Втора страна)",
+    "companyNameLabel": "Назив на компанија",
+    "companyNamePlaceholder": "пр. ACME Foods Ltd",
+    "addressLabel": "Регистрирана адреса",
+    "addressPlaceholder": "пр. 1 Commerce Street, London, EC1A 1BB",
+    "crnLabel": "Матичен број (CRN)",
+    "crnPlaceholder": "пр. 12345678",
+    "ceoLabel": "Директор / Овластено лице",
+    "ceoPlaceholder": "пр. Jane Smith",
+    "communicationSection": "Комуникација (Член 15)",
+    "customerEmailLabel": "Е-пошта на клиентот",
+    "customerEmailPlaceholder": "пр. procurement@customer.com",
+    "commercialSection": "Комерцијални услови",
+    "moqLabel": "MOQ — Минимална количина за нарачка (единици)",
+    "moqPlaceholder": "пр. 5000",
+    "moqHint": "Минимална производна нарачка потребна за прифаќање на развој на производ",
+    "depositLabel": "Депозит / Плаќање на остаток",
+    "depositHint": "Добавувачот издава про-форма фактура за <strong>{{deposit}}%</strong> депозит; остатокот од <strong>{{balance}}%</strong> се плаќа пред испорака.",
+    "signatorySection": "Потписник на клиентот",
+    "signatoryNameLabel": "Целосно име (за блок за потпис)",
+    "signatoryNamePlaceholder": "пр. Jane Smith",
+    "generateError": "Грешка при генерирање. Обидете се повторно.",
+    "generating": "Генерирање…",
+    "generateButton": "Генерирај PL договор (.docx)"
+  },
+
+  "companyFields": {
+    "crnLabel": "Матичен број",
+    "crnPlaceholder": "пр. 1234567890",
+    "mkdSection": "Податоци на македонски",
+    "engSection": "Податоци на англиски",
+    "nameLabel": "Назив на компанија",
+    "namePlaceholder": "Назив на компанијата",
+    "addressLabel": "Адреса",
+    "addressPlaceholder": "Регистрирана адреса",
+    "managerLabel": "Управител",
+    "managerPlaceholder": "Име и презиме"
+  }
+}

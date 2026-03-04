@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import api from '../api/axios.js';
-import Sidebar, { DEPARTMENTS } from '../components/layout/Sidebar.jsx';
+import Sidebar from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
 
 const AdminUsers = () => {
+  const { t } = useTranslation('common');
   const { data, isLoading } = useQuery({
     queryKey: ['admin-users'],
     queryFn: () => api.get('/users').then((r) => r.data.users),
@@ -13,10 +15,10 @@ const AdminUsers = () => {
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <Topbar title="Корисници" />
+        <Topbar title={t('users')} />
         <main className="flex-1 p-6">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Сите корисници</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-6">{t('admin.allUsers')}</h2>
 
             {isLoading && (
               <div className="flex items-center justify-center py-16">
@@ -34,11 +36,11 @@ const AdminUsers = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                        {DEPARTMENTS.find((d) => d.value === user.department)?.label || user.department}
+                        {t(`dept.${user.department}`, { defaultValue: user.department })}
                       </span>
                       {user.isManager && (
                         <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
-                          Менаџер
+                          {t('manager')}
                         </span>
                       )}
                     </div>

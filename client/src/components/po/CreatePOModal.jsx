@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Plus, Trash2, Loader2 } from 'lucide-react';
 import { useCreatePO } from '../../hooks/usePO.js';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +10,8 @@ const isEnglish = (s) => !s || ASCII_RE.test(s);
 const emptyProduct = () => ({ productType: '', weight: '', description: '' });
 
 const CreatePOModal = ({ onClose }) => {
+  const { t } = useTranslation('po');
+  const { t: tc } = useTranslation('common');
   const navigate    = useNavigate();
   const createPO    = useCreatePO();
 
@@ -28,18 +31,18 @@ const CreatePOModal = ({ onClose }) => {
 
   const validate = () => {
     const e = {};
-    if (!form.clientName.trim())  e.clientName   = 'Required';
-    if (!isEnglish(form.clientName))  e.clientName = 'English only (ASCII)';
-    if (!form.dateExpected)       e.dateExpected  = 'Required';
-    if (!form.moq || isNaN(form.moq)) e.moq       = 'Required (number)';
-    if (!isEnglish(form.description)) e.description = 'English only (ASCII)';
+    if (!form.clientName.trim())  e.clientName   = t('modal.required');
+    if (!isEnglish(form.clientName))  e.clientName = t('modal.englishOnly');
+    if (!form.dateExpected)       e.dateExpected  = t('modal.required');
+    if (!form.moq || isNaN(form.moq)) e.moq       = t('modal.requiredNumber');
+    if (!isEnglish(form.description)) e.description = t('modal.englishOnly');
 
     products.forEach((p, i) => {
-      if (!p.productType.trim()) e[`pt_${i}`] = 'Required';
-      if (!isEnglish(p.productType)) e[`pt_${i}`] = 'English only';
-      if (!p.weight.trim())      e[`pw_${i}`] = 'Required';
-      if (!isEnglish(p.weight))  e[`pw_${i}`] = 'English only';
-      if (!isEnglish(p.description)) e[`pd_${i}`] = 'English only';
+      if (!p.productType.trim()) e[`pt_${i}`] = t('modal.required');
+      if (!isEnglish(p.productType)) e[`pt_${i}`] = t('modal.englishOnly');
+      if (!p.weight.trim())      e[`pw_${i}`] = t('modal.required');
+      if (!isEnglish(p.weight))  e[`pw_${i}`] = t('modal.englishOnly');
+      if (!isEnglish(p.description)) e[`pd_${i}`] = t('modal.englishOnly');
     });
 
     setErrors(e);
@@ -66,7 +69,7 @@ const CreatePOModal = ({ onClose }) => {
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
-          <h2 className="text-base font-bold text-gray-900">New Purchase Order</h2>
+          <h2 className="text-base font-bold text-gray-900">{t('modal.title')}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><X size={18} /></button>
         </div>
 
@@ -75,17 +78,17 @@ const CreatePOModal = ({ onClose }) => {
           {/* Client + Date row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="label">Client Name *</label>
+              <label className="label">{t('modal.clientNameLabel')}</label>
               <input
                 className={`input ${errors.clientName ? 'border-red-400' : ''}`}
-                placeholder="Acme Corp"
+                placeholder={t('modal.clientNamePlaceholder')}
                 value={form.clientName}
                 onChange={(e) => setField('clientName', e.target.value)}
               />
               {errors.clientName && <p className="text-red-500 text-xs mt-1">{errors.clientName}</p>}
             </div>
             <div>
-              <label className="label">Date Expected *</label>
+              <label className="label">{t('modal.dateExpectedLabel')}</label>
               <input
                 type="date"
                 className={`input ${errors.dateExpected ? 'border-red-400' : ''}`}
@@ -99,21 +102,21 @@ const CreatePOModal = ({ onClose }) => {
           {/* MOQ + Description row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="label">MOQ *</label>
+              <label className="label">{t('modal.moqLabel')}</label>
               <input
                 type="number"
                 className={`input ${errors.moq ? 'border-red-400' : ''}`}
-                placeholder="1000"
+                placeholder={t('modal.moqPlaceholder')}
                 value={form.moq}
                 onChange={(e) => setField('moq', e.target.value)}
               />
               {errors.moq && <p className="text-red-500 text-xs mt-1">{errors.moq}</p>}
             </div>
             <div>
-              <label className="label">Description</label>
+              <label className="label">{t('modal.descriptionLabel')}</label>
               <input
                 className={`input ${errors.description ? 'border-red-400' : ''}`}
-                placeholder="Optional notes..."
+                placeholder={t('modal.descriptionPlaceholder')}
                 value={form.description}
                 onChange={(e) => setField('description', e.target.value)}
               />
@@ -124,9 +127,9 @@ const CreatePOModal = ({ onClose }) => {
           {/* Products */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="label mb-0">Products</label>
+              <label className="label mb-0">{t('modal.productsLabel')}</label>
               <button type="button" onClick={addProduct} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800">
-                <Plus size={12} /> Add product
+                <Plus size={12} /> {t('modal.addProduct')}
               </button>
             </div>
 
@@ -134,7 +137,7 @@ const CreatePOModal = ({ onClose }) => {
               {products.map((p, i) => (
                 <div key={i} className="border border-gray-200 rounded-xl p-3 space-y-2">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500">Product {i + 1}</span>
+                    <span className="text-xs font-medium text-gray-500">{t('modal.productNum', { num: i + 1 })}</span>
                     {products.length > 1 && (
                       <button type="button" onClick={() => removeProduct(i)} className="text-gray-300 hover:text-red-500">
                         <Trash2 size={13} />
@@ -145,7 +148,7 @@ const CreatePOModal = ({ onClose }) => {
                     <div>
                       <input
                         className={`input text-sm ${errors[`pt_${i}`] ? 'border-red-400' : ''}`}
-                        placeholder="Type *"
+                        placeholder={t('modal.typePlaceholder')}
                         value={p.productType}
                         onChange={(e) => setProduct(i, 'productType', e.target.value)}
                       />
@@ -154,7 +157,7 @@ const CreatePOModal = ({ onClose }) => {
                     <div>
                       <input
                         className={`input text-sm ${errors[`pw_${i}`] ? 'border-red-400' : ''}`}
-                        placeholder="Weight *"
+                        placeholder={t('modal.weightPlaceholder')}
                         value={p.weight}
                         onChange={(e) => setProduct(i, 'weight', e.target.value)}
                       />
@@ -164,7 +167,7 @@ const CreatePOModal = ({ onClose }) => {
                   <div>
                     <input
                       className={`input text-sm ${errors[`pd_${i}`] ? 'border-red-400' : ''}`}
-                      placeholder="Description (optional)"
+                      placeholder={t('modal.productDescPlaceholder')}
                       value={p.description}
                       onChange={(e) => setProduct(i, 'description', e.target.value)}
                     />
@@ -177,10 +180,10 @@ const CreatePOModal = ({ onClose }) => {
 
           {/* Footer */}
           <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
-            <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+            <button type="button" onClick={onClose} className="btn-secondary">{tc('cancel')}</button>
             <button type="submit" disabled={createPO.isPending} className="btn-primary flex items-center gap-2">
               {createPO.isPending && <Loader2 size={14} className="animate-spin" />}
-              Create PO
+              {t('modal.submitButton')}
             </button>
           </div>
         </form>

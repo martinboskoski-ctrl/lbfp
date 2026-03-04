@@ -1,5 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 import { FileText, ArrowLeft, ClipboardList } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import NDAForm from './NDAForm.jsx';
 import PLAgreementForm from './PLAgreementForm.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -7,25 +8,23 @@ import { useAuth } from '../../context/AuthContext.jsx';
 const TEMPLATES = [
   {
     id: 'nda',
-    label: 'NDA',
-    sublabel: 'Non-Disclosure Agreement',
-    sublabelMk: 'Договор за доверливост',
+    labelKey: 'template.nda.label',
+    sublabelKey: 'template.nda.sublabel',
     icon: FileText,
     color: 'bg-blue-50 text-blue-600',
     depts: ['top_management', 'sales'],
   },
   {
     id: 'pl-agreement',
-    label: 'PL Agreement',
-    sublabel: 'Private Label Agreement',
-    sublabelMk: 'Договор за приватна етикета',
+    labelKey: 'template.pl.label',
+    sublabelKey: 'template.pl.sublabel',
     icon: ClipboardList,
     color: 'bg-green-50 text-green-600',
     depts: ['top_management', 'sales'],
   },
 ];
 
-const TemplateIcon = ({ template, onClick }) => {
+const TemplateIcon = ({ template, onClick, t }) => {
   const Icon = template.icon;
   return (
     <button
@@ -36,8 +35,8 @@ const TemplateIcon = ({ template, onClick }) => {
         <Icon size={28} />
       </div>
       <div>
-        <p className="text-sm font-semibold text-gray-900">{template.label}</p>
-        <p className="text-xs text-gray-400 mt-0.5">{template.sublabel}</p>
+        <p className="text-sm font-semibold text-gray-900">{t(template.labelKey)}</p>
+        <p className="text-xs text-gray-400 mt-0.5">{t(template.sublabelKey)}</p>
       </div>
     </button>
   );
@@ -45,6 +44,7 @@ const TemplateIcon = ({ template, onClick }) => {
 
 const TerkoviGallery = () => {
   const { user } = useAuth();
+  const { t } = useTranslation('terkovi');
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTemplate = searchParams.get('template');
   const userDept = user?.department;
@@ -69,7 +69,7 @@ const TerkoviGallery = () => {
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6 transition-colors"
         >
           <ArrowLeft size={16} />
-          Назад кон теркови
+          {t('backToTemplates')}
         </button>
         <NDAForm />
       </div>
@@ -84,7 +84,7 @@ const TerkoviGallery = () => {
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6 transition-colors"
         >
           <ArrowLeft size={16} />
-          Назад кон теркови
+          {t('backToTemplates')}
         </button>
         <PLAgreementForm />
       </div>
@@ -94,13 +94,13 @@ const TerkoviGallery = () => {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Теркови</h2>
-        <p className="text-sm text-gray-400 mt-0.5">Изберете терк за генерирање на документ</p>
+        <h2 className="text-xl font-bold text-gray-900">{t('title')}</h2>
+        <p className="text-sm text-gray-400 mt-0.5">{t('subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {TEMPLATES.filter((t) => !t.depts || t.depts.includes(userDept)).map((t) => (
-          <TemplateIcon key={t.id} template={t} onClick={() => openTemplate(t.id)} />
+        {TEMPLATES.filter((tmpl) => !tmpl.depts || tmpl.depts.includes(userDept)).map((tmpl) => (
+          <TemplateIcon key={tmpl.id} template={tmpl} onClick={() => openTemplate(tmpl.id)} t={t} />
         ))}
       </div>
     </div>

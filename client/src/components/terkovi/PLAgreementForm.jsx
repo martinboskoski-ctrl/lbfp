@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FileText, Download, Building2, CreditCard, User, Mail } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { plAgreementSchema, DEPOSIT_OPTIONS } from '../../schemas/terkovi/plAgreementSchema.js';
 import api from '../../api/axios.js';
 
@@ -9,6 +10,7 @@ import api from '../../api/axios.js';
 const depositToBalance = { '70': '30', '60': '40', '50': '50' };
 
 export default function PLAgreementForm() {
+  const { t } = useTranslation('terkovi');
   const [generateError, setGenerateError] = useState('');
 
   const {
@@ -58,7 +60,7 @@ export default function PLAgreementForm() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('PL Agreement generation failed:', err);
-      setGenerateError('Document generation failed. Please try again.');
+      setGenerateError(t('pl.generateError'));
     }
   };
 
@@ -70,9 +72,9 @@ export default function PLAgreementForm() {
           <FileText size={22} className="text-green-600" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Private Label Agreement</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t('pl.heading')}</h2>
           <p className="text-sm text-gray-500 mt-0.5">
-            Generate a PL Agreement between LBFP DOO Bitola (Supplier) and the Customer
+            {t('pl.description')}
           </p>
         </div>
       </div>
@@ -82,10 +84,10 @@ export default function PLAgreementForm() {
         {/* Effective Date */}
         <div className="card p-5">
           <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide mb-4">
-            Agreement Date
+            {t('pl.agreementDateSection')}
           </h3>
           <div>
-            <label className="label" htmlFor="pl-effectiveDate">Effective Date</label>
+            <label className="label" htmlFor="pl-effectiveDate">{t('pl.effectiveDateLabel')}</label>
             <input
               id="pl-effectiveDate"
               type="date"
@@ -103,17 +105,17 @@ export default function PLAgreementForm() {
           <div className="flex items-center gap-2">
             <Building2 size={16} className="text-gray-500" />
             <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">
-              Customer (Second Party)
+              {t('pl.customerSection')}
             </h3>
           </div>
 
           {/* Company Name */}
           <div>
-            <label className="label" htmlFor="pl-companyName">Company Name</label>
+            <label className="label" htmlFor="pl-companyName">{t('pl.companyNameLabel')}</label>
             <input
               id="pl-companyName"
               type="text"
-              placeholder="e.g. ACME Foods Ltd"
+              placeholder={t('pl.companyNamePlaceholder')}
               className={`input ${errors.companyName ? 'border-red-400' : ''}`}
               {...register('companyName')}
             />
@@ -124,11 +126,11 @@ export default function PLAgreementForm() {
 
           {/* Company Address */}
           <div>
-            <label className="label" htmlFor="pl-companyAddress">Registered Address</label>
+            <label className="label" htmlFor="pl-companyAddress">{t('pl.addressLabel')}</label>
             <input
               id="pl-companyAddress"
               type="text"
-              placeholder="e.g. 1 Commerce Street, London, EC1A 1BB"
+              placeholder={t('pl.addressPlaceholder')}
               className={`input ${errors.companyAddress ? 'border-red-400' : ''}`}
               {...register('companyAddress')}
             />
@@ -140,11 +142,11 @@ export default function PLAgreementForm() {
           {/* Two-column: CRN + CEO */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="label" htmlFor="pl-companyCRN">Organisation Number (CRN)</label>
+              <label className="label" htmlFor="pl-companyCRN">{t('pl.crnLabel')}</label>
               <input
                 id="pl-companyCRN"
                 type="text"
-                placeholder="e.g. 12345678"
+                placeholder={t('pl.crnPlaceholder')}
                 className={`input ${errors.companyCRN ? 'border-red-400' : ''}`}
                 {...register('companyCRN')}
               />
@@ -153,11 +155,11 @@ export default function PLAgreementForm() {
               )}
             </div>
             <div>
-              <label className="label" htmlFor="pl-companyCEO">CEO / Authorised Person</label>
+              <label className="label" htmlFor="pl-companyCEO">{t('pl.ceoLabel')}</label>
               <input
                 id="pl-companyCEO"
                 type="text"
-                placeholder="e.g. Jane Smith"
+                placeholder={t('pl.ceoPlaceholder')}
                 className={`input ${errors.companyCEO ? 'border-red-400' : ''}`}
                 {...register('companyCEO')}
               />
@@ -173,15 +175,15 @@ export default function PLAgreementForm() {
           <div className="flex items-center gap-2">
             <Mail size={16} className="text-gray-500" />
             <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">
-              Communication (Article 15)
+              {t('pl.communicationSection')}
             </h3>
           </div>
           <div>
-            <label className="label" htmlFor="pl-customerEmail">Customer Email Address</label>
+            <label className="label" htmlFor="pl-customerEmail">{t('pl.customerEmailLabel')}</label>
             <input
               id="pl-customerEmail"
               type="email"
-              placeholder="e.g. procurement@customer.com"
+              placeholder={t('pl.customerEmailPlaceholder')}
               className={`input ${errors.customerEmail ? 'border-red-400' : ''}`}
               {...register('customerEmail')}
             />
@@ -196,26 +198,26 @@ export default function PLAgreementForm() {
           <div className="flex items-center gap-2">
             <CreditCard size={16} className="text-gray-500" />
             <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">
-              Commercial Terms
+              {t('pl.commercialSection')}
             </h3>
           </div>
 
           {/* MOQ */}
           <div>
             <label className="label" htmlFor="pl-MOQamount">
-              MOQ — Minimum Order Quantity (units)
+              {t('pl.moqLabel')}
             </label>
             <input
               id="pl-MOQamount"
               type="number"
               min="1"
               step="1"
-              placeholder="e.g. 5000"
+              placeholder={t('pl.moqPlaceholder')}
               className={`input ${errors.MOQamount ? 'border-red-400' : ''}`}
               {...register('MOQamount')}
             />
             <p className="mt-1 text-xs text-gray-400">
-              Minimum production order potential required for product development acceptance
+              {t('pl.moqHint')}
             </p>
             {errors.MOQamount && (
               <p className="mt-1 text-xs text-red-600">{errors.MOQamount.message}</p>
@@ -224,7 +226,7 @@ export default function PLAgreementForm() {
 
           {/* Deposit / Balance split */}
           <div>
-            <label className="label">Deposit / Balance Payment Split</label>
+            <label className="label">{t('pl.depositLabel')}</label>
             <div className="flex flex-col sm:flex-row gap-3 mt-1">
               {DEPOSIT_OPTIONS.map((opt) => (
                 <label
@@ -248,10 +250,10 @@ export default function PLAgreementForm() {
             {errors.depositPercent && (
               <p className="mt-1.5 text-xs text-red-600">{errors.depositPercent.message}</p>
             )}
-            <p className="mt-2 text-xs text-gray-400">
-              Supplier issues pro-forma invoice for <strong>{depositPercent}%</strong> deposit;
-              remaining <strong>{balancePercent}%</strong> must be paid before shipment.
-            </p>
+            <p
+              className="mt-2 text-xs text-gray-400"
+              dangerouslySetInnerHTML={{ __html: t('pl.depositHint', { deposit: depositPercent, balance: balancePercent }) }}
+            />
           </div>
         </div>
 
@@ -260,17 +262,17 @@ export default function PLAgreementForm() {
           <div className="flex items-center gap-2">
             <User size={16} className="text-gray-500" />
             <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">
-              Customer Signatory
+              {t('pl.signatorySection')}
             </h3>
           </div>
           <div>
             <label className="label" htmlFor="pl-customerSignatoryName">
-              Full Name (for signature block)
+              {t('pl.signatoryNameLabel')}
             </label>
             <input
               id="pl-customerSignatoryName"
               type="text"
-              placeholder="e.g. Jane Smith"
+              placeholder={t('pl.signatoryNamePlaceholder')}
               className={`input ${errors.customerSignatoryName ? 'border-red-400' : ''}`}
               {...register('customerSignatoryName')}
             />
@@ -292,7 +294,7 @@ export default function PLAgreementForm() {
           className="btn-primary w-full gap-2"
         >
           <Download size={16} />
-          {isSubmitting ? 'Generating…' : 'Generate PL Agreement (.docx)'}
+          {isSubmitting ? t('pl.generating') : t('pl.generateButton')}
         </button>
       </form>
     </div>

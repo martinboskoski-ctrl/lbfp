@@ -1,0 +1,110 @@
+{
+  "title": "Agreements",
+  "agreementCount_one": "{{count}} agreement",
+  "agreementCount_other": "{{count}} agreements",
+  "newAgreement": "New Agreement",
+  "addFirstAgreement": "Add the first agreement",
+  "noAgreements": "No agreements recorded.",
+  "noFilterMatch": "No agreements match the filter.",
+  "searchPlaceholder": "Search by title or party…",
+  "allStatuses": "All statuses",
+  "allCategories": "All categories",
+
+  "status": {
+    "active": "Active",
+    "expiring_soon": "Expiring",
+    "expired": "Expired",
+    "terminated": "Terminated",
+    "renewed": "Renewed",
+    "draft": "Draft"
+  },
+
+  "statusFilter": {
+    "active": "Active",
+    "expiring_soon": "Expiring",
+    "expired": "Expired",
+    "terminated": "Terminated",
+    "renewed": "Renewed",
+    "draft": "Drafts"
+  },
+
+  "stat": {
+    "total": "Total",
+    "active": "Active",
+    "expiringSoon": "Expiring",
+    "expired": "Expired"
+  },
+
+  "category": {
+    "nda": "NDA — Non-Disclosure Agreement",
+    "service": "Service Agreement",
+    "supply": "Supply Agreement",
+    "lease": "Lease Agreement",
+    "employment": "Employment Agreement",
+    "partnership": "Partnership Agreement",
+    "other": "Other"
+  },
+  "categoryShort": {
+    "nda": "NDA",
+    "service": "Service",
+    "supply": "Supply",
+    "lease": "Lease",
+    "employment": "Employment",
+    "partnership": "Partnership",
+    "other": "Other"
+  },
+
+  "daysChip": {
+    "openEnded": "Open-ended",
+    "expiredAgo_one": "Expired {{count}} day ago",
+    "expiredAgo_other": "Expired {{count}} days ago",
+    "expiresToday": "Expires today",
+    "expiresIn_one": "{{count}} day left",
+    "expiresIn_other": "{{count}} days left",
+    "daysLeft": "{{count}} days"
+  },
+
+  "autoRenew": "Auto-renew",
+
+  "actions": {
+    "edit": "Edit",
+    "renew": "Renew",
+    "terminate": "Terminate",
+    "delete": "Delete",
+    "confirmTerminate": "Confirm termination",
+    "terminateReasonPlaceholder": "Reason for termination (optional)…"
+  },
+
+  "modal": {
+    "createTitle": "Add Agreement",
+    "editTitle": "Edit Agreement",
+    "renewTitle": "Renew Agreement",
+    "renewNote": "A new agreement will be created. The previous one will be marked as renewed.",
+    "titleLabel": "Agreement title *",
+    "titlePlaceholder": "e.g. Raw Materials Supply Agreement 2026",
+    "titleRequired": "Title is required",
+    "categoryLabel": "Category *",
+    "otherPartyLabel": "Other contracting party *",
+    "otherPartyPlaceholder": "Company name",
+    "startDateLabel": "Start date *",
+    "endDateLabel": "Expiry date",
+    "openEnded": "Open-ended",
+    "reminderLabel": "Reminder (days before expiry, current: {{days}})",
+    "reminderDays7": "7 days",
+    "reminderDays90": "90 days",
+    "autoRenewLabel": "Automatic renewal",
+    "valueLabel": "Value (optional)",
+    "valuePlaceholder": "e.g. 50000",
+    "currencyLabel": "Currency",
+    "currencyMKD": "MKD — Denar",
+    "currencyEUR": "EUR — Euro",
+    "currencyUSD": "USD — Dollar",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Brief description of the agreement…",
+    "notesLabel": "Notes (optional)",
+    "notesPlaceholder": "Internal notes…",
+    "submitCreate": "Add Agreement",
+    "submitEdit": "Save",
+    "submitRenew": "Renew"
+  }
+}

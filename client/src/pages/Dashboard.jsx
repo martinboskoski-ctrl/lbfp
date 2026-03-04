@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { PlusCircle, ShieldCheck } from 'lucide-react';
 import KanbanBoard from '../components/tasks/KanbanBoard.jsx';
 import Whiteboard from '../components/Whiteboard.jsx';
@@ -10,18 +11,18 @@ import LeadsPage from '../components/leads/LeadsPage.jsx';
 import { useProjects } from '../hooks/useProjects.js';
 import { useDirectory } from '../hooks/useUsers.js';
 import ProjectCard from '../components/project/ProjectCard.jsx';
-import Sidebar, { DEPARTMENTS } from '../components/layout/Sidebar.jsx';
+import Sidebar from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { canManage } from '../utils/userTier.js';
 
 const DEPT_TABS = [
-  { value: 'terkovi',    label: 'Теркови' },
-  { value: 'projects',   label: 'Проекти' },
-  { value: 'tasks',      label: 'Тековни задачи' },
-  { value: 'nabavki',    label: 'Набавки' },
-  { value: 'dogovori',   label: 'Договори' },
-  { value: 'vraboteni',  label: 'Вработени' },
+  { value: 'terkovi',   key: 'tabs.terkovi' },
+  { value: 'projects',  key: 'tabs.projects' },
+  { value: 'tasks',     key: 'tabs.tasks' },
+  { value: 'nabavki',   key: 'tabs.nabavki' },
+  { value: 'dogovori',  key: 'tabs.dogovori' },
+  { value: 'vraboteni', key: 'tabs.vraboteni' },
 ];
 
 // Departments that have the Purchase Order tab
@@ -31,6 +32,8 @@ const PO_DEPTS = ['sales', 'quality_assurance', 'r_and_d', 'nabavki', 'top_manag
 const LEADS_DEPTS = ['sales', 'top_management'];
 
 const EmployeeList = ({ dept }) => {
+  const { t } = useTranslation('dashboard');
+  const { t: tc } = useTranslation('common');
   const { data: users = [], isLoading } = useDirectory(dept);
 
   if (isLoading) {
@@ -44,7 +47,7 @@ const EmployeeList = ({ dept }) => {
   if (users.length === 0) {
     return (
       <div className="text-center py-16 text-gray-400 text-sm">
-        Нема регистрирани вработени во ова одделение.
+        {t('noEmployees')}
       </div>
     );
   }
@@ -61,12 +64,12 @@ const EmployeeList = ({ dept }) => {
               <span className="font-medium text-gray-900 text-sm">{u.name}</span>
               {u.isManager && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                  <ShieldCheck size={10} /> Менаџер
+                  <ShieldCheck size={10} /> {tc('manager')}
                 </span>
               )}
             </div>
             <p className="text-xs text-gray-400 mt-0.5">
-              {DEPARTMENTS.find((d) => d.value === u.department)?.label || u.department}
+              {tc('dept.' + u.department)}
             </p>
           </div>
         </div>
@@ -76,6 +79,8 @@ const EmployeeList = ({ dept }) => {
 };
 
 const Dashboard = () => {
+  const { t } = useTranslation('dashboard');
+  const { t: tc } = useTranslation('common');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const dept = searchParams.get('dept') || '';
@@ -84,11 +89,9 @@ const Dashboard = () => {
 
   const { data: projects, isLoading, error } = useProjects(dept);
 
-  const deptLabel = dept
-    ? DEPARTMENTS.find((d) => d.value === dept)?.label || dept
-    : null;
+  const deptLabel = dept ? tc('dept.' + dept) : null;
 
-  const title = deptLabel || 'Огласна табла';
+  const title = deptLabel || t('bulletin');
   const newProjectLink = dept ? `/projects/new?dept=${dept}` : '/projects/new';
 
   const switchTab = (val) => {
@@ -111,19 +114,19 @@ const Dashboard = () => {
             <nav className="flex gap-1 overflow-x-auto">
               {[
                 ...DEPT_TABS,
-                ...(PO_DEPTS.includes(dept) ? [{ value: 'po', label: 'Purchase Order' }] : []),
-                ...(LEADS_DEPTS.includes(dept) ? [{ value: 'leads', label: 'Потенцијални клиенти' }] : []),
-              ].map((t) => (
+                ...(PO_DEPTS.includes(dept) ? [{ value: 'po', key: 'tabs.po' }] : []),
+                ...(LEADS_DEPTS.includes(dept) ? [{ value: 'leads', key: 'tabs.leads' }] : []),
+              ].map((tabItem) => (
                 <button
-                  key={t.value}
-                  onClick={() => switchTab(t.value)}
+                  key={tabItem.value}
+                  onClick={() => switchTab(tabItem.value)}
                   className={`flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                    tab === t.value
+                    tab === tabItem.value
                       ? 'border-blue-600 text-blue-700'
                       : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'
                   }`}
                 >
-                  {t.label}
+                  {t(tabItem.key)}
                 </button>
               ))}
             </nav>
@@ -157,13 +160,13 @@ const Dashboard = () => {
                     <div>
                       <h2 className="text-xl font-bold text-gray-900">{title}</h2>
                       <p className="text-sm text-gray-500 mt-0.5">
-                        {projects?.length ?? 0} проект{projects?.length !== 1 ? 'и' : ''}
+                        {t('projectCount', { count: projects?.length ?? 0 })}
                       </p>
                     </div>
                     {canManage(user) && (
                       <Link to={newProjectLink} className="btn-primary flex items-center gap-2">
                         <PlusCircle size={16} />
-                        Нов проект
+                        {t('newProject')}
                       </Link>
                     )}
                   </div>
@@ -175,17 +178,17 @@ const Dashboard = () => {
                   )}
 
                   {error && (
-                    <div className="text-center py-16 text-red-500">Неуспешно вчитување на проектите.</div>
+                    <div className="text-center py-16 text-red-500">{t('loadProjectsFailed')}</div>
                   )}
 
                   {!isLoading && !error && projects?.length === 0 && (
                     <div className="text-center py-16">
                       <p className="text-gray-400 text-sm mb-4">
-                        Сè уште нема проекти{deptLabel ? ` во ${deptLabel}` : ''}.
+                        {deptLabel ? t('noProjectsInDept', { dept: deptLabel }) : t('noProjectsYet')}
                       </p>
                       {canManage(user) && (
                         <Link to={newProjectLink} className="btn-primary">
-                          Креирај го првиот проект
+                          {t('createFirstProject')}
                         </Link>
                       )}
                     </div>
@@ -205,7 +208,7 @@ const Dashboard = () => {
 
               {dept && tab === 'nabavki' && (
                 <div className="text-center py-16 text-gray-400 text-sm">
-                  Набавки — наскоро
+                  {t('nabavkiComingSoon')}
                 </div>
               )}
 
@@ -220,7 +223,7 @@ const Dashboard = () => {
               {dept && tab === 'vraboteni' && (
                 <>
                   <div className="mb-6">
-                    <h2 className="text-xl font-bold text-gray-900">Вработени</h2>
+                    <h2 className="text-xl font-bold text-gray-900">{t('employees')}</h2>
                     <p className="text-sm text-gray-500 mt-0.5">{deptLabel}</p>
                   </div>
                   <EmployeeList dept={dept} />

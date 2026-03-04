@@ -1,0 +1,76 @@
+{
+  "title": "Purchase Orders",
+  "totalCount": "{{count}} вкупно",
+  "newPO": "Нова нарачка",
+  "noPOs": "Нема нарачки",
+  "notFound": "Purchase Order не е пронајден.",
+
+  "expected": "Очекуван: {{date}}",
+  "moqShort": "MOQ: {{value}}",
+  "productCount_one": "{{count}} производ",
+  "productCount_other": "{{count}} производи",
+  "openQuestions_one": "{{count}} отворено",
+  "openQuestions_other": "{{count}} отворени",
+
+  "status": {
+    "open": "отворен",
+    "closed": "затворен"
+  },
+  "closePO": "Затвори PO",
+  "reopenPO": "Отвори PO",
+  "deletePO": "Избриши",
+  "deleteConfirm": "Избриши ја оваа нарачка?",
+
+  "overview": "Преглед",
+  "dateExpected": "Очекуван датум",
+  "moq": "MOQ",
+  "description": "Опис",
+  "products": "Производи",
+  "productsCount": "Производи ({{count}})",
+  "weight": "Тежина: {{value}}",
+  "createdBy": "Креирано од",
+
+  "deptTab": {
+    "quality_assurance": "Обезбедување квалитет",
+    "r_and_d": "Истражување и развој",
+    "nabavki": "Набавки"
+  },
+
+  "question": {
+    "askedBy": "Прашано од {{name}} · {{date}}",
+    "resolved": "Решено",
+    "answeredBy": "— {{name}} · {{date}}",
+    "noAnswer": "Нема одговор",
+    "noQuestions": "Нема прашања за ова одделение",
+    "answerPlaceholder": "Внесете го одговорот на англиски…",
+    "answerEmpty": "Одговорот не може да биде празен",
+    "englishOnly": "Само англиски (ASCII карактери)",
+    "submitAnswer": "Одговори",
+    "markResolved": "Означи како решено",
+    "addQuestion": "Додај прашање за ова одделение",
+    "questionPlaceholder": "Напишете прашање на англиски…",
+    "questionEmpty": "Прашањето не може да биде празно",
+    "addQuestionBtn": "Додај прашање"
+  },
+
+  "modal": {
+    "title": "Нова нарачка",
+    "clientNameLabel": "Име на клиент *",
+    "clientNamePlaceholder": "Acme Corp",
+    "dateExpectedLabel": "Очекуван датум *",
+    "moqLabel": "MOQ *",
+    "moqPlaceholder": "1000",
+    "descriptionLabel": "Опис",
+    "descriptionPlaceholder": "Дополнителни белешки…",
+    "productsLabel": "Производи",
+    "addProduct": "Додај производ",
+    "productNum": "Производ {{num}}",
+    "typePlaceholder": "Тип *",
+    "weightPlaceholder": "Тежина *",
+    "productDescPlaceholder": "Опис (опционално)",
+    "required": "Задолжително",
+    "requiredNumber": "Задолжително (број)",
+    "englishOnly": "Само англиски (ASCII)",
+    "submitButton": "Креирај PO"
+  }
+}

@@ -1,21 +1,9 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Phone, Mail, MapPin, Calendar, User, MessageSquare, PhoneCall, Video, MoreHorizontal } from 'lucide-react';
 import { useAddActivity } from '../../hooks/useLeads.js';
-import { STAGES, SOURCES, PRIORITIES } from './AddLeadModal.jsx';
-
-const STAGE_LABEL = Object.fromEntries(STAGES.map((s) => [s.value, s.label]));
-const SOURCE_LABEL = Object.fromEntries(SOURCES.map((s) => [s.value, s.label]));
-const PRIORITY_LABEL = Object.fromEntries(PRIORITIES.map((p) => [p.value, p.label]));
-
-const ACTIVITY_TYPES = [
-  { value: 'note',    label: 'Белешка',  icon: MessageSquare },
-  { value: 'call',    label: 'Повик',    icon: PhoneCall },
-  { value: 'email',   label: 'Е-пошта',  icon: Mail },
-  { value: 'meeting', label: 'Состанок', icon: Video },
-  { value: 'other',   label: 'Друго',    icon: MoreHorizontal },
-];
-
-const ACTIVITY_TYPE_LABEL = Object.fromEntries(ACTIVITY_TYPES.map((t) => [t.value, t.label]));
+import { fmtDate, fmtDateTime } from '../../utils/formatDate.js';
+import { STAGE_VALUES, SOURCE_VALUES, PRIORITY_VALUES } from './AddLeadModal.jsx';
 
 const STAGE_COLOR = {
   new:         'bg-blue-100 text-blue-700',
@@ -33,13 +21,32 @@ const PRIORITY_COLOR = {
   high:   'bg-red-100 text-red-700',
 };
 
-const fmtDate = (d) => d ? new Date(d).toLocaleDateString('mk-MK', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-const fmtDateTime = (d) => d ? new Date(d).toLocaleDateString('mk-MK', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+const ACTIVITY_TYPE_VALUES = ['note', 'call', 'email', 'meeting', 'other'];
+const ACTIVITY_TYPE_ICONS = {
+  note: MessageSquare,
+  call: PhoneCall,
+  email: Mail,
+  meeting: Video,
+  other: MoreHorizontal,
+};
 
 export default function LeadDetailModal({ lead, onClose }) {
+  const { t } = useTranslation('leads');
+  const { t: tc } = useTranslation('common');
   const addActivity = useAddActivity();
   const [actType, setActType] = useState('note');
   const [actText, setActText] = useState('');
+
+  const stageLabel = Object.fromEntries(STAGE_VALUES.map((v) => [v, t(`stage.${v}`)]));
+  const sourceLabel = Object.fromEntries(SOURCE_VALUES.map((v) => [v, t(`source.${v}`)]));
+  const priorityLabel = Object.fromEntries(PRIORITY_VALUES.map((v) => [v, t(`leadPriority.${v}`)]));
+  const activityTypeLabel = Object.fromEntries(ACTIVITY_TYPE_VALUES.map((v) => [v, t(`activityType.${v}`)]));
+
+  const activityTypes = ACTIVITY_TYPE_VALUES.map((v) => ({
+    value: v,
+    label: t(`activityType.${v}`),
+    icon: ACTIVITY_TYPE_ICONS[v],
+  }));
 
   const handleAddActivity = async () => {
     if (!actText.trim()) return;
@@ -67,13 +74,13 @@ export default function LeadDetailModal({ lead, onClose }) {
           {/* Badges */}
           <div className="flex flex-wrap gap-2">
             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STAGE_COLOR[lead.stage]}`}>
-              {STAGE_LABEL[lead.stage]}
+              {stageLabel[lead.stage]}
             </span>
             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${PRIORITY_COLOR[lead.priority]}`}>
-              {PRIORITY_LABEL[lead.priority]}
+              {priorityLabel[lead.priority]}
             </span>
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-              {SOURCE_LABEL[lead.source]}
+              {sourceLabel[lead.source]}
             </span>
           </div>
 
@@ -94,13 +101,13 @@ export default function LeadDetailModal({ lead, onClose }) {
             {lead.assignedTo && (
               <div className="flex items-center gap-2 text-gray-600">
                 <User size={14} className="text-gray-400" />
-                <span>Задолжен: {lead.assignedTo.name || '—'}</span>
+                <span>{t('detail.assignedTo', { name: lead.assignedTo.name || '—' })}</span>
               </div>
             )}
             {lead.nextFollowUp && (
               <div className={`flex items-center gap-2 ${lead.isOverdue ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
                 <Calendar size={14} className={lead.isOverdue ? 'text-red-500' : 'text-gray-400'} />
-                <span>Следен контакт: {fmtDate(lead.nextFollowUp)}{lead.isOverdue ? ' (задоцнет!)' : ''}</span>
+                <span>{t('nextFollowUp', { date: fmtDate(lead.nextFollowUp) })}{lead.isOverdue ? ` ${t('overdueTag')}` : ''}</span>
               </div>
             )}
           </div>
@@ -108,7 +115,7 @@ export default function LeadDetailModal({ lead, onClose }) {
           {/* Value */}
           {lead.estimatedValue && (
             <div className="card p-3 flex items-center justify-between">
-              <span className="text-sm text-gray-500">Проценета вредност</span>
+              <span className="text-sm text-gray-500">{t('detail.estimatedValue')}</span>
               <span className="font-semibold text-gray-900">
                 {Number(lead.estimatedValue).toLocaleString('mk-MK')} {lead.currency}
               </span>
@@ -118,7 +125,7 @@ export default function LeadDetailModal({ lead, onClose }) {
           {/* Product interest */}
           {lead.productInterest && (
             <div>
-              <p className="text-xs font-medium text-gray-500 mb-1">Интерес за производи</p>
+              <p className="text-xs font-medium text-gray-500 mb-1">{t('detail.productInterest')}</p>
               <p className="text-sm text-gray-700 leading-relaxed">{lead.productInterest}</p>
             </div>
           )}
@@ -126,34 +133,34 @@ export default function LeadDetailModal({ lead, onClose }) {
           {/* Lost reason */}
           {lead.stage === 'lost' && lead.lostReason && (
             <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              <p className="text-xs font-medium text-red-600 mb-0.5">Причина за губење</p>
+              <p className="text-xs font-medium text-red-600 mb-0.5">{t('detail.lostReason')}</p>
               <p className="text-sm text-red-700">{lead.lostReason}</p>
             </div>
           )}
 
           {/* Won/Lost dates */}
           {lead.wonDate && (
-            <p className="text-xs text-green-600">Добиен на: {fmtDate(lead.wonDate)}</p>
+            <p className="text-xs text-green-600">{t('detail.wonDate', { date: fmtDate(lead.wonDate) })}</p>
           )}
           {lead.lostDate && (
-            <p className="text-xs text-red-600">Изгубен на: {fmtDate(lead.lostDate)}</p>
+            <p className="text-xs text-red-600">{t('detail.lostDate', { date: fmtDate(lead.lostDate) })}</p>
           )}
 
           {/* Activity log */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Активности</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('detail.activities')}</h3>
 
             {/* Add activity form */}
             <div className="space-y-2 mb-4">
               <div className="flex gap-2">
                 <select className="input w-32 text-sm" value={actType} onChange={(e) => setActType(e.target.value)}>
-                  {ACTIVITY_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
+                  {activityTypes.map((at) => (
+                    <option key={at.value} value={at.value}>{at.label}</option>
                   ))}
                 </select>
                 <input
                   className="input flex-1 text-sm"
-                  placeholder="Додај активност…"
+                  placeholder={t('detail.addActivityPlaceholder')}
                   value={actText}
                   onChange={(e) => setActText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddActivity()}
@@ -163,21 +170,21 @@ export default function LeadDetailModal({ lead, onClose }) {
                   disabled={!actText.trim() || addActivity.isPending}
                   className="btn-primary text-sm px-4"
                 >
-                  Додај
+                  {tc('add')}
                 </button>
               </div>
             </div>
 
             {/* Activity list */}
             {lead.activities?.length === 0 && (
-              <p className="text-xs text-gray-400 text-center py-4">Нема евидентирани активности.</p>
+              <p className="text-xs text-gray-400 text-center py-4">{t('detail.noActivities')}</p>
             )}
             <div className="space-y-2">
               {[...(lead.activities || [])].reverse().map((a) => (
                 <div key={a._id} className="card p-3 space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 text-xs font-medium">
-                      {ACTIVITY_TYPE_LABEL[a.type] || a.type}
+                      {activityTypeLabel[a.type] || a.type}
                     </span>
                     <span className="text-xs text-gray-400">{fmtDateTime(a.createdAt)}</span>
                   </div>
@@ -192,7 +199,7 @@ export default function LeadDetailModal({ lead, onClose }) {
 
         {/* Footer */}
         <div className="flex gap-3 px-6 py-4 border-t border-gray-100">
-          <button type="button" onClick={onClose} className="btn-secondary flex-1">Затвори</button>
+          <button type="button" onClick={onClose} className="btn-secondary flex-1">{tc('close')}</button>
         </div>
       </div>
     </div>

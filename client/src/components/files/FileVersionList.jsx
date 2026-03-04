@@ -1,5 +1,7 @@
 import { Download, File } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useDownloadUrl } from '../../hooks/useProjects.js';
+import { fmtDateShort } from '../../utils/formatDate.js';
 import toast from 'react-hot-toast';
 
 const formatSize = (bytes) => {
@@ -10,6 +12,7 @@ const formatSize = (bytes) => {
 };
 
 const FileVersionList = ({ files = [] }) => {
+  const { t } = useTranslation('common');
   const downloadUrl = useDownloadUrl();
 
   const handleDownload = async (fileId, originalName) => {
@@ -20,22 +23,22 @@ const FileVersionList = ({ files = [] }) => {
       a.download = originalName;
       a.click();
     } catch {
-      toast.error('Не успеа да се добие линкот за преземање');
+      toast.error(t('files.downloadError'));
     }
   };
 
   if (files.length === 0) {
     return (
       <div className="card p-5">
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">Датотеки</h2>
-        <p className="text-sm text-gray-400">Сè уште нема прикачени датотеки.</p>
+        <h2 className="text-sm font-semibold text-gray-700 mb-3">{t('files.title')}</h2>
+        <p className="text-sm text-gray-400">{t('files.noFiles')}</p>
       </div>
     );
   }
 
   return (
     <div className="card p-5">
-      <h2 className="text-sm font-semibold text-gray-700 mb-3">Датотеки</h2>
+      <h2 className="text-sm font-semibold text-gray-700 mb-3">{t('files.title')}</h2>
       <div className="space-y-2">
         {files.map((file) => (
           <div
@@ -58,19 +61,19 @@ const FileVersionList = ({ files = [] }) => {
                   {file.versionLabel}
                 </span>
                 {file.isLatest && (
-                  <span className="text-xs text-blue-600 font-medium">Најнова</span>
+                  <span className="text-xs text-blue-600 font-medium">{t('files.latest')}</span>
                 )}
               </div>
               <div className="text-xs text-gray-400 mt-0.5">
-                Порта {file.gateNumber} · {file.uploader?.name} ·{' '}
-                {new Date(file.uploadedAt).toLocaleDateString('mk-MK')}
+                {t('files.gate', { number: file.gateNumber })} · {file.uploader?.name} ·{' '}
+                {fmtDateShort(file.uploadedAt)}
                 {file.size ? ` · ${formatSize(file.size)}` : ''}
               </div>
             </div>
             <button
               onClick={() => handleDownload(file._id, file.originalName)}
               className="btn-secondary p-1.5"
-              title="Преземи"
+              title={t('files.download')}
             >
               <Download size={14} />
             </button>

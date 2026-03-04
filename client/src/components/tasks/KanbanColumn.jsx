@@ -1,16 +1,18 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import TaskCard from './TaskCard.jsx';
 
 const VISIBLE_DEFAULT = 5;
 
 const COLUMN_CFG = {
-  todo:        { label: 'За работа',  headerCls: 'bg-gray-100 text-gray-600',   dotCls: 'bg-gray-400'   },
-  in_progress: { label: 'Во тек',     headerCls: 'bg-blue-50 text-blue-700',    dotCls: 'bg-blue-500'   },
-  done:        { label: 'Завршено',   headerCls: 'bg-purple-50 text-purple-700', dotCls: 'bg-purple-500' },
-  approved:    { label: 'Одобрено',   headerCls: 'bg-green-50 text-green-700',  dotCls: 'bg-green-500'  },
+  todo:        { key: 'column.todo',        headerCls: 'bg-gray-100 text-gray-600',   dotCls: 'bg-gray-400'   },
+  in_progress: { key: 'column.in_progress', headerCls: 'bg-blue-50 text-blue-700',    dotCls: 'bg-blue-500'   },
+  done:        { key: 'column.done',        headerCls: 'bg-purple-50 text-purple-700', dotCls: 'bg-purple-500' },
+  approved:    { key: 'column.approved',    headerCls: 'bg-green-50 text-green-700',  dotCls: 'bg-green-500'  },
 };
 
 const KanbanColumn = ({ status, tasks, currentUser, isManager }) => {
+  const { t } = useTranslation('tasks');
   const [expanded, setExpanded] = useState(false);
 
   const cfg     = COLUMN_CFG[status];
@@ -22,7 +24,7 @@ const KanbanColumn = ({ status, tasks, currentUser, isManager }) => {
       {/* Column header */}
       <div className={`flex items-center gap-2 px-3 py-2 rounded-xl mb-2 ${cfg.headerCls}`}>
         <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dotCls}`} />
-        <span className="text-xs font-semibold uppercase tracking-wide flex-1">{cfg.label}</span>
+        <span className="text-xs font-semibold uppercase tracking-wide flex-1">{t(cfg.key)}</span>
         <span className="text-xs font-bold opacity-70">{tasks.length}</span>
       </div>
 
@@ -45,14 +47,14 @@ const KanbanColumn = ({ status, tasks, currentUser, isManager }) => {
           className="mt-2 text-xs text-gray-400 hover:text-gray-700 py-2.5 rounded-lg border border-dashed border-gray-200 hover:border-gray-400 transition-colors w-full"
         >
           {expanded
-            ? 'Прикажи помалку ↑'
-            : `Прикажи уште ${hidden} ↓`}
+            ? t('showLess')
+            : t('showMore', { count: hidden })}
         </button>
       )}
 
       {tasks.length === 0 && (
         <div className="flex items-center justify-center py-6">
-          <p className="text-xs text-gray-300">Нема задачи</p>
+          <p className="text-xs text-gray-300">{t('noTasks')}</p>
         </div>
       )}
     </div>

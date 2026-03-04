@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Send } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAddComment } from '../../hooks/useProjects.js';
-
-const formatDate = (d) =>
-  new Date(d).toLocaleString('mk-MK', { dateStyle: 'short', timeStyle: 'short' });
+import { fmtDateTime } from '../../utils/formatDate.js';
 
 const CommentThread = ({ projectId, gateNumber, comments = [] }) => {
+  const { t } = useTranslation('common');
   const [text, setText] = useState('');
   const addComment = useAddComment(projectId);
 
@@ -18,11 +18,11 @@ const CommentThread = ({ projectId, gateNumber, comments = [] }) => {
 
   return (
     <div className="mt-4">
-      <h4 className="text-sm font-semibold text-gray-700 mb-3">Коментари</h4>
+      <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('comments.title')}</h4>
 
       <div className="space-y-3 mb-4 max-h-48 overflow-y-auto">
         {comments.length === 0 && (
-          <p className="text-xs text-gray-400">Сè уште нема коментари.</p>
+          <p className="text-xs text-gray-400">{t('comments.noComments')}</p>
         )}
         {comments.map((c, i) => (
           <div key={i} className="flex gap-3">
@@ -31,8 +31,8 @@ const CommentThread = ({ projectId, gateNumber, comments = [] }) => {
             </div>
             <div className="flex-1">
               <div className="flex items-baseline gap-2">
-                <span className="text-xs font-medium text-gray-800">{c.author?.name || 'Непознат'}</span>
-                <span className="text-xs text-gray-400">{formatDate(c.createdAt)}</span>
+                <span className="text-xs font-medium text-gray-800">{c.author?.name || t('comments.unknown')}</span>
+                <span className="text-xs text-gray-400">{fmtDateTime(c.createdAt)}</span>
               </div>
               <p className="text-sm text-gray-700 mt-0.5">{c.text}</p>
             </div>
@@ -43,7 +43,7 @@ const CommentThread = ({ projectId, gateNumber, comments = [] }) => {
       <form onSubmit={handleSubmit} className="flex gap-2">
         <input
           className="input flex-1 text-sm"
-          placeholder="Додади коментар…"
+          placeholder={t('comments.placeholder')}
           value={text}
           onChange={(e) => setText(e.target.value)}
         />

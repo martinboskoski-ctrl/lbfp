@@ -1,5 +1,12 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getMeApi, loginApi, registerApi } from '../api/auth.api.js';
+import i18next from 'i18next';
+
+const syncLang = (lang) => {
+  const l = lang || 'mk';
+  i18next.changeLanguage(l);
+  localStorage.setItem('packflow_lang', l);
+};
 
 const AuthContext = createContext(null);
 
@@ -14,7 +21,10 @@ export const AuthProvider = ({ children }) => {
       return;
     }
     getMeApi()
-      .then(({ data }) => setUser(data.user))
+      .then(({ data }) => {
+        setUser(data.user);
+        syncLang(data.user.language);
+      })
       .catch(() => localStorage.removeItem('packflow_token'))
       .finally(() => setLoading(false));
   }, []);
@@ -23,6 +33,7 @@ export const AuthProvider = ({ children }) => {
     const { data } = await loginApi({ email, password });
     localStorage.setItem('packflow_token', data.token);
     setUser(data.user);
+    syncLang(data.user.language);
     return data;
   }, []);
 
@@ -30,6 +41,7 @@ export const AuthProvider = ({ children }) => {
     const { data } = await registerApi(payload);
     localStorage.setItem('packflow_token', data.token);
     setUser(data.user);
+    syncLang(data.user.language);
     return data;
   }, []);
 

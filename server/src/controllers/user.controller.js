@@ -14,6 +14,16 @@ export const listDirectory = async (req, res) => {
   res.json({ users });
 };
 
+export const updateLanguage = async (req, res) => {
+  const { language } = req.body;
+  if (!['mk', 'en'].includes(language)) {
+    return res.status(400).json({ message: 'Language must be "mk" or "en"' });
+  }
+  req.user.language = language;
+  await req.user.save();
+  res.json({ user: req.user.toSafeObject() });
+};
+
 export const inviteUser = async (req, res) => {
   const { email, name, role, companyId } = req.body;
 

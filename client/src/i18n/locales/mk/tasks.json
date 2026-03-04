@@ -1,0 +1,45 @@
+{
+  "title": "Тековни задачи",
+  "totalCount": "{{count}} вкупно",
+  "newTask": "Нова задача",
+  "loadError": "Грешка при вчитување на задачите.",
+  "noTasks": "Нема задачи",
+
+  "column": {
+    "todo": "За работа",
+    "in_progress": "Во тек",
+    "done": "Завршено",
+    "approved": "Одобрено"
+  },
+
+  "showLess": "Прикажи помалку ↑",
+  "showMore": "Прикажи уште {{count}} ↓",
+
+  "approvedBy": "Одобрено од {{name}}",
+  "approve": "Одобри",
+  "deleteTooltip": "Избриши",
+  "backTooltip": "Назад",
+  "forwardTooltip": "Напред",
+  "approveTooltip": "Одобри задача",
+
+  "modal": {
+    "title": "Нова задача",
+    "selfAssign": "Задачата ќе биде доделена на вас",
+    "departmentLabel": "Одделение *",
+    "departmentPlaceholder": "Изберете одделение…",
+    "titleLabel": "Наслов *",
+    "titlePlaceholder": "Опишете ја задачата…",
+    "titleRequired": "Насловот е задолжителен",
+    "descriptionLabel": "Опис",
+    "descriptionPlaceholder": "Дополнителни детали…",
+    "assigneeLabel": "Задолжено лице *",
+    "assigneeRequired": "Изберете лице",
+    "deptRequired": "Изберете одделение",
+    "noUsersInDept": "Нема регистрирани корисници во ова одделение.",
+    "selectDeptFirst": "Прво изберете одделение.",
+    "priorityLabel": "Приоритет",
+    "deadlineLabel": "Рок",
+    "projectLabel": "Поврзан проект (опционално)",
+    "submitButton": "Додај задача"
+  }
+}

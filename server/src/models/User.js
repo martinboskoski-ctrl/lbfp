@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
   // role is derived: managers get 'owner', others get 'reviewer'
   // kept for future access restriction
   role: { type: String, enum: ['owner', 'reviewer', 'client', 'admin'], default: 'reviewer' },
+  language: { type: String, enum: ['mk', 'en'], default: 'mk' },
 }, { timestamps: true });
 
 userSchema.methods.comparePassword = async function (password) {

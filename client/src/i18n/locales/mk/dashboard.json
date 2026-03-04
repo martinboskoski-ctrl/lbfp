@@ -1,0 +1,35 @@
+{
+  "bulletin": "Огласна табла",
+
+  "tabs": {
+    "terkovi": "Теркови",
+    "projects": "Проекти",
+    "tasks": "Тековни задачи",
+    "nabavki": "Набавки",
+    "dogovori": "Договори",
+    "vraboteni": "Вработени",
+    "po": "Purchase Order",
+    "leads": "Потенцијални клиенти"
+  },
+
+  "projectCount_one": "{{count}} проект",
+  "projectCount_other": "{{count}} проекти",
+  "newProject": "Нов проект",
+  "loadProjectsFailed": "Неуспешно вчитување на проектите.",
+  "noProjectsYet": "Сè уште нема проекти",
+  "noProjectsInDept": "Сè уште нема проекти во {{dept}}.",
+  "createFirstProject": "Креирај го првиот проект",
+
+  "nabavkiComingSoon": "Набавки — наскоро",
+
+  "employees": "Вработени",
+  "noEmployees": "Нема регистрирани вработени во ова одделение.",
+
+  "whiteboard": {
+    "subtitle": "Соопштенија од раководството",
+    "placeholder": "Напишете соопштение за сите вработени…",
+    "post": "Објави",
+    "noAnnouncements": "Сè уште нема соопштенија",
+    "deleteTitle": "Избриши"
+  }
+}

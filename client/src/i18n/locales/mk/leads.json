@@ -1,0 +1,104 @@
+{
+  "title": "Потенцијални клиенти",
+  "leadCount_one": "{{count}} лид",
+  "leadCount_other": "{{count}} лидови",
+  "newLead": "Нов лид",
+  "addFirstLead": "Додај го првиот лид",
+  "noLeads": "Нема евидентирани лидови.",
+  "noFilterMatch": "Нема лидови кои одговараат на филтерот.",
+  "searchPlaceholder": "Пребарај по компанија или контакт…",
+  "allStages": "Сите фази",
+  "allPriorities": "Сите приоритети",
+
+  "stage": {
+    "new": "Нов",
+    "contacted": "Контактиран",
+    "qualified": "Квалификуван",
+    "proposal": "Понуда",
+    "negotiation": "Преговори",
+    "won": "Добиен",
+    "lost": "Изгубен"
+  },
+
+  "source": {
+    "referral": "Препорака",
+    "website": "Веб-страна",
+    "cold_call": "Ладен повик",
+    "exhibition": "Саем",
+    "linkedin": "LinkedIn",
+    "existing_client": "Постоечки клиент",
+    "other": "Друго"
+  },
+
+  "leadPriority": {
+    "low": "Низок",
+    "medium": "Среден",
+    "high": "Висок"
+  },
+
+  "stat": {
+    "total": "Вкупно",
+    "new": "Нови",
+    "inNegotiation": "Во преговори",
+    "overdue": "Задоцнети"
+  },
+
+  "funnel": {
+    "title": "Продажен инка",
+    "totalValue": "Вкупна вредност:",
+    "hideFunnel": "Сокриј инка",
+    "showFunnel": "Прикажи продажен инка"
+  },
+
+  "nextFollowUp": "Следен контакт: {{date}}",
+  "overdueTag": "(задоцнет!)",
+  "details": "Детали",
+
+  "modal": {
+    "createTitle": "Нов лид",
+    "editTitle": "Уреди лид",
+    "contactNameLabel": "Контакт лице *",
+    "contactNamePlaceholder": "Име и презиме",
+    "companyLabel": "Компанија *",
+    "companyPlaceholder": "Назив на компанијата",
+    "emailLabel": "Е-пошта",
+    "phoneLabel": "Телефон",
+    "stageLabel": "Фаза",
+    "sourceLabel": "Извор",
+    "priorityLabel": "Приоритет",
+    "estimatedValueLabel": "Проценета вредност",
+    "estimatedValuePlaceholder": "пр. 50000",
+    "currencyLabel": "Валута",
+    "currencyEUR": "EUR — Евро",
+    "currencyMKD": "MKD — Денар",
+    "currencyUSD": "USD — Долар",
+    "productInterestLabel": "Интерес за производи",
+    "productInterestPlaceholder": "Кои амбалажни производи ги бара…",
+    "nextFollowUpLabel": "Следен контакт",
+    "assignedToLabel": "Задолжен",
+    "lostReasonLabel": "Причина за губење",
+    "lostReasonPlaceholder": "Зошто е изгубен лидот…",
+    "submitCreate": "Додај лид",
+    "submitEdit": "Зачувај"
+  },
+
+  "detail": {
+    "assignedTo": "Задолжен: {{name}}",
+    "estimatedValue": "Проценета вредност",
+    "productInterest": "Интерес за производи",
+    "lostReason": "Причина за губење",
+    "wonDate": "Добиен на: {{date}}",
+    "lostDate": "Изгубен на: {{date}}",
+    "activities": "Активности",
+    "addActivityPlaceholder": "Додај активност…",
+    "noActivities": "Нема евидентирани активности."
+  },
+
+  "activityType": {
+    "note": "Белешка",
+    "call": "Повик",
+    "email": "Е-пошта",
+    "meeting": "Состанок",
+    "other": "Друго"
+  }
+}

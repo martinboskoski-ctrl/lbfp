@@ -1,30 +1,28 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, CheckCircle2, Loader2, Send, Lock, Unlock, Trash2 } from 'lucide-react';
 import { usePO, useToggleStatus, useAddQuestion, useAnswerQuestion, useResolveQuestion, useDeletePO } from '../hooks/usePO.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { fmtDateShort, fmtDateLong } from '../utils/formatDate.js';
 
 const ASCII_RE  = /^[\x20-\x7E]*$/;
 const isEnglish = (s) => !s || ASCII_RE.test(s);
 
 const shortId = (id) => String(id).slice(-6).toUpperCase();
 
-const DEPT_TABS = [
-  { value: 'quality_assurance', label: 'Quality Assurance' },
-  { value: 'r_and_d',           label: 'R&D' },
-  { value: 'nabavki',           label: 'Набавки' },
-];
+const DEPT_KEYS = ['quality_assurance', 'r_and_d', 'nabavki'];
 
 // ── Question card ─────────────────────────────────────────────────────────────
-const QuestionCard = ({ question, poId, isSales, canAnswer, isClosed }) => {
+const QuestionCard = ({ question, poId, isSales, canAnswer, isClosed, t }) => {
   const [answerText, setAnswerText]   = useState('');
   const [answerError, setAnswerError] = useState('');
   const answerQuestion  = useAnswerQuestion(poId);
   const resolveQuestion = useResolveQuestion(poId);
 
   const handleAnswer = async () => {
-    if (!answerText.trim()) { setAnswerError('Answer cannot be empty'); return; }
-    if (!isEnglish(answerText)) { setAnswerError('English only (ASCII characters)'); return; }
+    if (!answerText.trim()) { setAnswerError(t('question.answerEmpty')); return; }
+    if (!isEnglish(answerText)) { setAnswerError(t('question.englishOnly')); return; }
     setAnswerError('');
     await answerQuestion.mutateAsync({ qid: question._id, answer: answerText.trim() });
     setAnswerText('');
@@ -37,12 +35,12 @@ const QuestionCard = ({ question, poId, isSales, canAnswer, isClosed }) => {
         <div>
           <p className="text-sm font-medium text-gray-900">{question.text}</p>
           <p className="text-xs text-gray-400 mt-0.5">
-            Asked by {question.createdBy?.name} · {new Date(question.createdAt).toLocaleDateString('en-GB')}
+            {t('question.askedBy', { name: question.createdBy?.name, date: fmtDateShort(question.createdAt) })}
           </p>
         </div>
         {question.resolved && (
           <span className="flex items-center gap-1 text-xs font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full flex-shrink-0">
-            <CheckCircle2 size={11} /> Resolved
+            <CheckCircle2 size={11} /> {t('question.resolved')}
           </span>
         )}
       </div>
@@ -52,7 +50,7 @@ const QuestionCard = ({ question, poId, isSales, canAnswer, isClosed }) => {
         <div className="mt-3 pl-3 border-l-2 border-blue-200">
           <p className="text-sm text-gray-700">{question.answer}</p>
           <p className="text-xs text-gray-400 mt-0.5">
-            — {question.answeredBy?.name} · {new Date(question.answeredAt).toLocaleDateString('en-GB')}
+            {t('question.answeredBy', { name: question.answeredBy?.name, date: fmtDateShort(question.answeredAt) })}
           </p>
         </div>
       ) : canAnswer && !isClosed ? (
@@ -60,7 +58,7 @@ const QuestionCard = ({ question, poId, isSales, canAnswer, isClosed }) => {
           <textarea
             className="input resize-none text-sm"
             rows={2}
-            placeholder="Type your answer in English..."
+            placeholder={t('question.answerPlaceholder')}
             value={answerText}
             onChange={(e) => { setAnswerText(e.target.value); setAnswerError(''); }}
           />
@@ -71,11 +69,11 @@ const QuestionCard = ({ question, poId, isSales, canAnswer, isClosed }) => {
             className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors"
           >
             {answerQuestion.isPending ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
-            Submit Answer
+            {t('question.submitAnswer')}
           </button>
         </div>
       ) : !question.answer && (
-        <p className="mt-2 text-xs text-gray-400 italic">No answer yet</p>
+        <p className="mt-2 text-xs text-gray-400 italic">{t('question.noAnswer')}</p>
       )}
 
       {/* Resolve (sales only, when answered and not yet resolved) */}
@@ -85,7 +83,7 @@ const QuestionCard = ({ question, poId, isSales, canAnswer, isClosed }) => {
           disabled={resolveQuestion.isPending}
           className="mt-3 flex items-center gap-1 text-xs text-green-700 hover:text-green-900 font-medium"
         >
-          <CheckCircle2 size={13} /> Mark as Resolved
+          <CheckCircle2 size={13} /> {t('question.markResolved')}
         </button>
       )}
     </div>
@@ -93,7 +91,7 @@ const QuestionCard = ({ question, poId, isSales, canAnswer, isClosed }) => {
 };
 
 // ── Dept Q&A panel ────────────────────────────────────────────────────────────
-const DeptPanel = ({ dept, po, isSales, userDept }) => {
+const DeptPanel = ({ dept, po, isSales, userDept, t }) => {
   const [qText, setQText]   = useState('');
   const [qError, setQError] = useState('');
   const addQuestion = useAddQuestion(po._id);
@@ -103,8 +101,8 @@ const DeptPanel = ({ dept, po, isSales, userDept }) => {
   const isClosed  = po.status === 'closed';
 
   const handleAddQuestion = async () => {
-    if (!qText.trim()) { setQError('Question cannot be empty'); return; }
-    if (!isEnglish(qText)) { setQError('English only (ASCII characters)'); return; }
+    if (!qText.trim()) { setQError(t('question.questionEmpty')); return; }
+    if (!isEnglish(qText)) { setQError(t('question.englishOnly')); return; }
     setQError('');
     await addQuestion.mutateAsync({ text: qText.trim(), targetDepartment: dept });
     setQText('');
@@ -113,7 +111,7 @@ const DeptPanel = ({ dept, po, isSales, userDept }) => {
   return (
     <div className="space-y-3">
       {questions.length === 0 && (
-        <p className="text-sm text-gray-400 text-center py-6">No questions yet for this department</p>
+        <p className="text-sm text-gray-400 text-center py-6">{t('question.noQuestions')}</p>
       )}
 
       {questions.map((q) => (
@@ -124,17 +122,18 @@ const DeptPanel = ({ dept, po, isSales, userDept }) => {
           isSales={isSales}
           canAnswer={canAnswer}
           isClosed={isClosed}
+          t={t}
         />
       ))}
 
       {/* Add question (sales only) */}
       {isSales && !isClosed && (
         <div className="border border-dashed border-gray-300 rounded-xl p-4 mt-2">
-          <p className="text-xs font-medium text-gray-500 mb-2">Add question for this department</p>
+          <p className="text-xs font-medium text-gray-500 mb-2">{t('question.addQuestion')}</p>
           <textarea
             className="input resize-none text-sm"
             rows={2}
-            placeholder="Type question in English..."
+            placeholder={t('question.questionPlaceholder')}
             value={qText}
             onChange={(e) => { setQText(e.target.value); setQError(''); }}
           />
@@ -145,7 +144,7 @@ const DeptPanel = ({ dept, po, isSales, userDept }) => {
             className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors"
           >
             {addQuestion.isPending ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
-            Add Question
+            {t('question.addQuestionBtn')}
           </button>
         </div>
       )}
@@ -155,6 +154,7 @@ const DeptPanel = ({ dept, po, isSales, userDept }) => {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 const PODetail = () => {
+  const { t } = useTranslation('po');
   const { id }       = useParams();
   const navigate     = useNavigate();
   const { user }     = useAuth();
@@ -167,8 +167,8 @@ const PODetail = () => {
 
   // Which dept tabs to show
   const visibleTabs = isSales
-    ? DEPT_TABS
-    : DEPT_TABS.filter((t) => t.value === userDept);
+    ? DEPT_KEYS
+    : DEPT_KEYS.filter((k) => k === userDept);
 
   const [activeTab, setActiveTab] = useState(
     isSales ? 'quality_assurance' : userDept
@@ -185,13 +185,13 @@ const PODetail = () => {
   if (error || !po) {
     return (
       <div className="flex items-center justify-center min-h-screen text-red-500">
-        Purchase Order not found.
+        {t('notFound')}
       </div>
     );
   }
 
   const handleDelete = async () => {
-    if (!window.confirm('Delete this Purchase Order?')) return;
+    if (!window.confirm(t('deleteConfirm'))) return;
     await deletePO.mutateAsync(po._id);
     navigate(-1);
   };
@@ -212,7 +212,7 @@ const PODetail = () => {
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
             po.status === 'open' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
           }`}>
-            {po.status}
+            {t(`status.${po.status}`)}
           </span>
         </div>
 
@@ -223,14 +223,14 @@ const PODetail = () => {
               disabled={toggleStatus.isPending}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
             >
-              {po.status === 'open' ? <><Lock size={12} /> Close PO</> : <><Unlock size={12} /> Reopen PO</>}
+              {po.status === 'open' ? <><Lock size={12} /> {t('closePO')}</> : <><Unlock size={12} /> {t('reopenPO')}</>}
             </button>
             <button
               onClick={handleDelete}
               disabled={deletePO.isPending}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
             >
-              <Trash2 size={12} /> Delete
+              <Trash2 size={12} /> {t('deletePO')}
             </button>
           </div>
         )}
@@ -242,22 +242,22 @@ const PODetail = () => {
         {/* Left — Overview */}
         <div className="w-full lg:w-72 lg:flex-shrink-0 space-y-4">
           <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-gray-700 mb-4">Overview</h3>
+            <h3 className="text-sm font-bold text-gray-700 mb-4">{t('overview')}</h3>
 
             <div className="space-y-3 text-sm">
               <div>
-                <p className="text-xs text-gray-400 mb-0.5">Date Expected</p>
+                <p className="text-xs text-gray-400 mb-0.5">{t('dateExpected')}</p>
                 <p className="font-medium text-gray-800">
-                  {new Date(po.dateExpected).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  {fmtDateLong(po.dateExpected)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-400 mb-0.5">MOQ</p>
+                <p className="text-xs text-gray-400 mb-0.5">{t('moq')}</p>
                 <p className="font-medium text-gray-800">{po.moq.toLocaleString()}</p>
               </div>
               {po.description && (
                 <div>
-                  <p className="text-xs text-gray-400 mb-0.5">Description</p>
+                  <p className="text-xs text-gray-400 mb-0.5">{t('description')}</p>
                   <p className="text-gray-700 leading-relaxed">{po.description}</p>
                 </div>
               )}
@@ -268,13 +268,13 @@ const PODetail = () => {
           {po.products?.length > 0 && (
             <div className="bg-white border border-gray-200 rounded-2xl p-5">
               <h3 className="text-sm font-bold text-gray-700 mb-3">
-                Products ({po.products.length})
+                {t('productsCount', { count: po.products.length })}
               </h3>
               <div className="space-y-3">
                 {po.products.map((p, i) => (
                   <div key={i} className="border-b border-gray-100 last:border-0 pb-3 last:pb-0">
                     <p className="text-xs font-semibold text-gray-800">{p.productType}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">Weight: {p.weight}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{t('weight', { value: p.weight })}</p>
                     {p.description && <p className="text-xs text-gray-400 mt-0.5">{p.description}</p>}
                   </div>
                 ))}
@@ -284,10 +284,10 @@ const PODetail = () => {
 
           {/* Created by */}
           <div className="bg-white border border-gray-200 rounded-2xl p-4">
-            <p className="text-xs text-gray-400">Created by</p>
+            <p className="text-xs text-gray-400">{t('createdBy')}</p>
             <p className="text-sm font-medium text-gray-800 mt-0.5">{po.createdBy?.name}</p>
             <p className="text-xs text-gray-400 mt-0.5">
-              {new Date(po.createdAt).toLocaleDateString('en-GB')}
+              {fmtDateShort(po.createdAt)}
             </p>
           </div>
         </div>
@@ -298,21 +298,21 @@ const PODetail = () => {
             {/* Tab bar */}
             {visibleTabs.length > 1 && (
               <div className="flex border-b border-gray-100 overflow-x-auto">
-                {visibleTabs.map((t) => {
+                {visibleTabs.map((deptKey) => {
                   const openCount = po.questions.filter(
-                    (q) => q.targetDepartment === t.value && !q.resolved
+                    (q) => q.targetDepartment === deptKey && !q.resolved
                   ).length;
                   return (
                     <button
-                      key={t.value}
-                      onClick={() => setActiveTab(t.value)}
+                      key={deptKey}
+                      onClick={() => setActiveTab(deptKey)}
                       className={`flex-shrink-0 px-5 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                        activeTab === t.value
+                        activeTab === deptKey
                           ? 'border-blue-600 text-blue-700'
                           : 'border-transparent text-gray-500 hover:text-gray-800'
                       }`}
                     >
-                      {t.label}
+                      {t(`deptTab.${deptKey}`)}
                       {openCount > 0 && (
                         <span className="text-xs bg-orange-100 text-orange-600 font-semibold px-1.5 py-0.5 rounded-full">
                           {openCount}
@@ -327,7 +327,7 @@ const PODetail = () => {
             {/* Single dept label (non-sales) */}
             {visibleTabs.length === 1 && (
               <div className="px-5 py-3 border-b border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-700">{visibleTabs[0].label}</h3>
+                <h3 className="text-sm font-semibold text-gray-700">{t(`deptTab.${visibleTabs[0]}`)}</h3>
               </div>
             )}
 
@@ -338,6 +338,7 @@ const PODetail = () => {
                 po={po}
                 isSales={isSales}
                 userDept={userDept}
+                t={t}
               />
             </div>
           </div>

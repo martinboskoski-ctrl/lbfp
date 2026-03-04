@@ -2,24 +2,27 @@ import { NavLink, useSearchParams } from 'react-router-dom';
 import {
   TrendingUp, DollarSign, Building2,
   Users, ShieldCheck, Wrench, Settings, FlaskConical,
-  Factory, Crown, LogOut, Users2,
+  Factory, Crown, LogOut, Users2, Globe,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { canManage, isTopManagement } from '../../utils/userTier.js';
+import { useUpdateLanguage } from '../../hooks/useUsers.js';
+import i18next from 'i18next';
 
 export const DEPARTMENTS = [
-  { value: 'top_management',    label: 'Топ менаџмент',           icon: Crown       },
-  { value: 'sales',             label: 'Продажба',                icon: TrendingUp  },
-  { value: 'finance',           label: 'Финансии',                icon: DollarSign  },
-  { value: 'administration',    label: 'Администрација',          icon: Building2   },
-  { value: 'hr',                label: 'Човечки ресурси',         icon: Users2      },
-  { value: 'quality_assurance', label: 'Обезбедување квалитет',   icon: ShieldCheck },
-  { value: 'facility',          label: 'Објект',                  icon: Building2   },
-  { value: 'machines',          label: 'Машини',                  icon: Settings    },
-  { value: 'r_and_d',           label: 'Истражување и развој',    icon: FlaskConical },
-  { value: 'production',        label: 'Производство',            icon: Factory     },
-  { value: 'carina',            label: 'Царина',                  icon: Wrench      },
-  { value: 'nabavki',           label: 'Набавки (суровини и амбалажа)', icon: Factory },
+  { value: 'top_management',    icon: Crown       },
+  { value: 'sales',             icon: TrendingUp  },
+  { value: 'finance',           icon: DollarSign  },
+  { value: 'administration',    icon: Building2   },
+  { value: 'hr',                icon: Users2      },
+  { value: 'quality_assurance', icon: ShieldCheck },
+  { value: 'facility',          icon: Building2   },
+  { value: 'machines',          icon: Settings    },
+  { value: 'r_and_d',           icon: FlaskConical },
+  { value: 'production',        icon: Factory     },
+  { value: 'carina',            icon: Wrench      },
+  { value: 'nabavki',           icon: Factory     },
 ];
 
 const NavItem = ({ to, icon: Icon, label, end }) => (
@@ -41,9 +44,18 @@ const NavItem = ({ to, icon: Icon, label, end }) => (
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
+  const { t } = useTranslation('common');
+  const updateLang = useUpdateLanguage();
 
   const handleNavClick = () => {
     if (onClose) onClose();
+  };
+
+  const toggleLanguage = () => {
+    const newLang = i18next.language === 'mk' ? 'en' : 'mk';
+    i18next.changeLanguage(newLang);
+    localStorage.setItem('packflow_lang', newLang);
+    updateLang.mutate(newLang);
   };
 
   return (
@@ -69,7 +81,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         <nav className="flex-1 p-2 overflow-y-auto space-y-0.5">
           <div className="pt-2 pb-1 px-3">
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-              Одделенија
+              {t('departments')}
             </span>
           </div>
 
@@ -81,7 +93,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               <NavItem
                 to={`/dashboard?dept=${dept.value}`}
                 icon={dept.icon}
-                label={dept.label}
+                label={t(`dept.${dept.value}`)}
               />
             </div>
           ))}
@@ -90,11 +102,11 @@ const Sidebar = ({ isOpen, onClose }) => {
             <>
               <div className="pt-3 pb-1 px-3">
                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                  Администрација
+                  {t('administration')}
                 </span>
               </div>
               <div onClick={handleNavClick}>
-                <NavItem to="/admin/users" icon={Users} label="Корисници" />
+                <NavItem to="/admin/users" icon={Users} label={t('users')} />
               </div>
             </>
           )}
@@ -104,18 +116,25 @@ const Sidebar = ({ isOpen, onClose }) => {
           <div className="px-2 py-1.5 text-xs mb-1">
             <div className="font-medium text-gray-700">{user?.name}</div>
             <div className="text-gray-400">
-              {DEPARTMENTS.find((d) => d.value === user?.department)?.label || user?.department}
+              {t(`dept.${user?.department}`, { defaultValue: user?.department })}
             </div>
             {user?.isManager && (
-              <div className="text-blue-500 font-medium mt-0.5">Менаџер</div>
+              <div className="text-blue-500 font-medium mt-0.5">{t('manager')}</div>
             )}
           </div>
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors mb-0.5"
+          >
+            <Globe size={14} />
+            {i18next.language === 'mk' ? 'EN' : 'MK'}
+          </button>
           <button
             onClick={logout}
             className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
           >
             <LogOut size={14} />
-            Одјави се
+            {t('logout')}
           </button>
         </div>
       </aside>

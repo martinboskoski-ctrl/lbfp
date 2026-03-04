@@ -1,0 +1,76 @@
+{
+  "title": "Purchase Orders",
+  "totalCount": "{{count}} total",
+  "newPO": "New Purchase Order",
+  "noPOs": "No purchase orders yet",
+  "notFound": "Purchase Order not found.",
+
+  "expected": "Expected: {{date}}",
+  "moqShort": "MOQ: {{value}}",
+  "productCount_one": "{{count}} product",
+  "productCount_other": "{{count}} products",
+  "openQuestions_one": "{{count}} open",
+  "openQuestions_other": "{{count}} open",
+
+  "status": {
+    "open": "open",
+    "closed": "closed"
+  },
+  "closePO": "Close PO",
+  "reopenPO": "Reopen PO",
+  "deletePO": "Delete",
+  "deleteConfirm": "Delete this Purchase Order?",
+
+  "overview": "Overview",
+  "dateExpected": "Date Expected",
+  "moq": "MOQ",
+  "description": "Description",
+  "products": "Products",
+  "productsCount": "Products ({{count}})",
+  "weight": "Weight: {{value}}",
+  "createdBy": "Created by",
+
+  "deptTab": {
+    "quality_assurance": "Quality Assurance",
+    "r_and_d": "R&D",
+    "nabavki": "Procurement"
+  },
+
+  "question": {
+    "askedBy": "Asked by {{name}} · {{date}}",
+    "resolved": "Resolved",
+    "answeredBy": "— {{name}} · {{date}}",
+    "noAnswer": "No answer yet",
+    "noQuestions": "No questions yet for this department",
+    "answerPlaceholder": "Type your answer in English...",
+    "answerEmpty": "Answer cannot be empty",
+    "englishOnly": "English only (ASCII characters)",
+    "submitAnswer": "Submit Answer",
+    "markResolved": "Mark as Resolved",
+    "addQuestion": "Add question for this department",
+    "questionPlaceholder": "Type question in English...",
+    "questionEmpty": "Question cannot be empty",
+    "addQuestionBtn": "Add Question"
+  },
+
+  "modal": {
+    "title": "New Purchase Order",
+    "clientNameLabel": "Client Name *",
+    "clientNamePlaceholder": "Acme Corp",
+    "dateExpectedLabel": "Date Expected *",
+    "moqLabel": "MOQ *",
+    "moqPlaceholder": "1000",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Optional notes...",
+    "productsLabel": "Products",
+    "addProduct": "Add product",
+    "productNum": "Product {{num}}",
+    "typePlaceholder": "Type *",
+    "weightPlaceholder": "Weight *",
+    "productDescPlaceholder": "Description (optional)",
+    "required": "Required",
+    "requiredNumber": "Required (number)",
+    "englishOnly": "English only (ASCII)",
+    "submitButton": "Create PO"
+  }
+}

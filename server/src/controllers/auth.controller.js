@@ -21,7 +21,7 @@ const signToken = (userId) =>
 export const register = async (req, res) => {
   const {
     email: rawEmail, password, name: rawName,
-    department, isManager,
+    department, isManager, language,
   } = req.body;
 
   const email = rawEmail?.toLowerCase().trim();
@@ -54,6 +54,7 @@ export const register = async (req, res) => {
     email, passwordHash, name, department,
     isManager: manager,
     role: manager ? 'owner' : 'reviewer',
+    language: ['mk', 'en'].includes(language) ? language : 'mk',
   });
 
   const token = signToken(user._id);

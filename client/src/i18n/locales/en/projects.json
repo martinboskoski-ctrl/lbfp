@@ -1,0 +1,122 @@
+{
+  "notFound": "Project not found.",
+  "noPermission": "You do not have permission to create projects.",
+  "newProject": "New Project",
+
+  "projectStatus": {
+    "draft": "Draft",
+    "active": "Active",
+    "on_hold": "On Hold",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+
+  "taskStatus": {
+    "todo": "Pending",
+    "in_progress": "In Progress",
+    "done": "Done"
+  },
+
+  "priority": "Priority: {{value}}",
+  "owner": "Owner: {{name}}",
+  "tasksProgress": "{{done}}/{{total}} completed",
+  "tasksLabel": "tasks",
+  "noTasks": "No tasks.",
+  "subtasksCount": "{{done}}/{{total}} subtasks",
+  "by": "by {{name}}",
+
+  "section": {
+    "info": "Information",
+    "description": "Description",
+    "startDate": "Start Date",
+    "deadline": "Deadline",
+    "budget": "Budget",
+    "goals": "Goals",
+    "team": "Team",
+    "involvedDepts": "Involved Departments",
+    "tasks": "Tasks",
+    "reason": "Reason: ",
+    "expectations": "Expectations: ",
+    "deadlineLabel": "Deadline: {{date}}"
+  },
+
+  "create": {
+    "steps": ["Basic Information", "Team & Goals", "Tasks", "Involved Departments"],
+    "titleLabel": "Title *",
+    "titlePlaceholder": "Project title",
+    "titleRequired": "Title is required",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Describe the project…",
+    "priorityLabel": "Priority",
+    "statusLabel": "Status",
+    "departmentLabel": "Department *",
+    "departmentPlaceholder": "Select a department…",
+    "departmentRequired": "Department is required",
+    "startDateLabel": "Start Date",
+    "endDateLabel": "Deadline / End Date",
+    "budgetLabel": "Budget (MKD)",
+    "goalsLabel": "Project Goals",
+    "addGoalPlaceholder": "Add a goal…",
+    "noGoals": "No goals yet.",
+    "teamLabel": "Team Members",
+    "noUsersInDept": "No registered users in this department.",
+    "selectedCount": "{{count}} selected",
+    "noTasks": "No tasks yet. You can skip this step.",
+    "newTaskPlaceholder": "New task",
+    "taskTitleLabel": "Title *",
+    "taskDescPlaceholder": "Describe the task…",
+    "taskDescLabel": "Description",
+    "taskPriorityLabel": "Priority",
+    "taskDeadlineLabel": "Deadline",
+    "taskAssigneesLabel": "Assignees",
+    "subtasksLabel": "Subtasks",
+    "subtaskPlaceholder": "Subtask…",
+    "addSubtask": "Add subtask",
+    "addTask": "Add task",
+    "subtasksSuffix": "subtasks",
+    "involvedDeptsLabel": "Departments (select to tag)",
+    "involvedReasonLabel": "Why is this department involved?",
+    "involvedReasonPlaceholder": "Reason for involvement…",
+    "involvedExpectedLabel": "What is expected of them?",
+    "involvedExpectedPlaceholder": "Expectations…",
+    "involvedDeadlineLabel": "Deadline for their contribution",
+    "noInvolvedDepts": "No departments tagged. You can skip this step.",
+    "next": "Next",
+    "creating": "Creating…",
+    "createProject": "Create Project"
+  },
+
+  "gate": {
+    "activeGate": "Active Gate",
+    "labels": [
+      "Gate 0 — Project Setup",
+      "Gate 1 — Internal Review",
+      "Gate 2 — Regulatory Review",
+      "Gate 3 — Packaging Design",
+      "Gate 4 — Client Approval"
+    ],
+    "workflowProgress": "Workflow Progress",
+    "status": {
+      "pending": "Pending",
+      "in_progress": "Active",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "submitDescription": "Fill in all required fields, then submit the project to start the review process.",
+    "submitButton": "Submit Project → Gate 1",
+    "submitting": "Submitting…",
+    "changeRequest": "Change Request:",
+    "resubmitDescription": "Address the comments above and resubmit for review.",
+    "resubmitButton": "Resubmit",
+    "resubmitting": "Resubmitting…",
+    "dispatchDescription": "Gather all reviewer comments and send them to the client for final confirmation.",
+    "dispatchButton": "Send to Client",
+    "dispatching": "Sending…",
+    "awaitingClient": "Awaiting client confirmation…",
+    "clientReviewDescription": "Review the packaging materials and confirm approval.",
+    "acknowledgeButton": "Confirm & Approve",
+    "acknowledging": "Confirming…",
+    "allGatesApproved": "All gates approved — project is complete.",
+    "awaitingReviewer": "Waiting for the reviewer to approve or reject this gate."
+  }
+}

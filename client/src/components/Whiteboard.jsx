@@ -1,16 +1,13 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Megaphone, Trash2, Loader2, Send } from 'lucide-react';
 import { useAnnouncements, useCreateAnnouncement, useDeleteAnnouncement } from '../hooks/useAnnouncements.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { isTopManagement } from '../utils/userTier.js';
-
-const formatDate = (iso) => {
-  const d = new Date(iso);
-  return d.toLocaleDateString('mk-MK', { day: 'numeric', month: 'long', year: 'numeric' })
-    + ' · ' + d.toLocaleTimeString('mk-MK', { hour: '2-digit', minute: '2-digit' });
-};
+import { fmtDateTime } from '../utils/formatDate.js';
 
 const Whiteboard = () => {
+  const { t } = useTranslation('dashboard');
   const { user } = useAuth();
   const isTopMgmt = isTopManagement(user);
 
@@ -36,8 +33,8 @@ const Whiteboard = () => {
           <Megaphone size={20} className="text-white" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Огласна табла</h2>
-          <p className="text-sm text-gray-400">Соопштенија од раководството</p>
+          <h2 className="text-xl font-bold text-gray-900">{t('bulletin')}</h2>
+          <p className="text-sm text-gray-400">{t('whiteboard.subtitle')}</p>
         </div>
       </div>
 
@@ -48,7 +45,7 @@ const Whiteboard = () => {
             <textarea
               className="w-full text-sm text-gray-800 placeholder-gray-400 resize-none outline-none"
               rows={3}
-              placeholder="Напишете соопштение за сите вработени…"
+              placeholder={t('whiteboard.placeholder')}
               value={text}
               onChange={(e) => setText(e.target.value)}
             />
@@ -61,7 +58,7 @@ const Whiteboard = () => {
                 {createAnnouncement.isPending
                   ? <Loader2 size={14} className="animate-spin" />
                   : <Send size={14} />}
-                Објави
+                {t('whiteboard.post')}
               </button>
             </div>
           </div>
@@ -78,7 +75,7 @@ const Whiteboard = () => {
       {!isLoading && announcements.length === 0 && (
         <div className="text-center py-20 text-gray-300">
           <Megaphone size={40} className="mx-auto mb-3 opacity-40" />
-          <p className="text-sm">Сè уште нема соопштенија</p>
+          <p className="text-sm">{t('whiteboard.noAnnouncements')}</p>
         </div>
       )}
 
@@ -92,7 +89,7 @@ const Whiteboard = () => {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-800">{a.createdBy?.name}</p>
-                  <p className="text-xs text-gray-400">{formatDate(a.createdAt)}</p>
+                  <p className="text-xs text-gray-400">{fmtDateTime(a.createdAt)}</p>
                 </div>
               </div>
               {isTopMgmt && (
@@ -100,7 +97,7 @@ const Whiteboard = () => {
                   onClick={() => deleteAnnouncement.mutate(a._id)}
                   disabled={deleteAnnouncement.isPending}
                   className="text-gray-300 hover:text-red-500 transition-colors flex-shrink-0"
-                  title="Избриши"
+                  title={t('whiteboard.deleteTitle')}
                 >
                   <Trash2 size={15} />
                 </button>

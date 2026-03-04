@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Users, Plus, Search, Trash2, Edit2, Eye,
   AlertTriangle, TrendingUp, Clock, UserPlus,
@@ -7,14 +8,11 @@ import {
 import { useLeads, useDeleteLead } from '../../hooks/useLeads.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { canManage } from '../../utils/userTier.js';
-import AddLeadModal, { STAGES, SOURCES, PRIORITIES } from './AddLeadModal.jsx';
+import { fmtDate } from '../../utils/formatDate.js';
+import AddLeadModal, { STAGE_VALUES, SOURCE_VALUES, PRIORITY_VALUES, useStages, useSources, usePriorities } from './AddLeadModal.jsx';
 import LeadDetailModal from './LeadDetailModal.jsx';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const STAGE_LABEL = Object.fromEntries(STAGES.map((s) => [s.value, s.label]));
-const PRIORITY_LABEL = Object.fromEntries(PRIORITIES.map((p) => [p.value, p.label]));
-const SOURCE_LABEL = Object.fromEntries(SOURCES.map((s) => [s.value, s.label]));
 
 const STAGE_COLOR = {
   new:         'bg-blue-100 text-blue-700',
@@ -31,18 +29,6 @@ const PRIORITY_COLOR = {
   medium: 'bg-amber-100 text-amber-700',
   high:   'bg-red-100 text-red-700',
 };
-
-const STAGE_FILTER_OPTIONS = [
-  { value: '', label: 'Сите фази' },
-  ...STAGES,
-];
-
-const PRIORITY_FILTER_OPTIONS = [
-  { value: '', label: 'Сите приоритети' },
-  ...PRIORITIES,
-];
-
-const fmtDate = (d) => d ? new Date(d).toLocaleDateString('mk-MK', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
@@ -61,38 +47,56 @@ const StatCard = ({ label, count, color, icon: Icon, onClick, active }) => (
 
 // ─── Funnel stages (pipeline order, excluding won/lost which show as outcomes) ─
 
-const FUNNEL_STAGES = [
-  { value: 'new',         label: 'Нов',           color: 'bg-blue-500',   light: 'bg-blue-50 text-blue-700' },
-  { value: 'contacted',   label: 'Контактиран',   color: 'bg-sky-500',    light: 'bg-sky-50 text-sky-700' },
-  { value: 'qualified',   label: 'Квалификуван',  color: 'bg-indigo-500', light: 'bg-indigo-50 text-indigo-700' },
-  { value: 'proposal',    label: 'Понуда',         color: 'bg-violet-500', light: 'bg-violet-50 text-violet-700' },
-  { value: 'negotiation', label: 'Преговори',      color: 'bg-amber-500',  light: 'bg-amber-50 text-amber-700' },
-];
+const FUNNEL_STAGE_VALUES = ['new', 'contacted', 'qualified', 'proposal', 'negotiation'];
+const FUNNEL_STAGE_COLORS = {
+  new:         { color: 'bg-blue-500',   light: 'bg-blue-50 text-blue-700' },
+  contacted:   { color: 'bg-sky-500',    light: 'bg-sky-50 text-sky-700' },
+  qualified:   { color: 'bg-indigo-500', light: 'bg-indigo-50 text-indigo-700' },
+  proposal:    { color: 'bg-violet-500', light: 'bg-violet-50 text-violet-700' },
+  negotiation: { color: 'bg-amber-500',  light: 'bg-amber-50 text-amber-700' },
+};
 
-const OUTCOME_STAGES = [
-  { value: 'won',  label: 'Добиен',  color: 'bg-green-500', light: 'bg-green-50 text-green-700' },
-  { value: 'lost', label: 'Изгубен', color: 'bg-red-400',   light: 'bg-red-50 text-red-700' },
-];
+const OUTCOME_STAGE_VALUES = ['won', 'lost'];
+const OUTCOME_STAGE_COLORS = {
+  won:  { color: 'bg-green-500', light: 'bg-green-50 text-green-700' },
+  lost: { color: 'bg-red-400',   light: 'bg-red-50 text-red-700' },
+};
 
 // ─── Sales Funnel Chart ──────────────────────────────────────────────────────
 
 const SalesFunnel = ({ leads, onStageClick, activeStage }) => {
+  const { t } = useTranslation('leads');
+
+  const funnelStages = useMemo(() =>
+    FUNNEL_STAGE_VALUES.map((v) => ({
+      value: v,
+      label: t(`stage.${v}`),
+      ...FUNNEL_STAGE_COLORS[v],
+    })), [t]);
+
+  const outcomeStages = useMemo(() =>
+    OUTCOME_STAGE_VALUES.map((v) => ({
+      value: v,
+      label: t(`stage.${v}`),
+      ...OUTCOME_STAGE_COLORS[v],
+    })), [t]);
+
   const funnelData = useMemo(() => {
-    const max = Math.max(...FUNNEL_STAGES.map((s) => leads.filter((l) => l.stage === s.value).length), 1);
-    return FUNNEL_STAGES.map((s) => {
+    const max = Math.max(...funnelStages.map((s) => leads.filter((l) => l.stage === s.value).length), 1);
+    return funnelStages.map((s) => {
       const items = leads.filter((l) => l.stage === s.value);
       const count = items.length;
       const totalVal = items.reduce((sum, l) => sum + (l.estimatedValue || 0), 0);
       const pct = Math.max((count / max) * 100, 8); // min 8% so empty stages still show
       return { ...s, count, totalVal, pct };
     });
-  }, [leads]);
+  }, [leads, funnelStages]);
 
   const outcomes = useMemo(() =>
-    OUTCOME_STAGES.map((s) => {
+    outcomeStages.map((s) => {
       const items = leads.filter((l) => l.stage === s.value);
       return { ...s, count: items.length, totalVal: items.reduce((sum, l) => sum + (l.estimatedValue || 0), 0) };
-    }), [leads]);
+    }), [leads, outcomeStages]);
 
   const totalValue = leads.reduce((sum, l) => sum + (l.estimatedValue || 0), 0);
 
@@ -106,10 +110,10 @@ const SalesFunnel = ({ leads, onStageClick, activeStage }) => {
   return (
     <div className="card p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-900">Продажен инка</h3>
+        <h3 className="text-sm font-semibold text-gray-900">{t('funnel.title')}</h3>
         {totalValue > 0 && (
           <span className="text-xs text-gray-500">
-            Вкупна вредност: <span className="font-semibold text-gray-700">{totalValue.toLocaleString('mk-MK')} EUR</span>
+            {t('funnel.totalValue')} <span className="font-semibold text-gray-700">{totalValue.toLocaleString('mk-MK')} EUR</span>
           </span>
         )}
       </div>
@@ -166,7 +170,7 @@ const SalesFunnel = ({ leads, onStageClick, activeStage }) => {
 
 // ─── Lead Card ────────────────────────────────────────────────────────────────
 
-const LeadCard = ({ lead, canAct, onDetail, onEdit, onDelete }) => {
+const LeadCard = ({ lead, canAct, onDetail, onEdit, onDelete, t, tc, stageLabel, priorityLabel, sourceLabel }) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
@@ -184,10 +188,10 @@ const LeadCard = ({ lead, canAct, onDetail, onEdit, onDelete }) => {
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STAGE_COLOR[lead.stage]}`}>
-            {STAGE_LABEL[lead.stage]}
+            {stageLabel[lead.stage]}
           </span>
           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${PRIORITY_COLOR[lead.priority]}`}>
-            {PRIORITY_LABEL[lead.priority]}
+            {priorityLabel[lead.priority]}
           </span>
         </div>
       </div>
@@ -195,7 +199,7 @@ const LeadCard = ({ lead, canAct, onDetail, onEdit, onDelete }) => {
       {/* Meta row */}
       <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 font-medium">
-          {SOURCE_LABEL[lead.source]}
+          {sourceLabel[lead.source]}
         </span>
         {lead.estimatedValue && (
           <span className="font-medium text-gray-700">
@@ -227,8 +231,8 @@ const LeadCard = ({ lead, canAct, onDetail, onEdit, onDelete }) => {
       {lead.nextFollowUp && (
         <div className={`flex items-center gap-1 text-xs ${lead.isOverdue ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
           <Calendar size={11} className={lead.isOverdue ? 'text-red-500' : 'text-gray-400'} />
-          Следен контакт: {fmtDate(lead.nextFollowUp)}
-          {lead.isOverdue && ' (задоцнет!)'}
+          {t('nextFollowUp', { date: fmtDate(lead.nextFollowUp) })}
+          {lead.isOverdue && ` ${t('overdueTag')}`}
         </div>
       )}
 
@@ -236,30 +240,30 @@ const LeadCard = ({ lead, canAct, onDetail, onEdit, onDelete }) => {
       <div className="pt-1 border-t border-gray-100">
         {confirmDelete ? (
           <div className="flex gap-2">
-            <button onClick={() => setConfirmDelete(false)} className="btn-secondary flex-1 text-xs py-1.5">Откажи</button>
+            <button onClick={() => setConfirmDelete(false)} className="btn-secondary flex-1 text-xs py-1.5">{tc('cancel')}</button>
             <button
               onClick={() => onDelete(lead._id)}
               className="flex-1 text-xs py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
             >
-              Избриши
+              {tc('delete')}
             </button>
           </div>
         ) : (
           <div className="flex gap-1.5 flex-wrap">
             <button onClick={() => onDetail(lead)}
               className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-              <Eye size={11} /> Детали
+              <Eye size={11} /> {t('details')}
             </button>
             {canAct && (
               <button onClick={() => onEdit(lead)}
                 className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
-                <Edit2 size={11} /> Уреди
+                <Edit2 size={11} /> {tc('edit')}
               </button>
             )}
             {canAct && (
               <button onClick={() => setConfirmDelete(true)}
                 className="ml-auto flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
-                <Trash2 size={11} /> Избриши
+                <Trash2 size={11} /> {tc('delete')}
               </button>
             )}
           </div>
@@ -272,9 +276,29 @@ const LeadCard = ({ lead, canAct, onDetail, onEdit, onDelete }) => {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function LeadsPage() {
+  const { t } = useTranslation('leads');
+  const { t: tc } = useTranslation('common');
   const { user } = useAuth();
   const { data: leads = [], isLoading } = useLeads();
   const remove = useDeleteLead();
+
+  const stages = useStages();
+  const sources = useSources();
+  const priorities = usePriorities();
+
+  const STAGE_LABEL = useMemo(() => Object.fromEntries(stages.map((s) => [s.value, s.label])), [stages]);
+  const PRIORITY_LABEL = useMemo(() => Object.fromEntries(priorities.map((p) => [p.value, p.label])), [priorities]);
+  const SOURCE_LABEL = useMemo(() => Object.fromEntries(sources.map((s) => [s.value, s.label])), [sources]);
+
+  const STAGE_FILTER_OPTIONS = useMemo(() => [
+    { value: '', label: t('allStages') },
+    ...stages,
+  ], [stages, t]);
+
+  const PRIORITY_FILTER_OPTIONS = useMemo(() => [
+    { value: '', label: t('allPriorities') },
+    ...priorities,
+  ], [priorities, t]);
 
   const [modal, setModal]               = useState(null); // null | { mode, initial }
   const [detailLead, setDetailLead]     = useState(null);
@@ -332,29 +356,29 @@ export default function LeadsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Потенцијални клиенти</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{leads.length} лид{leads.length !== 1 ? 'ови' : ''}</p>
+          <h2 className="text-xl font-bold text-gray-900">{t('title')}</h2>
+          <p className="text-sm text-gray-500 mt-0.5">{t('leadCount', { count: leads.length })}</p>
         </div>
         <button onClick={() => setModal({ mode: 'create', initial: null })} className="btn-primary flex items-center gap-2">
-          <Plus size={16} /> Нов лид
+          <Plus size={16} /> {t('newLead')}
         </button>
       </div>
 
       {/* Stats bar */}
       <div className="flex gap-3 overflow-x-auto pb-1">
-        <StatCard label="Вкупно" count={stats.total} color="bg-gray-100 text-gray-600"
+        <StatCard label={t('stat.total')} count={stats.total} color="bg-gray-100 text-gray-600"
           icon={Users}
           onClick={() => setStatFilter('')}
           active={statFilter === ''} />
-        <StatCard label="Нови" count={stats.new} color="bg-blue-100 text-blue-600"
+        <StatCard label={t('stat.new')} count={stats.new} color="bg-blue-100 text-blue-600"
           icon={UserPlus}
           onClick={() => toggleStat('new')}
           active={statFilter === 'new'} />
-        <StatCard label="Во преговори" count={stats.negotiation} color="bg-amber-100 text-amber-600"
+        <StatCard label={t('stat.inNegotiation')} count={stats.negotiation} color="bg-amber-100 text-amber-600"
           icon={TrendingUp}
           onClick={() => toggleStat('negotiation')}
           active={statFilter === 'negotiation'} />
-        <StatCard label="Задоцнети" count={stats.overdue} color="bg-red-100 text-red-600"
+        <StatCard label={t('stat.overdue')} count={stats.overdue} color="bg-red-100 text-red-600"
           icon={AlertTriangle}
           onClick={() => toggleStat('overdue')}
           active={statFilter === 'overdue'} />
@@ -367,7 +391,7 @@ export default function LeadsPage() {
           className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 mb-2 transition-colors"
         >
           {showFunnel ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          {showFunnel ? 'Сокриј инка' : 'Прикажи продажен инка'}
+          {showFunnel ? t('funnel.hideFunnel') : t('funnel.showFunnel')}
         </button>
         {showFunnel && (
           <SalesFunnel
@@ -384,7 +408,7 @@ export default function LeadsPage() {
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             className="input pl-8 text-sm"
-            placeholder="Пребарај по компанија или контакт…"
+            placeholder={t('searchPlaceholder')}
             value={searchQ}
             onChange={(e) => setSearchQ(e.target.value)}
           />
@@ -402,13 +426,11 @@ export default function LeadsPage() {
         <div className="text-center py-16">
           <Users size={36} className="mx-auto text-gray-300 mb-3" />
           <p className="text-gray-400 text-sm mb-4">
-            {leads.length === 0
-              ? 'Нема евидентирани лидови.'
-              : 'Нема лидови кои одговараат на филтерот.'}
+            {leads.length === 0 ? t('noLeads') : t('noFilterMatch')}
           </p>
           {leads.length === 0 && (
             <button onClick={() => setModal({ mode: 'create', initial: null })} className="btn-primary">
-              Додај го првиот лид
+              {t('addFirstLead')}
             </button>
           )}
         </div>
@@ -424,6 +446,11 @@ export default function LeadsPage() {
             onDetail={(lead) => setDetailLead(lead)}
             onEdit={(lead) => setModal({ mode: 'edit', initial: lead })}
             onDelete={(id) => remove.mutate(id)}
+            t={t}
+            tc={tc}
+            stageLabel={STAGE_LABEL}
+            priorityLabel={PRIORITY_LABEL}
+            sourceLabel={SOURCE_LABEL}
           />
         ))}
       </div>

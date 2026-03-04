@@ -9,27 +9,7 @@
  *   errors   — errors[prefix] from formState.errors
  */
 
-const MKD_LABELS = {
-  name:    'Назив на компанијата',
-  address: 'Адреса',
-  manager: 'Одговорно лице (управник / директор)',
-  crn:     'Матичен број (CRN)',
-  namePh:    'пр. АКМЕ Корпорација ДОО Скопје',
-  addressPh: 'пр. ул. Македонија 1, 1000 Скопје',
-  managerPh: 'пр. Иван Иванов',
-  crnPh:     'пр. 1234567',
-};
-
-const ENG_LABELS = {
-  name:    'Company Name',
-  address: 'Address',
-  manager: 'Manager / Director',
-  crn:     'CRN (Company Registration Number)',
-  namePh:    'e.g. ACME Corporation DOO Skopje',
-  addressPh: 'e.g. 1 Macedonia St, 1000 Skopje',
-  managerPh: 'e.g. Ivan Ivanov',
-  crnPh:     'e.g. 1234567',
-};
+import { useTranslation } from 'react-i18next';
 
 // Single input field used in both single-lang and bilingual layouts
 const Field = ({ id, label, placeholder, hasError, errorMsg, registration }) => (
@@ -47,27 +27,26 @@ const Field = ({ id, label, placeholder, hasError, errorMsg, registration }) => 
 );
 
 // Single-language block (MKD-only or ENG-only)
-const LangBlock = ({ prefix, lang, register, errors }) => {
-  const L = lang === 'mkd' ? MKD_LABELS : ENG_LABELS;
+const LangBlock = ({ prefix, lang, register, errors, labels }) => {
   const f = (name) => `${prefix}.${lang}.${name}`;
 
   return (
     <div className="space-y-3">
-      <Field id={`${prefix}-${lang}-name`}    label={L.name}    placeholder={L.namePh}    hasError={!!errors?.[lang]?.name}    errorMsg={errors?.[lang]?.name?.message}    registration={register(f('name'))} />
-      <Field id={`${prefix}-${lang}-address`} label={L.address} placeholder={L.addressPh} hasError={!!errors?.[lang]?.address} errorMsg={errors?.[lang]?.address?.message} registration={register(f('address'))} />
-      <Field id={`${prefix}-${lang}-manager`} label={L.manager} placeholder={L.managerPh} hasError={!!errors?.[lang]?.manager} errorMsg={errors?.[lang]?.manager?.message} registration={register(f('manager'))} />
+      <Field id={`${prefix}-${lang}-name`}    label={labels.name}    placeholder={labels.namePh}    hasError={!!errors?.[lang]?.name}    errorMsg={errors?.[lang]?.name?.message}    registration={register(f('name'))} />
+      <Field id={`${prefix}-${lang}-address`} label={labels.address} placeholder={labels.addressPh} hasError={!!errors?.[lang]?.address} errorMsg={errors?.[lang]?.address?.message} registration={register(f('address'))} />
+      <Field id={`${prefix}-${lang}-manager`} label={labels.manager} placeholder={labels.managerPh} hasError={!!errors?.[lang]?.manager} errorMsg={errors?.[lang]?.manager?.message} registration={register(f('manager'))} />
     </div>
   );
 };
 
 // Bilingual side-by-side layout — one row per field, MKD left / ENG right
-const BilingualBlock = ({ prefix, register, errors }) => {
+const BilingualBlock = ({ prefix, register, errors, mkdLabels, engLabels, t }) => {
   const f = (lang, name) => `${prefix}.${lang}.${name}`;
 
   const FIELDS = [
-    { key: 'name',    mkdLabel: MKD_LABELS.name,    engLabel: ENG_LABELS.name,    mkdPh: MKD_LABELS.namePh,    engPh: ENG_LABELS.namePh    },
-    { key: 'address', mkdLabel: MKD_LABELS.address,  engLabel: ENG_LABELS.address, mkdPh: MKD_LABELS.addressPh, engPh: ENG_LABELS.addressPh },
-    { key: 'manager', mkdLabel: MKD_LABELS.manager,  engLabel: ENG_LABELS.manager, mkdPh: MKD_LABELS.managerPh, engPh: ENG_LABELS.managerPh },
+    { key: 'name',    mkdLabel: mkdLabels.name,    engLabel: engLabels.name,    mkdPh: mkdLabels.namePh,    engPh: engLabels.namePh    },
+    { key: 'address', mkdLabel: mkdLabels.address,  engLabel: engLabels.address, mkdPh: mkdLabels.addressPh, engPh: engLabels.addressPh },
+    { key: 'manager', mkdLabel: mkdLabels.manager,  engLabel: engLabels.manager, mkdPh: mkdLabels.managerPh, engPh: engLabels.managerPh },
   ];
 
   return (
@@ -75,12 +54,10 @@ const BilingualBlock = ({ prefix, register, errors }) => {
       {/* Column headers */}
       <div className="grid grid-cols-2 gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold px-2 py-0.5 rounded bg-yellow-50 text-yellow-700 border border-yellow-200">МКД</span>
-          <span className="text-xs text-gray-400">Кирилица</span>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded bg-yellow-50 text-yellow-700 border border-yellow-200">{t('companyFields.mkdSection')}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">ENG</span>
-          <span className="text-xs text-gray-400">Latin</span>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">{t('companyFields.engSection')}</span>
         </div>
       </div>
 
@@ -116,8 +93,22 @@ const BilingualBlock = ({ prefix, register, errors }) => {
 };
 
 const CompanyFieldsSection = ({ prefix, legend, language = 'MKD', register, errors = {} }) => {
-  const crnLabel = language === 'ENG' ? ENG_LABELS.crn : MKD_LABELS.crn;
-  const crnPh    = language === 'ENG' ? ENG_LABELS.crnPh : MKD_LABELS.crnPh;
+  const { t } = useTranslation('terkovi');
+
+  // These labels are always MKD/ENG regardless of UI language — they label the document language fields
+  const MKD_LABELS = {
+    name:      t('companyFields.nameLabel'),
+    address:   t('companyFields.addressLabel'),
+    manager:   t('companyFields.managerLabel'),
+    namePh:    t('companyFields.namePlaceholder'),
+    addressPh: t('companyFields.addressPlaceholder'),
+    managerPh: t('companyFields.managerPlaceholder'),
+  };
+
+  const ENG_LABELS = { ...MKD_LABELS };
+
+  const crnLabel = t('companyFields.crnLabel');
+  const crnPh    = t('companyFields.crnPlaceholder');
 
   return (
     <div className="card p-5 space-y-4">
@@ -125,9 +116,9 @@ const CompanyFieldsSection = ({ prefix, legend, language = 'MKD', register, erro
         <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">{legend}</h3>
       )}
 
-      {language === 'MKD'      && <LangBlock     prefix={prefix} lang="mkd" register={register} errors={errors} />}
-      {language === 'ENG'      && <LangBlock     prefix={prefix} lang="eng" register={register} errors={errors} />}
-      {language === 'BILINGUAL' && <BilingualBlock prefix={prefix}           register={register} errors={errors} />}
+      {language === 'MKD'      && <LangBlock     prefix={prefix} lang="mkd" register={register} errors={errors} labels={MKD_LABELS} />}
+      {language === 'ENG'      && <LangBlock     prefix={prefix} lang="eng" register={register} errors={errors} labels={ENG_LABELS} />}
+      {language === 'BILINGUAL' && <BilingualBlock prefix={prefix}           register={register} errors={errors} mkdLabels={MKD_LABELS} engLabels={ENG_LABELS} t={t} />}
 
       {/* CRN — always single, language-agnostic */}
       <div>

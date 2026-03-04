@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import i18next from 'i18next';
+
+const t = (key, ns = 'terkovi') => i18next.t(key, { ns });
+const tc = (key) => i18next.t(key, { ns: 'common' });
 
 // Deposit / balance payment pairs — the two values must sum to 100
 const PAYMENT_PAIRS = [
@@ -9,34 +13,22 @@ const PAYMENT_PAIRS = [
 
 export const DEPOSIT_OPTIONS = PAYMENT_PAIRS.map((p) => ({
   value: String(p.deposit),
-  label: `${p.deposit}% deposit / ${p.balance}% balance`,
+  label: `${p.deposit}% / ${p.balance}%`,
 }));
 
 export const plAgreementSchema = z.object({
-  // Effective / signing date
-  effectiveDate: z.string().min(1, 'Effective date is required'),
-
-  // Customer (second party) — English only fields
-  companyName:    z.string().min(1, 'Company name is required'),
-  companyAddress: z.string().min(1, 'Company address is required'),
-  companyCRN:     z.string().min(1, 'Organisation number is required'),
-  companyCEO:     z.string().min(1, 'CEO / authorised representative name is required'),
-  customerEmail:  z
-    .string()
-    .min(1, 'Customer email is required')
-    .email('Must be a valid email address'),
-
-  // Signature block
-  customerSignatoryName: z.string().min(1, 'Customer signatory name is required'),
-
-  // Commercial terms
+  effectiveDate:         z.string().min(1, tc('validation.required')),
+  companyName:           z.string().min(1, tc('validation.required')),
+  companyAddress:        z.string().min(1, tc('validation.required')),
+  companyCRN:            z.string().min(1, tc('validation.required')),
+  companyCEO:            z.string().min(1, tc('validation.required')),
+  customerEmail:         z.string().min(1, tc('validation.required')).email(tc('validation.invalidEmail')),
+  customerSignatoryName: z.string().min(1, tc('validation.required')),
   MOQamount: z.coerce
-    .number({ invalid_type_error: 'MOQ must be a number' })
-    .int('MOQ must be a whole number')
-    .positive('MOQ must be greater than zero'),
-
-  // Deposit percent: '70' | '60' | '50'
+    .number({ invalid_type_error: tc('validation.required') })
+    .int(tc('validation.required'))
+    .positive(tc('validation.required')),
   depositPercent: z.enum(['70', '60', '50'], {
-    required_error: 'Select a deposit / balance split',
+    required_error: tc('validation.required'),
   }),
 });

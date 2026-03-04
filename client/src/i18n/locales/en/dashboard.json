@@ -1,0 +1,35 @@
+{
+  "bulletin": "Bulletin Board",
+
+  "tabs": {
+    "terkovi": "Templates",
+    "projects": "Projects",
+    "tasks": "Current Tasks",
+    "nabavki": "Procurement",
+    "dogovori": "Agreements",
+    "vraboteni": "Employees",
+    "po": "Purchase Order",
+    "leads": "Leads"
+  },
+
+  "projectCount_one": "{{count}} project",
+  "projectCount_other": "{{count}} projects",
+  "newProject": "New Project",
+  "loadProjectsFailed": "Failed to load projects.",
+  "noProjectsYet": "No projects yet",
+  "noProjectsInDept": "No projects yet in {{dept}}.",
+  "createFirstProject": "Create the first project",
+
+  "nabavkiComingSoon": "Procurement — coming soon",
+
+  "employees": "Employees",
+  "noEmployees": "No registered employees in this department.",
+
+  "whiteboard": {
+    "subtitle": "Announcements from management",
+    "placeholder": "Write an announcement for all employees…",
+    "post": "Post",
+    "noAnnouncements": "No announcements yet",
+    "deleteTitle": "Delete"
+  }
+}
