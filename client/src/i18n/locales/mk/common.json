@@ -32,6 +32,7 @@
   "manager": "Менаџер",
   "employee": "Вработен",
   "logout": "Одјави се",
+  "registerUser": "Регистрирај корисник",
   "language": "Јазик",
 
   "dept": {
@@ -67,6 +68,8 @@
   "validation": {
     "required": "Задолжително поле",
     "invalidEmail": "Невалидна е-пошта адреса",
+    "invalidEmbg": "ЕМБГ мора да содржи точно 13 цифри",
+    "endDateAfterContractDate": "Новиот краен датум мора да биде после датумот на договорот",
     "minLength": "Мора да содржи најмалку {{count}} знаци",
     "maxLength": "Максимум {{count}} знаци",
     "passwordMismatch": "Лозинките не се совпаѓаат",

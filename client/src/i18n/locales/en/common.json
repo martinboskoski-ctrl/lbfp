@@ -32,6 +32,7 @@
   "manager": "Manager",
   "employee": "Employee",
   "logout": "Log out",
+  "registerUser": "Register user",
   "language": "Language",
 
   "dept": {
@@ -67,6 +68,8 @@
   "validation": {
     "required": "Required field",
     "invalidEmail": "Invalid email address",
+    "invalidEmbg": "EMBG must contain exactly 13 digits",
+    "endDateAfterContractDate": "The new end date must be after the contract date",
     "minLength": "Must contain at least {{count}} characters",
     "maxLength": "Maximum {{count}} characters",
     "passwordMismatch": "Passwords do not match",

@@ -11,6 +11,10 @@
     "pl": {
       "label": "PL Agreement",
       "sublabel": "Договор за приватна етикета"
+    },
+    "contractAnnex": {
+      "label": "Анекс на договор",
+      "sublabel": "Анекс на договорот за вработување"
     }
   },
 
@@ -58,6 +62,27 @@
     "generateError": "Грешка при генерирање. Обидете се повторно.",
     "generating": "Генерирање…",
     "generateButton": "Генерирај PL договор (.docx)"
+  },
+
+  "contractAnnex": {
+    "heading": "Анекс на договорот за вработување",
+    "description": "Генерирај анекс на договорот за вработување за работник на ЛБФП ДОО Битола",
+    "annexDateSection": "Датум на анексот",
+    "dateLabel": "Датум на потпишување / стапување во сила",
+    "employeeSection": "Податоци за работникот",
+    "employeeNameLabel": "Ime и презиме на работникот",
+    "employeeNamePlaceholder": "пр. Марија Петрова",
+    "employeePinLabel": "ЕМБГ на работникот",
+    "employeePinPlaceholder": "пр. 0101990450001",
+    "contractSection": "Основен договор за вработување",
+    "contractNumberLabel": "Број на договор",
+    "contractNumberPlaceholder": "пр. 123/2021",
+    "contractDateLabel": "Датум на договорот",
+    "newEndDateSection": "Ново времетраење",
+    "newEndDateLabel": "Нов краен датум на договорот",
+    "generateError": "Грешка при генерирање. Обидете се повторно.",
+    "generating": "Генерирање…",
+    "generateButton": "Генерирај анекс (.docx)"
   },
 
   "companyFields": {

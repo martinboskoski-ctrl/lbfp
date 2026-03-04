@@ -2,7 +2,7 @@ import { NavLink, useSearchParams } from 'react-router-dom';
 import {
   TrendingUp, DollarSign, Building2,
   Users, ShieldCheck, Wrench, Settings, FlaskConical,
-  Factory, Crown, LogOut, Users2, Globe,
+  Factory, Crown, LogOut, Users2, Globe, UserPlus,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -122,6 +122,21 @@ const Sidebar = ({ isOpen, onClose }) => {
               <div className="text-blue-500 font-medium mt-0.5">{t('manager')}</div>
             )}
           </div>
+          {isTopManagement(user) && (
+            <div onClick={handleNavClick}>
+              <NavLink
+                to="/register"
+                className={({ isActive }) =>
+                  `flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-sm transition-colors mb-0.5 ${
+                    isActive ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'
+                  }`
+                }
+              >
+                <UserPlus size={14} />
+                {t('registerUser')}
+              </NavLink>
+            </div>
+          )}
           <button
             onClick={toggleLanguage}
             className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors mb-0.5"

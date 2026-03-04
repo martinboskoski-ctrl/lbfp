@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { isTopManagement } from '../utils/userTier.js';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
+import { registerApi } from '../api/auth.api.js';
 import toast from 'react-hot-toast';
 
 const DEPT_VALUES = [
@@ -84,7 +86,7 @@ const StrengthBar = ({ password }) => {
 // ── Component ─────────────────────────────────────────────────────────────
 
 const Register = () => {
-  const { register: registerUser, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation('auth');
   const { t: tc } = useTranslation('common');
@@ -92,20 +94,17 @@ const Register = () => {
   const [showConfirm,  setShowConfirm]      = useState(false);
   const [loading, setLoading]               = useState(false);
 
-  useEffect(() => {
-    if (user) navigate('/dashboard', { replace: true });
-  }, [user, navigate]);
-
-  const toggleLanguage = () => {
-    const newLang = i18next.language === 'mk' ? 'en' : 'mk';
-    i18next.changeLanguage(newLang);
-    localStorage.setItem('packflow_lang', newLang);
-  };
+  // Only top management can access this page
+  if (!isTopManagement(user)) {
+    navigate('/dashboard', { replace: true });
+    return null;
+  }
 
   const {
     register,
     handleSubmit,
     watch,
+    reset,
     setError,
     formState: { errors },
   } = useForm({
@@ -122,16 +121,15 @@ const Register = () => {
       const { confirmPassword, ...payload } = data;
       payload.email = payload.email.trim().toLowerCase();
       payload.name  = payload.name.trim();
-      await registerUser(payload);
-      navigate('/dashboard');
+      await registerApi(payload);
+      toast.success(t('userCreated'));
+      reset();
     } catch (err) {
       const res = err?.response;
       if (res?.status === 409) {
         setError('email', { message: res.data.message });
       } else if (res?.status === 422 && res.data?.errors) {
         Object.entries(res.data.errors).forEach(([field, msg]) => setError(field, { message: msg }));
-      } else if (res?.status === 429) {
-        toast.error(res.data.message);
       } else {
         toast.error(res?.data?.message || t('registerFailed'));
       }
@@ -141,21 +139,19 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
-      <div className="card w-full max-w-sm p-8 relative">
+    <div className="max-w-md mx-auto py-8 px-4">
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-6"
+      >
+        <ArrowLeft size={16} />
+        {tc('back')}
+      </button>
 
-        {/* Language toggle */}
-        <button
-          type="button"
-          onClick={toggleLanguage}
-          className="absolute top-4 right-4 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
-        >
-          {i18next.language === 'mk' ? 'EN' : 'MK'}
-        </button>
-
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-blue-700">{tc('companyName')}</h1>
-          <p className="text-gray-400 mt-1 text-sm">{t('registerTitle')}</p>
+      <div className="card p-8">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-gray-900">{t('createUserTitle')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('createUserSubtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
@@ -165,7 +161,7 @@ const Register = () => {
             <label className="label">{t('nameLabel')}</label>
             <input
               className={`input ${errors.name ? 'border-red-400' : ''}`}
-              autoComplete="name"
+              autoComplete="off"
               autoFocus
               placeholder={t('namePlaceholder')}
               {...register('name')}
@@ -178,7 +174,7 @@ const Register = () => {
             <label className="label">{t('emailLabel')}</label>
             <input
               type="email"
-              autoComplete="email"
+              autoComplete="off"
               className={`input ${errors.email ? 'border-red-400' : ''}`}
               placeholder={t('emailPlaceholder')}
               {...register('email')}
@@ -270,16 +266,9 @@ const Register = () => {
             className="btn-primary w-full flex items-center justify-center gap-2 mt-2"
           >
             {loading && <Loader2 size={15} className="animate-spin" />}
-            {loading ? t('registerLoading') : t('registerButton')}
+            {loading ? t('registerLoading') : t('createUserButton')}
           </button>
         </form>
-
-        <p className="text-center text-sm text-gray-500 mt-6">
-          {t('hasAccount')}{' '}
-          <Link to="/login" className="text-blue-600 hover:underline font-medium">
-            {t('loginLink')}
-          </Link>
-        </p>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -138,12 +138,6 @@ const Login = () => {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          {t('noAccount')}{' '}
-          <Link to="/register" className="text-blue-600 hover:underline font-medium">
-            {t('registerLink')}
-          </Link>
-        </p>
       </div>
     </div>
   );

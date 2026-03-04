@@ -1,8 +1,9 @@
 import { useSearchParams } from 'react-router-dom';
-import { FileText, ArrowLeft, ClipboardList } from 'lucide-react';
+import { FileText, ArrowLeft, ClipboardList, ScrollText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import NDAForm from './NDAForm.jsx';
 import PLAgreementForm from './PLAgreementForm.jsx';
+import ContractAnnexForm from './ContractAnnexForm.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 const TEMPLATES = [
@@ -21,6 +22,14 @@ const TEMPLATES = [
     icon: ClipboardList,
     color: 'bg-green-50 text-green-600',
     depts: ['top_management', 'sales'],
+  },
+  {
+    id: 'contract-annex',
+    labelKey: 'template.contractAnnex.label',
+    sublabelKey: 'template.contractAnnex.sublabel',
+    icon: ScrollText,
+    color: 'bg-purple-50 text-purple-600',
+    depts: ['top_management', 'hr'],
   },
 ];
 
@@ -87,6 +96,21 @@ const TerkoviGallery = () => {
           {t('backToTemplates')}
         </button>
         <PLAgreementForm />
+      </div>
+    );
+  }
+
+  if (activeTemplate === 'contract-annex') {
+    return (
+      <div>
+        <button
+          onClick={closeTemplate}
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          {t('backToTemplates')}
+        </button>
+        <ContractAnnexForm />
       </div>
     );
   }

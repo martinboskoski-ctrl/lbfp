@@ -115,6 +115,92 @@ export const generateNDA = async (req, res) => {
 };
 
 /**
+ * POST /api/terkovi/contract-annex/generate
+ * Generates a filled Employment Contract Annex .docx for the HR department and streams it to the client.
+ * Access: hr and top_management departments only.
+ */
+export const generateContractAnnex = async (req, res) => {
+  try {
+    // Department-level access guard: only hr and top_management may generate this document
+    const userDept = req.user?.department;
+    if (userDept !== 'hr' && userDept !== 'top_management') {
+      return res.status(403).json({ message: 'Access denied. HR or Top Management only.' });
+    }
+
+    const { date, employeeName, employeePin, contractNumber, contractDate, newEndDate } = req.body;
+
+    if (!date || !employeeName || !employeePin || !contractNumber || !contractDate || !newEndDate) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const templatePath = path.join(
+      __dirname,
+      '../templates/terkovi/contract-annex.docx'
+    );
+
+    if (!fs.existsSync(templatePath)) {
+      console.error('Contract Annex template not found at:', templatePath);
+      return res.status(500).json({ message: 'Contract Annex template file not found on server' });
+    }
+
+    const templateContent = fs.readFileSync(templatePath, 'binary');
+    const zip = new PizZip(templateContent);
+
+    const doc = new Docxtemplater(zip, {
+      paragraphLoop: true,
+      linebreaks:    true,
+      nullGetter:    () => '',
+    });
+
+    // Format all dates as Macedonian long form: dd MMMM yyyy год.
+    const fmtMk = (isoDate) => {
+      const parsed = new Date(isoDate + 'T00:00:00');
+      return parsed.toLocaleDateString('mk-MK', {
+        day:   '2-digit',
+        month: 'long',
+        year:  'numeric',
+      });
+    };
+
+    doc.render({
+      date:           fmtMk(date),
+      employeeName:   employeeName.trim(),
+      employeePin:    employeePin.trim(),
+      contractNumber: contractNumber.trim(),
+      contractDate:   fmtMk(contractDate),
+      newEndDate:     fmtMk(newEndDate),
+    });
+
+    const buffer = doc.getZip().generate({
+      type:        'nodebuffer',
+      compression: 'DEFLATE',
+    });
+
+    // Build a safe filename
+    const dateStr  = date.replace(/-/g, '');
+    const nameSlug = (employeeName ?? '')
+      .trim()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-zA-Z0-9_]/g, '')
+      .substring(0, 30);
+    const filename = `Aneks_${nameSlug}_${dateStr}.docx`;
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    );
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  } catch (error) {
+    const details = error?.properties?.errors
+      ? error.properties.errors.map((e) => e.message).join('; ')
+      : error?.message ?? 'Unknown error';
+    console.error('Contract Annex generation error:', details);
+    res.status(500).json({ message: 'Failed to generate Contract Annex document', error: details });
+  }
+};
+
+/**
  * POST /api/terkovi/pl-agreement/generate
  * Generates a filled Private Label Agreement .docx and streams it to the client.
  */

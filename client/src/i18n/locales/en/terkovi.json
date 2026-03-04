@@ -11,6 +11,10 @@
     "pl": {
       "label": "PL Agreement",
       "sublabel": "Private Label Agreement"
+    },
+    "contractAnnex": {
+      "label": "Contract Annex",
+      "sublabel": "Employment Contract Annex"
     }
   },
 
@@ -58,6 +62,27 @@
     "generateError": "Document generation failed. Please try again.",
     "generating": "Generating…",
     "generateButton": "Generate PL Agreement (.docx)"
+  },
+
+  "contractAnnex": {
+    "heading": "Employment Contract Annex",
+    "description": "Generate an employment contract annex for an LBFP DOO Bitola employee",
+    "annexDateSection": "Annex Date",
+    "dateLabel": "Date of signing / entry into force",
+    "employeeSection": "Employee Details",
+    "employeeNameLabel": "Employee full name",
+    "employeeNamePlaceholder": "e.g. Maria Petrova",
+    "employeePinLabel": "Employee EMBG (national ID number)",
+    "employeePinPlaceholder": "e.g. 0101990450001",
+    "contractSection": "Base Employment Contract",
+    "contractNumberLabel": "Contract number",
+    "contractNumberPlaceholder": "e.g. 123/2021",
+    "contractDateLabel": "Contract date",
+    "newEndDateSection": "New Duration",
+    "newEndDateLabel": "New contract end date",
+    "generateError": "Generation failed. Please try again.",
+    "generating": "Generating…",
+    "generateButton": "Generate Annex (.docx)"
   },
 
   "companyFields": {
