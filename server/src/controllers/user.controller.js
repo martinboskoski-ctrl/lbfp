@@ -14,6 +14,27 @@ export const listDirectory = async (req, res) => {
   res.json({ users });
 };
 
+export const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: 'Current and new password are required' });
+  }
+
+  if (newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+    return res.status(422).json({ message: 'New password must be at least 8 characters with a letter and digit' });
+  }
+
+  const valid = await req.user.comparePassword(currentPassword);
+  if (!valid) {
+    return res.status(401).json({ message: 'Incorrect current password' });
+  }
+
+  req.user.passwordHash = await bcrypt.hash(newPassword, 12);
+  await req.user.save();
+  res.json({ message: 'Password changed' });
+};
+
 export const updateLanguage = async (req, res) => {
   const { language } = req.body;
   if (!['mk', 'en'].includes(language)) {

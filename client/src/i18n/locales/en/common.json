@@ -33,6 +33,7 @@
   "employee": "Employee",
   "logout": "Log out",
   "registerUser": "Register user",
+  "changePassword": "Change password",
   "language": "Language",
 
   "dept": {

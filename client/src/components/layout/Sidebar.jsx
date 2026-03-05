@@ -4,10 +4,12 @@ import {
   Users, ShieldCheck, Wrench, Settings, FlaskConical,
   Factory, Crown, LogOut, Users2, Globe, UserPlus,
 } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { canManage, isTopManagement } from '../../utils/userTier.js';
 import { useUpdateLanguage } from '../../hooks/useUsers.js';
+import ChangePasswordModal from './ChangePasswordModal.jsx';
 import i18next from 'i18next';
 
 export const DEPARTMENTS = [
@@ -46,6 +48,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
   const { t } = useTranslation('common');
   const updateLang = useUpdateLanguage();
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const handleNavClick = () => {
     if (onClose) onClose();
@@ -113,7 +116,11 @@ const Sidebar = ({ isOpen, onClose }) => {
         </nav>
 
         <div className="p-3 border-t border-gray-200">
-          <div className="px-2 py-1.5 text-xs mb-1">
+          <button
+            onClick={() => setShowPasswordModal(true)}
+            className="w-full text-left px-2 py-1.5 text-xs mb-1 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+            title={t('changePassword')}
+          >
             <div className="font-medium text-gray-700">{user?.name}</div>
             <div className="text-gray-400">
               {t(`dept.${user?.department}`, { defaultValue: user?.department })}
@@ -121,7 +128,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             {user?.isManager && (
               <div className="text-blue-500 font-medium mt-0.5">{t('manager')}</div>
             )}
-          </div>
+          </button>
           {isTopManagement(user) && (
             <div onClick={handleNavClick}>
               <NavLink
@@ -153,6 +160,10 @@ const Sidebar = ({ isOpen, onClose }) => {
           </button>
         </div>
       </aside>
+
+      {showPasswordModal && (
+        <ChangePasswordModal onClose={() => setShowPasswordModal(false)} />
+      )}
     </>
   );
 };

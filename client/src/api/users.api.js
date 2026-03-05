@@ -5,3 +5,6 @@ export const listDirectoryApi = (dept) =>
 
 export const updateLanguageApi = (language) =>
   api.patch('/users/me/language', { language });
+
+export const changePasswordApi = (data) =>
+  api.patch('/users/me/password', data);
