@@ -3,6 +3,7 @@ import {
   TrendingUp, DollarSign, Building2,
   Users, ShieldCheck, Wrench, Settings, FlaskConical,
   Factory, Crown, LogOut, Users2, Globe, UserPlus,
+  ChevronDown, ClipboardList, GraduationCap,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -49,6 +50,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { t } = useTranslation('common');
   const updateLang = useUpdateLanguage();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [deptsOpen, setDeptsOpen] = useState(false);
 
   const handleNavClick = () => {
     if (onClose) onClose();
@@ -82,24 +84,46 @@ const Sidebar = ({ isOpen, onClose }) => {
         </div>
 
         <nav className="flex-1 p-2 overflow-y-auto space-y-0.5">
-          <div className="pt-2 pb-1 px-3">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          {/* Collapsible departments */}
+          <button
+            onClick={() => setDeptsOpen((v) => !v)}
+            className="flex items-center justify-between w-full pt-2 pb-1 px-3 group"
+          >
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider group-hover:text-gray-600 transition-colors">
               {t('departments')}
             </span>
-          </div>
+            <ChevronDown
+              size={14}
+              className={`text-gray-400 transition-transform duration-200 ${deptsOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
 
-          {(isTopManagement(user)
-            ? DEPARTMENTS
-            : DEPARTMENTS.filter((d) => d.value === user?.department)
-          ).map((dept) => (
-            <div key={dept.value} onClick={handleNavClick}>
-              <NavItem
-                to={`/dashboard?dept=${dept.value}`}
-                icon={dept.icon}
-                label={t(`dept.${dept.value}`)}
-              />
+          {deptsOpen && (
+            <div className="space-y-0.5">
+              {(isTopManagement(user)
+                ? DEPARTMENTS
+                : DEPARTMENTS.filter((d) => d.value === user?.department)
+              ).map((dept) => (
+                <div key={dept.value} onClick={handleNavClick}>
+                  <NavItem
+                    to={`/dashboard?dept=${dept.value}`}
+                    icon={dept.icon}
+                    label={t(`dept.${dept.value}`)}
+                  />
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+
+          {/* Static nav items */}
+          <div className="pt-3 space-y-0.5">
+            <div onClick={handleNavClick}>
+              <NavItem to="/procedures" icon={ClipboardList} label={t('procedures')} />
+            </div>
+            <div onClick={handleNavClick}>
+              <NavItem to="/trainings" icon={GraduationCap} label={t('trainings')} />
+            </div>
+          </div>
 
           {user?.role === 'admin' && (
             <>
