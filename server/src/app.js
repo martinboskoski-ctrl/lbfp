@@ -13,6 +13,7 @@ import poRoutes from './routes/po.routes.js';
 import terkoviRoutes from './routes/terkovi.routes.js';
 import agreementRoutes from './routes/agreement.routes.js';
 import leadRoutes from './routes/lead.routes.js';
+import procedureRoutes from './routes/procedure.routes.js';
 
 // Validate required environment variables
 const REQUIRED_ENV = ['MONGO_URI', 'JWT_SECRET'];
@@ -37,6 +38,7 @@ app.use('/api/po',            poRoutes);
 app.use('/api/terkovi',       terkoviRoutes);
 app.use('/api/agreements',    agreementRoutes);
 app.use('/api/leads',         leadRoutes);
+app.use('/api/procedures',    procedureRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 

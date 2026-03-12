@@ -120,6 +120,20 @@
     "confirmReject": "Потврди одбивање"
   },
 
+  "addProcedure": "Додај процедура",
+  "procedureTitle": "Наслов",
+  "procedureContent": "Содржина",
+  "procedureTitlePlaceholder": "Внесете наслов на процедурата",
+  "procedureContentPlaceholder": "Внесете го текстот на процедурата…",
+  "procedureCreated": "Процедурата е креирана",
+  "procedureDeleted": "Процедурата е избришана",
+  "confirmDeleteProcedure": "Дали сте сигурни дека сакате да ја избришете оваа процедура?",
+  "allEmployees": "Сите вработени",
+  "procedureDepartments": "Одделенија",
+  "procedureDepartmentsHint": "Оставете празно за сите вработени",
+  "noProcedures": "Нема процедури",
+  "createdBy": "Креирано од",
+
   "admin": {
     "allUsers": "Сите корисници"
   }

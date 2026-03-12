@@ -12,6 +12,7 @@ import AdminUsers from './pages/AdminUsers.jsx';
 import PODetail from './pages/PODetail.jsx';
 import Procedures from './pages/Procedures.jsx';
 import Trainings from './pages/Trainings.jsx';
+import ProcedureDetail from './pages/ProcedureDetail.jsx';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/po/:id"       element={<PODetail />} />
             <Route path="/register" element={<Register />} />
             <Route path="/procedures" element={<Procedures />} />
+            <Route path="/procedures/:id" element={<ProcedureDetail />} />
             <Route path="/trainings" element={<Trainings />} />
           </Route>
 

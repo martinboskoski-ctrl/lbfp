@@ -120,6 +120,20 @@
     "confirmReject": "Confirm rejection"
   },
 
+  "addProcedure": "Add procedure",
+  "procedureTitle": "Title",
+  "procedureContent": "Content",
+  "procedureTitlePlaceholder": "Enter procedure title",
+  "procedureContentPlaceholder": "Enter the procedure text…",
+  "procedureCreated": "Procedure created",
+  "procedureDeleted": "Procedure deleted",
+  "confirmDeleteProcedure": "Are you sure you want to delete this procedure?",
+  "allEmployees": "All employees",
+  "procedureDepartments": "Departments",
+  "procedureDepartmentsHint": "Leave empty for all employees",
+  "noProcedures": "No procedures",
+  "createdBy": "Created by",
+
   "admin": {
     "allUsers": "All Users"
   }
