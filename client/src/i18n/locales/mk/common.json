@@ -36,6 +36,11 @@
   "changePassword": "Промени лозинка",
   "procedures": "Процедури и правилници",
   "trainings": "Обуки",
+  "requests": "Барања",
+  "announcements": "Соопштенија",
+  "shifts": "Распоред на смени",
+  "maintenance": "Одржување",
+  "productionReport": "Производство",
   "language": "Јазик",
 
   "dept": {

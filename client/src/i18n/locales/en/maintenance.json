@@ -1,0 +1,37 @@
+{
+  "title": "Maintenance",
+  "create": "Report issue",
+  "created": "Request submitted",
+  "noRequests": "No maintenance requests",
+  "titleLabel": "Title",
+  "titlePlaceholder": "Short description of the issue",
+  "descriptionLabel": "Description",
+  "descriptionPlaceholder": "Describe the issue in detail…",
+  "machineId": "Machine / Equipment",
+  "machineIdPlaceholder": "e.g. CNC-01, Line 3, HVAC Zone B",
+  "priority": "Priority",
+  "status": "Status",
+  "reportedBy": "Reported by",
+  "assignedTo": "Assigned to",
+  "unassigned": "Unassigned",
+  "assignTechnician": "Assign technician",
+  "resolutionNotes": "Resolution notes",
+  "resolutionPlaceholder": "Describe what was done…",
+  "resolvedAt": "Resolved at",
+  "statusValues": {
+    "reported": "Reported",
+    "in_progress": "In Progress",
+    "resolved": "Resolved"
+  },
+  "priorityValues": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+  "filterAll": "All",
+  "details": "Details",
+  "machine": "Machine",
+  "department": "Department",
+  "date": "Date"
+}

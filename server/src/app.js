@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import express from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import connectDB from './config/db.js';
+import { initSocket } from './config/socket.js';
 
 import authRoutes from './routes/auth.routes.js';
 import projectRoutes from './routes/project.routes.js';
@@ -14,6 +16,12 @@ import terkoviRoutes from './routes/terkovi.routes.js';
 import agreementRoutes from './routes/agreement.routes.js';
 import leadRoutes from './routes/lead.routes.js';
 import procedureRoutes from './routes/procedure.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
+import requestRoutes from './routes/request.routes.js';
+import leaveBalanceRoutes from './routes/leaveBalance.routes.js';
+import shiftRoutes from './routes/shift.routes.js';
+import maintenanceRoutes from './routes/maintenance.routes.js';
+import productionReportRoutes from './routes/productionReport.routes.js';
 
 // Validate required environment variables
 const REQUIRED_ENV = ['MONGO_URI', 'JWT_SECRET'];
@@ -24,6 +32,8 @@ if (missing.length > 0) {
 }
 
 const app = express();
+const server = createServer(app);
+initSocket(server);
 
 app.use(cors({ origin: process.env.CLIENT_URL || '*', credentials: true }));
 app.use(express.json());
@@ -39,6 +49,12 @@ app.use('/api/terkovi',       terkoviRoutes);
 app.use('/api/agreements',    agreementRoutes);
 app.use('/api/leads',         leadRoutes);
 app.use('/api/procedures',    procedureRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/requests',        requestRoutes);
+app.use('/api/leave-balances',  leaveBalanceRoutes);
+app.use('/api/shifts',          shiftRoutes);
+app.use('/api/maintenance',     maintenanceRoutes);
+app.use('/api/production-reports', productionReportRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
@@ -53,7 +69,7 @@ const PORT = process.env.PORT || 5000;
 
 connectDB()
   .then(() => {
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch((err) => {
     console.error('Failed to connect to MongoDB:', err);

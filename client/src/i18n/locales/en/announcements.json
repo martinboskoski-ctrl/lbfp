@@ -1,0 +1,29 @@
+{
+  "title": "Announcements",
+  "create": "New announcement",
+  "created": "Announcement posted",
+  "deleted": "Announcement deleted",
+  "confirmDelete": "Are you sure you want to delete this announcement?",
+  "noAnnouncements": "No announcements",
+  "titleLabel": "Title",
+  "titlePlaceholder": "Enter title",
+  "contentLabel": "Content",
+  "contentPlaceholder": "Write your announcement…",
+  "priorityLabel": "Priority",
+  "pinned": "Pinned",
+  "pin": "Pin",
+  "unpin": "Unpin",
+  "markRead": "Mark as read",
+  "read": "Read",
+  "unread": "Unread",
+  "readBy": "Read by",
+  "departments": "Departments",
+  "departmentsHint": "Leave empty for all employees",
+  "allEmployees": "All employees",
+  "priority": {
+    "info": "Info",
+    "important": "Important",
+    "urgent": "Urgent"
+  },
+  "postedBy": "Posted by"
+}

@@ -3,7 +3,8 @@ import {
   TrendingUp, DollarSign, Building2,
   Users, ShieldCheck, Wrench, Settings, FlaskConical,
   Factory, Crown, LogOut, Users2, Globe, UserPlus,
-  ChevronDown, ClipboardList, GraduationCap,
+  ChevronDown, ClipboardList, GraduationCap, FileText,
+  Megaphone, CalendarClock, Wrench as WrenchIcon, BarChart3,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -122,6 +123,21 @@ const Sidebar = ({ isOpen, onClose }) => {
             </div>
             <div onClick={handleNavClick}>
               <NavItem to="/trainings" icon={GraduationCap} label={t('trainings')} />
+            </div>
+            <div onClick={handleNavClick}>
+              <NavItem to="/requests" icon={FileText} label={t('requests')} />
+            </div>
+            <div onClick={handleNavClick}>
+              <NavItem to="/announcements" icon={Megaphone} label={t('announcements')} />
+            </div>
+            <div onClick={handleNavClick}>
+              <NavItem to="/shifts" icon={CalendarClock} label={t('shifts')} />
+            </div>
+            <div onClick={handleNavClick}>
+              <NavItem to="/maintenance" icon={WrenchIcon} label={t('maintenance')} />
+            </div>
+            <div onClick={handleNavClick}>
+              <NavItem to="/production-report" icon={BarChart3} label={t('productionReport')} />
             </div>
           </div>
 

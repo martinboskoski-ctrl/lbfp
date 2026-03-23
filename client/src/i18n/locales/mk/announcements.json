@@ -1,0 +1,29 @@
+{
+  "title": "Соопштенија",
+  "create": "Ново соопштение",
+  "created": "Соопштението е објавено",
+  "deleted": "Соопштението е избришано",
+  "confirmDelete": "Дали сте сигурни дека сакате да го избришете ова соопштение?",
+  "noAnnouncements": "Нема соопштенија",
+  "titleLabel": "Наслов",
+  "titlePlaceholder": "Внесете наслов",
+  "contentLabel": "Содржина",
+  "contentPlaceholder": "Напишете го соопштението…",
+  "priorityLabel": "Приоритет",
+  "pinned": "Закачено",
+  "pin": "Закачи",
+  "unpin": "Откачи",
+  "markRead": "Прочитано",
+  "read": "Прочитано",
+  "unread": "Непрочитано",
+  "readBy": "Прочитано од",
+  "departments": "Одделенија",
+  "departmentsHint": "Оставете празно за сите вработени",
+  "allEmployees": "Сите вработени",
+  "priority": {
+    "info": "Инфо",
+    "important": "Важно",
+    "urgent": "Итно"
+  },
+  "postedBy": "Објавено од"
+}

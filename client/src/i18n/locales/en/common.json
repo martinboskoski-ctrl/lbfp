@@ -36,6 +36,11 @@
   "changePassword": "Change password",
   "procedures": "Procedures & regulations",
   "trainings": "Trainings",
+  "requests": "Requests",
+  "announcements": "Announcements",
+  "shifts": "Shift Schedule",
+  "maintenance": "Maintenance",
+  "productionReport": "Production",
   "language": "Language",
 
   "dept": {

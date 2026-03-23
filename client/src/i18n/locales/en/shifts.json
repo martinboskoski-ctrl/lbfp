@@ -1,0 +1,42 @@
+{
+  "title": "Shift Schedule",
+  "create": "Add shift",
+  "created": "Shift added",
+  "deleted": "Shift deleted",
+  "updated": "Shift updated",
+  "confirmDelete": "Are you sure you want to delete this shift?",
+  "noShifts": "No shifts scheduled for this week",
+  "employee": "Employee",
+  "date": "Date",
+  "shiftType": "Shift",
+  "startTime": "Start",
+  "endTime": "End",
+  "notes": "Notes",
+  "notesPlaceholder": "Additional notes…",
+  "week": "Week",
+  "prevWeek": "Previous week",
+  "nextWeek": "Next week",
+  "today": "Today",
+  "type": {
+    "morning": "Morning (06:00–14:00)",
+    "afternoon": "Afternoon (14:00–22:00)",
+    "night": "Night (22:00–06:00)"
+  },
+  "typeShort": {
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "night": "Night"
+  },
+  "doubleBooking": "Employee already has a shift on this date",
+  "department": "Department",
+  "allDepartments": "All departments",
+  "days": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "title": "Одржување",
+  "create": "Пријави проблем",
+  "created": "Пријавата е поднесена",
+  "noRequests": "Нема пријави за одржување",
+  "titleLabel": "Наслов",
+  "titlePlaceholder": "Краток опис на проблемот",
+  "descriptionLabel": "Опис",
+  "descriptionPlaceholder": "Детално опишете го проблемот…",
+  "machineId": "Машина / Опрема",
+  "machineIdPlaceholder": "нпр. CNC-01, Линија 3, Климатизер зона Б",
+  "priority": "Приоритет",
+  "status": "Статус",
+  "reportedBy": "Пријавено од",
+  "assignedTo": "Доделено на",
+  "unassigned": "Недоделено",
+  "assignTechnician": "Додели техничар",
+  "resolutionNotes": "Белешки од решавање",
+  "resolutionPlaceholder": "Опишете што беше направено…",
+  "resolvedAt": "Решено на",
+  "statusValues": {
+    "reported": "Пријавено",
+    "in_progress": "Во тек",
+    "resolved": "Решено"
+  },
+  "priorityValues": {
+    "low": "Ниска",
+    "medium": "Средна",
+    "high": "Висока",
+    "urgent": "Итна"
+  },
+  "filterAll": "Сите",
+  "details": "Детали",
+  "machine": "Машина",
+  "department": "Одделение",
+  "date": "Датум"
+}
