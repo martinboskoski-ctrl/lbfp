@@ -7,7 +7,7 @@ import {
 import Sidebar from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { canManage } from '../utils/userTier.js';
+import { isTopManagement } from '../utils/userTier.js';
 import {
   useProductionReport, useProductionSummary,
   useCreateProductionReport, useUpdateProductionReport,
@@ -79,6 +79,7 @@ const ProductionReport = () => {
   const { t } = useTranslation('production');
   const { t: tc } = useTranslation('common');
   const { user } = useAuth();
+  const canEditReport = isTopManagement(user) || user?.department === 'production';
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const now = new Date();
@@ -185,7 +186,7 @@ const ProductionReport = () => {
                 </button>
               </div>
 
-              {canManage(user) && tab === 'details' && !editing && (
+              {canEditReport && tab === 'details' && !editing && (
                 <button onClick={startEditing} className="btn-primary text-sm">
                   {report ? t('editReport') : `+ ${t('createReport')}`}
                 </button>

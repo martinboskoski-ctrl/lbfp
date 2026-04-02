@@ -1,0 +1,95 @@
+{
+  "title": "Барања",
+  "myRequests": "Мои барања",
+  "pendingApprovals": "Чекаат одобрување",
+  "newRequest": "Ново барање",
+  "requestType": "Тип на барање",
+  "selectType": "Изберете тип",
+  "submit": "Поднеси",
+  "submitting": "Поднесување...",
+  "cancel": "Откажи",
+  "approve": "Одобри",
+  "reject": "Одбиј",
+  "loading": "Се вчитува...",
+  "noRequests": "Немате поднесени барања",
+  "noPending": "Нема барања за одобрување",
+  "backToList": "Назад кон барања",
+  "approvalHistory": "Историја на одобрување",
+  "notePlaceholder": "Забелешка (опционално)",
+  "requestCreated": "Барањето е поднесено",
+  "requestApproved": "Барањето е одобрено",
+  "requestRejected": "Барањето е одбиено",
+  "yes": "Да",
+  "no": "Не",
+
+  "type": {
+    "day_off": "Слободен ден",
+    "overtime": "Прекувремена работа",
+    "equipment": "Набавка / Опрема",
+    "travel": "Патување",
+    "complaint": "Жалба / Предлог"
+  },
+
+  "status": {
+    "pending": "Чека",
+    "in_progress": "Во тек",
+    "approved": "Одобрено",
+    "rejected": "Одбиено"
+  },
+
+  "field": {
+    "startDate": "Почеток",
+    "endDate": "Крај",
+    "reason": "Причина",
+    "date": "Датум",
+    "hours": "Часови",
+    "itemName": "Име на артикл",
+    "quantity": "Количина",
+    "estimatedCost": "Проценет трошок",
+    "destination": "Дестинација",
+    "purpose": "Цел",
+    "subject": "Наслов",
+    "description": "Опис",
+    "anonymous": "Анонимно"
+  },
+
+  "step": {
+    "Department Manager": "Менаџер",
+    "HR": "Човечки ресурси",
+    "Administration": "Администрација",
+    "Finance": "Финансии",
+    "Top Management": "Топ менаџмент"
+  },
+
+  "dept": {
+    "sales": "Продажба",
+    "finance": "Финансии",
+    "administration": "Администрација",
+    "hr": "Човечки ресурси",
+    "quality_assurance": "Контрола на квалитет",
+    "facility": "Објект",
+    "machines": "Машини",
+    "r_and_d": "Истражување и развој",
+    "production": "Производство",
+    "top_management": "Топ менаџмент",
+    "carina": "Царина",
+    "nabavki": "Набавки"
+  },
+
+  "dashboard": "Статистика",
+
+  "stats": {
+    "total": "Вкупно барања",
+    "pending": "Чекаат",
+    "approved": "Одобрени",
+    "rejected": "Одбиени",
+    "byType": "По тип",
+    "lowBalance": "Вработени со малку слободни денови"
+  },
+
+  "leaveBalance": "Слободни денови",
+  "daysUsed": "искористени",
+  "daysRemaining": "преостанати денови",
+  "businessDays": "работни денови",
+  "insufficientBalance": "Немате доволно слободни денови"
+}

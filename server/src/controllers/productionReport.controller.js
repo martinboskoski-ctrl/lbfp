@@ -1,11 +1,16 @@
 import ProductionReport from '../models/ProductionReport.js';
 
 const isTopMgmt = (u) => u.department === 'top_management';
-const isProductionOrMgmt = (u) =>
-  isTopMgmt(u) || u.department === 'production' || u.isManager;
+const isProduction = (u) => u.department === 'production';
+const canView = (u) => isTopMgmt(u) || isProduction(u);
+const canEdit = (u) => isTopMgmt(u) || isProduction(u);
 
 // GET /api/production-reports
 export const list = async (req, res) => {
+  if (!canView(req.user)) {
+    return res.status(403).json({ message: 'Access denied' });
+  }
+
   const { year } = req.query;
   const filter = {};
   if (year) filter.year = parseInt(year);
@@ -19,6 +24,10 @@ export const list = async (req, res) => {
 
 // GET /api/production-reports/:year/:month
 export const getOne = async (req, res) => {
+  if (!canView(req.user)) {
+    return res.status(403).json({ message: 'Access denied' });
+  }
+
   const { year, month } = req.params;
   const report = await ProductionReport.findOne({
     year: parseInt(year),
@@ -31,7 +40,7 @@ export const getOne = async (req, res) => {
 
 // POST /api/production-reports
 export const create = async (req, res) => {
-  if (!isProductionOrMgmt(req.user)) {
+  if (!canEdit(req.user)) {
     return res.status(403).json({ message: 'Access denied' });
   }
 
@@ -57,7 +66,7 @@ export const create = async (req, res) => {
 
 // PUT /api/production-reports/:year/:month
 export const update = async (req, res) => {
-  if (!isProductionOrMgmt(req.user)) {
+  if (!canEdit(req.user)) {
     return res.status(403).json({ message: 'Access denied' });
   }
 
@@ -94,6 +103,10 @@ export const remove = async (req, res) => {
 
 // GET /api/production-reports/summary?year=2024&view=monthly|quarterly|annual
 export const summary = async (req, res) => {
+  if (!canView(req.user)) {
+    return res.status(403).json({ message: 'Access denied' });
+  }
+
   const { year, view } = req.query;
   const filter = {};
   if (year) filter.year = parseInt(year);

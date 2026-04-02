@@ -1,0 +1,95 @@
+{
+  "title": "Requests",
+  "myRequests": "My Requests",
+  "pendingApprovals": "Pending Approvals",
+  "newRequest": "New Request",
+  "requestType": "Request Type",
+  "selectType": "Select type",
+  "submit": "Submit",
+  "submitting": "Submitting...",
+  "cancel": "Cancel",
+  "approve": "Approve",
+  "reject": "Reject",
+  "loading": "Loading...",
+  "noRequests": "You have no submitted requests",
+  "noPending": "No requests pending approval",
+  "backToList": "Back to requests",
+  "approvalHistory": "Approval History",
+  "notePlaceholder": "Note (optional)",
+  "requestCreated": "Request submitted",
+  "requestApproved": "Request approved",
+  "requestRejected": "Request rejected",
+  "yes": "Yes",
+  "no": "No",
+
+  "type": {
+    "day_off": "Day Off",
+    "overtime": "Overtime",
+    "equipment": "Equipment / Supply",
+    "travel": "Travel",
+    "complaint": "Complaint / Suggestion"
+  },
+
+  "status": {
+    "pending": "Pending",
+    "in_progress": "In Progress",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+
+  "field": {
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "reason": "Reason",
+    "date": "Date",
+    "hours": "Hours",
+    "itemName": "Item Name",
+    "quantity": "Quantity",
+    "estimatedCost": "Estimated Cost",
+    "destination": "Destination",
+    "purpose": "Purpose",
+    "subject": "Subject",
+    "description": "Description",
+    "anonymous": "Anonymous"
+  },
+
+  "step": {
+    "Department Manager": "Manager",
+    "HR": "HR",
+    "Administration": "Administration",
+    "Finance": "Finance",
+    "Top Management": "Top Management"
+  },
+
+  "dept": {
+    "sales": "Sales",
+    "finance": "Finance",
+    "administration": "Administration",
+    "hr": "HR",
+    "quality_assurance": "Quality Assurance",
+    "facility": "Facility",
+    "machines": "Machines",
+    "r_and_d": "R&D",
+    "production": "Production",
+    "top_management": "Top Management",
+    "carina": "Customs",
+    "nabavki": "Procurement"
+  },
+
+  "dashboard": "Dashboard",
+
+  "stats": {
+    "total": "Total Requests",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "byType": "By Type",
+    "lowBalance": "Employees with low leave balance"
+  },
+
+  "leaveBalance": "Leave Balance",
+  "daysUsed": "used",
+  "daysRemaining": "days remaining",
+  "businessDays": "business days",
+  "insufficientBalance": "Insufficient leave balance"
+}

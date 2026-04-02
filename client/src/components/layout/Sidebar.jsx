@@ -51,7 +51,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { t } = useTranslation('common');
   const updateLang = useUpdateLanguage();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [deptsOpen, setDeptsOpen] = useState(false);
+  const [deptsOpen, setDeptsOpen] = useState(true);
 
   const handleNavClick = () => {
     if (onClose) onClose();
@@ -136,9 +136,11 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div onClick={handleNavClick}>
               <NavItem to="/maintenance" icon={WrenchIcon} label={t('maintenance')} />
             </div>
-            <div onClick={handleNavClick}>
-              <NavItem to="/production-report" icon={BarChart3} label={t('productionReport')} />
-            </div>
+            {(isTopManagement(user) || user?.department === 'production') && (
+              <div onClick={handleNavClick}>
+                <NavItem to="/production-report" icon={BarChart3} label={t('productionReport')} />
+              </div>
+            )}
           </div>
 
           {user?.role === 'admin' && (

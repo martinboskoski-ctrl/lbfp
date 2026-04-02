@@ -1,0 +1,13 @@
+{
+  "title": "Известувања",
+  "markAllRead": "Означи ги сите",
+  "empty": "Нема известувања",
+  "justNow": "Сега",
+  "minutesAgo": "пред {{count}} мин",
+  "hoursAgo": "пред {{count}} ч",
+  "daysAgo": "пред {{count}} ден",
+  "requestCreated": "Ново барање",
+  "requestApproved": "Барање одобрено",
+  "requestRejected": "Барање одбиено",
+  "requestPending": "Барање чека одобрување"
+}
