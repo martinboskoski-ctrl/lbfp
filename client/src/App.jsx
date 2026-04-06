@@ -13,6 +13,7 @@ import AdminUsers from './pages/AdminUsers.jsx';
 import PODetail from './pages/PODetail.jsx';
 import Procedures from './pages/Procedures.jsx';
 import Trainings from './pages/Trainings.jsx';
+import AnticorruptionTraining from './pages/AnticorruptionTraining.jsx';
 import ProcedureDetail from './pages/ProcedureDetail.jsx';
 import Requests from './pages/Requests.jsx';
 import RequestDetail from './pages/RequestDetail.jsx';
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/procedures" element={<Procedures />} />
             <Route path="/procedures/:id" element={<ProcedureDetail />} />
             <Route path="/trainings" element={<Trainings />} />
+            <Route path="/trainings/anticorruption" element={<AnticorruptionTraining />} />
             <Route path="/requests" element={<Requests />} />
             <Route path="/requests/:id" element={<RequestDetail />} />
             <Route path="/announcements" element={<Announcements />} />
