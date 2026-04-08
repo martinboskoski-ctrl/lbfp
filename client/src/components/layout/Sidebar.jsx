@@ -51,7 +51,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { t } = useTranslation('common');
   const updateLang = useUpdateLanguage();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [deptsOpen, setDeptsOpen] = useState(true);
+  const [deptsOpen, setDeptsOpen] = useState(false);
 
   const handleNavClick = () => {
     if (onClose) onClose();
@@ -85,26 +85,38 @@ const Sidebar = ({ isOpen, onClose }) => {
         </div>
 
         <nav className="flex-1 p-2 overflow-y-auto space-y-0.5">
-          {/* Collapsible departments */}
-          <button
-            onClick={() => setDeptsOpen((v) => !v)}
-            className="flex items-center justify-between w-full pt-2 pb-1 px-3 group"
-          >
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider group-hover:text-gray-600 transition-colors">
-              {t('departments')}
-            </span>
-            <ChevronDown
-              size={14}
-              className={`text-gray-400 transition-transform duration-200 ${deptsOpen ? 'rotate-180' : ''}`}
-            />
-          </button>
-
-          {deptsOpen && (
-            <div className="space-y-0.5">
-              {(isTopManagement(user)
-                ? DEPARTMENTS
-                : DEPARTMENTS.filter((d) => d.value === user?.department)
-              ).map((dept) => (
+          {/* Departments section */}
+          {isTopManagement(user) ? (
+            <>
+              <button
+                onClick={() => setDeptsOpen((v) => !v)}
+                className="flex items-center justify-between w-full pt-2 pb-1 px-3 group"
+              >
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider group-hover:text-gray-600 transition-colors">
+                  {t('departments')}
+                </span>
+                <ChevronDown
+                  size={14}
+                  className={`text-gray-400 transition-transform duration-200 ${deptsOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {deptsOpen && (
+                <div className="space-y-0.5">
+                  {DEPARTMENTS.map((dept) => (
+                    <div key={dept.value} onClick={handleNavClick}>
+                      <NavItem
+                        to={`/dashboard?dept=${dept.value}`}
+                        icon={dept.icon}
+                        label={t(`dept.${dept.value}`)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="space-y-0.5 pt-1">
+              {DEPARTMENTS.filter((d) => d.value === user?.department).map((dept) => (
                 <div key={dept.value} onClick={handleNavClick}>
                   <NavItem
                     to={`/dashboard?dept=${dept.value}`}
