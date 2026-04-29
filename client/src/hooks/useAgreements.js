@@ -1,21 +1,36 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   listAgreementsApi,
+  getAgreementApi,
   createAgreementApi,
   updateAgreementApi,
   renewAgreementApi,
   terminateAgreementApi,
   deleteAgreementApi,
+  addAgreementNoteApi,
+  dispatchRemindersApi,
 } from '../api/agreements.api.js';
 import toast from 'react-hot-toast';
 
 const onErr = (e) => toast.error(e?.response?.data?.message || 'Нешто тргна наопаку');
 const invalidateAll = (qc) => qc.invalidateQueries({ queryKey: ['agreements'] });
 
-export const useAgreements = (dept) =>
+// `params` may be a string (legacy: dept) or object: { dept, status, q, category, riskLevel }.
+export const useAgreements = (params) => {
+  const normalized = typeof params === 'string'
+    ? (params ? { dept: params } : {})
+    : (params || {});
+  return useQuery({
+    queryKey: ['agreements', 'list', normalized],
+    queryFn:  () => listAgreementsApi(normalized).then((r) => r.data.agreements),
+  });
+};
+
+export const useAgreement = (id) =>
   useQuery({
-    queryKey: ['agreements', dept ?? 'all'],
-    queryFn:  () => listAgreementsApi(dept).then((r) => r.data.agreements),
+    queryKey: ['agreements', 'detail', id],
+    queryFn:  () => getAgreementApi(id).then((r) => r.data.agreement),
+    enabled: !!id,
   });
 
 export const useCreateAgreement = () => {
@@ -59,6 +74,24 @@ export const useDeleteAgreement = () => {
   return useMutation({
     mutationFn: deleteAgreementApi,
     onSuccess: () => { invalidateAll(qc); toast.success('Договорот е избришан'); },
+    onError: onErr,
+  });
+};
+
+export const useAddAgreementNote = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, text }) => addAgreementNoteApi(id, text),
+    onSuccess: () => { invalidateAll(qc); },
+    onError: onErr,
+  });
+};
+
+export const useDispatchReminders = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: dispatchRemindersApi,
+    onSuccess: (r) => { invalidateAll(qc); toast.success(`Испратени ${r.data.dispatched} известувања`); },
     onError: onErr,
   });
 };

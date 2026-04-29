@@ -43,3 +43,8 @@ export const getIO = () => {
   if (!io) throw new Error('Socket.io not initialized');
   return io;
 };
+
+export const emitToUser = (userId, event, payload) => {
+  if (!io) return;
+  io.to(`user:${userId}`).emit(event, payload);
+};

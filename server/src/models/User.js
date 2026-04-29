@@ -26,6 +26,8 @@ const userSchema = new mongoose.Schema({
   // kept for future access restriction
   role: { type: String, enum: ['owner', 'reviewer', 'client', 'admin'], default: 'reviewer' },
   language: { type: String, enum: ['mk', 'en'], default: 'mk' },
+  manager: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  active: { type: Boolean, default: true },
 }, { timestamps: true });
 
 userSchema.methods.comparePassword = async function (password) {

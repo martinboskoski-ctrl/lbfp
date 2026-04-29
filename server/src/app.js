@@ -22,6 +22,10 @@ import leaveBalanceRoutes from './routes/leaveBalance.routes.js';
 import shiftRoutes from './routes/shift.routes.js';
 import maintenanceRoutes from './routes/maintenance.routes.js';
 import productionReportRoutes from './routes/productionReport.routes.js';
+import employeeRoutes from './routes/employee.routes.js';
+import lhcRoutes from './routes/lhc.routes.js';
+import { dispatchReminders } from './controllers/agreement.controller.js';
+import { autoCloseCampaigns } from './controllers/lhc.controller.js';
 
 // Validate required environment variables
 const REQUIRED_ENV = ['MONGO_URI', 'JWT_SECRET'];
@@ -55,6 +59,8 @@ app.use('/api/leave-balances',  leaveBalanceRoutes);
 app.use('/api/shifts',          shiftRoutes);
 app.use('/api/maintenance',     maintenanceRoutes);
 app.use('/api/production-reports', productionReportRoutes);
+app.use('/api/employees',       employeeRoutes);
+app.use('/api/lhc',             lhcRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
@@ -70,6 +76,30 @@ const PORT = process.env.PORT || 5000;
 connectDB()
   .then(() => {
     server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+    // Agreement reminders — fire once on boot (delayed) and every hour after.
+    const ONE_HOUR = 60 * 60 * 1000;
+    const runReminders = async () => {
+      try {
+        const n = await dispatchReminders();
+        if (n > 0) console.log(`[reminders] dispatched ${n} agreement notifications`);
+      } catch (e) {
+        console.error('[reminders] failed:', e.message);
+      }
+    };
+    setTimeout(runReminders, 30_000);
+    setInterval(runReminders, ONE_HOUR);
+
+    const runLhcAutoClose = async () => {
+      try {
+        const n = await autoCloseCampaigns();
+        if (n > 0) console.log(`[lhc] auto-closed ${n} campaigns`);
+      } catch (e) {
+        console.error('[lhc] auto-close failed:', e.message);
+      }
+    };
+    setTimeout(runLhcAutoClose, 45_000);
+    setInterval(runLhcAutoClose, ONE_HOUR);
   })
   .catch((err) => {
     console.error('Failed to connect to MongoDB:', err);

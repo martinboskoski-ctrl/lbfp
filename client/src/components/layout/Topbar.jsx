@@ -8,25 +8,25 @@ const Topbar = ({ title, onMenuClick }) => {
   const { data: unread = 0 } = useUnreadCount();
 
   return (
-    <header className="h-14 border-b border-gray-200 bg-white flex items-center px-4 gap-3">
+    <header className="h-14 border-b border-slate-200 bg-white flex items-center px-3 sm:px-4 gap-2 sm:gap-3">
       <button
         onClick={onMenuClick}
-        className="md:hidden p-2 -ml-1 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+        className="md:hidden p-2 -ml-1 rounded-md text-slate-600 hover:bg-slate-100 transition-colors"
         aria-label="Open menu"
       >
         <Menu size={20} />
       </button>
-      <h1 className="text-base font-semibold text-gray-800">{title}</h1>
+      <h1 className="text-sm sm:text-base font-semibold text-slate-800 truncate">{title}</h1>
 
       <div className="ml-auto relative">
         <button
           onClick={() => setShowNotifications((prev) => !prev)}
-          className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors relative"
+          className="p-2 rounded-md text-slate-600 hover:bg-slate-100 transition-colors relative"
           aria-label="Notifications"
         >
           <Bell size={20} />
           {unread > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-slate-700 text-white text-[10px] font-semibold leading-none">
               {unread > 99 ? '99+' : unread}
             </span>
           )}

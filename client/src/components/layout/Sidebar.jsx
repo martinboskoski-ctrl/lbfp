@@ -5,12 +5,14 @@ import {
   Factory, Crown, LogOut, Users2, Globe, UserPlus,
   ChevronDown, ClipboardList, GraduationCap, FileText,
   Megaphone, CalendarClock, Wrench as WrenchIcon, BarChart3,
+  Scale,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { canManage, isTopManagement } from '../../utils/userTier.js';
 import { useUpdateLanguage } from '../../hooks/useUsers.js';
+import { useLhcOverview } from '../../hooks/useLhc.js';
 import ChangePasswordModal from './ChangePasswordModal.jsx';
 import i18next from 'i18next';
 
@@ -29,20 +31,25 @@ export const DEPARTMENTS = [
   { value: 'nabavki',           icon: Factory     },
 ];
 
-const NavItem = ({ to, icon: Icon, label, end }) => (
+const NavItem = ({ to, icon: Icon, label, end, badge }) => (
   <NavLink
     to={to}
     end={end}
     className={({ isActive }) =>
-      `flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+      `flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
         isActive
-          ? 'bg-blue-50 text-blue-700'
-          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+          ? 'bg-slate-100 text-slate-900 font-medium'
+          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
       }`
     }
   >
     <Icon size={15} className="flex-shrink-0" />
-    <span className="truncate">{label}</span>
+    <span className="truncate flex-1">{label}</span>
+    {badge > 0 && (
+      <span className="text-[10px] font-semibold min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-slate-700 text-white">
+        {badge > 99 ? '99+' : badge}
+      </span>
+    )}
   </NavLink>
 );
 
@@ -52,6 +59,11 @@ const Sidebar = ({ isOpen, onClose }) => {
   const updateLang = useUpdateLanguage();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [deptsOpen, setDeptsOpen] = useState(false);
+
+  const { data: lhcOverview } = useLhcOverview();
+  const lhcBadge = (lhcOverview?.myAssignments || []).filter(
+    (a) => a?.campaign?.status === 'open' && a?.status !== 'completed'
+  ).length;
 
   const handleNavClick = () => {
     if (onClose) onClose();
@@ -75,13 +87,13 @@ const Sidebar = ({ isOpen, onClose }) => {
       )}
 
       <aside className={`
-        fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 flex flex-col
+        fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 flex flex-col
         transform transition-transform duration-200 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:relative md:translate-x-0 md:w-52 md:z-auto md:transition-none
+        md:relative md:translate-x-0 md:w-56 md:z-auto md:transition-none
       `}>
-        <div className="px-4 py-4 border-b border-gray-200">
-          <span className="text-base font-bold text-blue-700 leading-tight">ЛБФП ДОО<br />Битола</span>
+        <div className="px-4 py-4 border-b border-slate-200">
+          <span className="text-sm font-semibold text-slate-800 leading-tight tracking-tight">ЛБФП ДОО<br /><span className="text-slate-500 font-normal">Битола</span></span>
         </div>
 
         <nav className="flex-1 p-2 overflow-y-auto space-y-0.5">
@@ -92,12 +104,12 @@ const Sidebar = ({ isOpen, onClose }) => {
                 onClick={() => setDeptsOpen((v) => !v)}
                 className="flex items-center justify-between w-full pt-2 pb-1 px-3 group"
               >
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider group-hover:text-gray-600 transition-colors">
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider group-hover:text-slate-600 transition-colors">
                   {t('departments')}
                 </span>
                 <ChevronDown
                   size={14}
-                  className={`text-gray-400 transition-transform duration-200 ${deptsOpen ? 'rotate-180' : ''}`}
+                  className={`text-slate-400 transition-transform duration-200 ${deptsOpen ? 'rotate-180' : ''}`}
                 />
               </button>
               {deptsOpen && (
@@ -148,9 +160,20 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div onClick={handleNavClick}>
               <NavItem to="/maintenance" icon={WrenchIcon} label={t('maintenance')} />
             </div>
+            <div onClick={handleNavClick}>
+              <NavItem to="/agreements" icon={FileText} label="Договори" />
+            </div>
+            <div onClick={handleNavClick}>
+              <NavItem to="/lhc" icon={Scale} label="Усогласеност" badge={lhcBadge} />
+            </div>
             {(isTopManagement(user) || user?.department === 'production') && (
               <div onClick={handleNavClick}>
                 <NavItem to="/production-report" icon={BarChart3} label={t('productionReport')} />
+              </div>
+            )}
+            {(canManage(user) || user?.department === 'hr') && (
+              <div onClick={handleNavClick}>
+                <NavItem to="/employees" icon={Users2} label="Вработени" />
               </div>
             )}
           </div>
@@ -158,7 +181,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           {user?.role === 'admin' && (
             <>
               <div className="pt-3 pb-1 px-3">
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                   {t('administration')}
                 </span>
               </div>
@@ -169,18 +192,18 @@ const Sidebar = ({ isOpen, onClose }) => {
           )}
         </nav>
 
-        <div className="p-3 border-t border-gray-200">
+        <div className="p-3 border-t border-slate-200">
           <button
             onClick={() => setShowPasswordModal(true)}
-            className="w-full text-left px-2 py-1.5 text-xs mb-1 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+            className="w-full text-left px-2 py-1.5 text-xs mb-1 rounded-md hover:bg-slate-100 transition-colors cursor-pointer"
             title={t('changePassword')}
           >
-            <div className="font-medium text-gray-700">{user?.name}</div>
-            <div className="text-gray-400">
+            <div className="font-medium text-slate-800">{user?.name}</div>
+            <div className="text-slate-500">
               {t(`dept.${user?.department}`, { defaultValue: user?.department })}
             </div>
             {user?.isManager && (
-              <div className="text-blue-500 font-medium mt-0.5">{t('manager')}</div>
+              <div className="text-slate-600 mt-0.5">{t('manager')}</div>
             )}
           </button>
           {isTopManagement(user) && (
@@ -188,8 +211,8 @@ const Sidebar = ({ isOpen, onClose }) => {
               <NavLink
                 to="/register"
                 className={({ isActive }) =>
-                  `flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-sm transition-colors mb-0.5 ${
-                    isActive ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'
+                  `flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm transition-colors mb-0.5 ${
+                    isActive ? 'bg-slate-100 text-slate-900 font-medium' : 'text-slate-600 hover:bg-slate-50'
                   }`
                 }
               >
@@ -200,14 +223,14 @@ const Sidebar = ({ isOpen, onClose }) => {
           )}
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors mb-0.5"
+            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-slate-600 hover:bg-slate-50 transition-colors mb-0.5"
           >
             <Globe size={14} />
             {i18next.language === 'mk' ? 'EN' : 'MK'}
           </button>
           <button
             onClick={logout}
-            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-slate-600 hover:bg-slate-50 transition-colors"
           >
             <LogOut size={14} />
             {t('logout')}
