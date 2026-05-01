@@ -1,8 +1,8 @@
-import { NavLink, useSearchParams } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   TrendingUp, DollarSign, Building2,
   Users, ShieldCheck, Wrench, Settings, FlaskConical,
-  Factory, Crown, LogOut, Users2, Globe, UserPlus,
+  Factory, Crown, Users2,
   ChevronDown, ClipboardList, GraduationCap, FileText,
   Megaphone, CalendarClock, Wrench as WrenchIcon, BarChart3,
   Scale,
@@ -11,10 +11,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { canManage, isTopManagement } from '../../utils/userTier.js';
-import { useUpdateLanguage } from '../../hooks/useUsers.js';
 import { useLhcOverview } from '../../hooks/useLhc.js';
-import ChangePasswordModal from './ChangePasswordModal.jsx';
-import i18next from 'i18next';
 
 export const DEPARTMENTS = [
   { value: 'top_management',    icon: Crown       },
@@ -31,33 +28,34 @@ export const DEPARTMENTS = [
   { value: 'nabavki',           icon: Factory     },
 ];
 
-const NavItem = ({ to, icon: Icon, label, end, badge }) => (
-  <NavLink
-    to={to}
-    end={end}
-    className={({ isActive }) =>
-      `flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
-        isActive
-          ? 'bg-slate-100 text-slate-900 font-medium'
-          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-      }`
-    }
-  >
-    <Icon size={15} className="flex-shrink-0" />
-    <span className="truncate flex-1">{label}</span>
-    {badge > 0 && (
-      <span className="text-[10px] font-semibold min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-slate-700 text-white">
-        {badge > 99 ? '99+' : badge}
-      </span>
-    )}
-  </NavLink>
-);
+const NavItem = ({ to, icon, label, end, badge }) => {
+  const IconCmp = icon;
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        `flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
+          isActive
+            ? 'bg-slate-100 text-slate-900 font-medium'
+            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+        }`
+      }
+    >
+      <IconCmp size={15} className="flex-shrink-0" />
+      <span className="truncate flex-1">{label}</span>
+      {badge > 0 && (
+        <span className="text-[10px] font-semibold min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-slate-700 text-white">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
+    </NavLink>
+  );
+};
 
 const Sidebar = ({ isOpen, onClose }) => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { t } = useTranslation('common');
-  const updateLang = useUpdateLanguage();
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [deptsOpen, setDeptsOpen] = useState(false);
 
   const { data: lhcOverview } = useLhcOverview();
@@ -67,13 +65,6 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const handleNavClick = () => {
     if (onClose) onClose();
-  };
-
-  const toggleLanguage = () => {
-    const newLang = i18next.language === 'mk' ? 'en' : 'mk';
-    i18next.changeLanguage(newLang);
-    localStorage.setItem('packflow_lang', newLang);
-    updateLang.mutate(newLang);
   };
 
   return (
@@ -92,9 +83,19 @@ const Sidebar = ({ isOpen, onClose }) => {
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         md:relative md:translate-x-0 md:w-56 md:z-auto md:transition-none
       `}>
-        <div className="px-4 py-4 border-b border-slate-200">
-          <span className="text-sm font-semibold text-slate-800 leading-tight tracking-tight">ЛБФП ДОО<br /><span className="text-slate-500 font-normal">Битола</span></span>
-        </div>
+        <NavLink
+          to="/"
+          onClick={handleNavClick}
+          className="block px-4 py-4 border-b border-slate-200 hover:bg-slate-50 transition-colors"
+        >
+          <div className="text-sm font-semibold text-slate-800 leading-tight tracking-tight">
+            ЛБФП ДОО
+            <span className="block text-slate-500 font-normal">{t('appCity')}</span>
+          </div>
+          <div className="mt-1 text-[11px] italic text-slate-400 leading-tight">
+            {t('appTagline')}
+          </div>
+        </NavLink>
 
         <nav className="flex-1 p-2 overflow-y-auto space-y-0.5">
           {/* Departments section */}
@@ -191,56 +192,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             </>
           )}
         </nav>
-
-        <div className="p-3 border-t border-slate-200">
-          <button
-            onClick={() => setShowPasswordModal(true)}
-            className="w-full text-left px-2 py-1.5 text-xs mb-1 rounded-md hover:bg-slate-100 transition-colors cursor-pointer"
-            title={t('changePassword')}
-          >
-            <div className="font-medium text-slate-800">{user?.name}</div>
-            <div className="text-slate-500">
-              {t(`dept.${user?.department}`, { defaultValue: user?.department })}
-            </div>
-            {user?.isManager && (
-              <div className="text-slate-600 mt-0.5">{t('manager')}</div>
-            )}
-          </button>
-          {isTopManagement(user) && (
-            <div onClick={handleNavClick}>
-              <NavLink
-                to="/register"
-                className={({ isActive }) =>
-                  `flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm transition-colors mb-0.5 ${
-                    isActive ? 'bg-slate-100 text-slate-900 font-medium' : 'text-slate-600 hover:bg-slate-50'
-                  }`
-                }
-              >
-                <UserPlus size={14} />
-                {t('registerUser')}
-              </NavLink>
-            </div>
-          )}
-          <button
-            onClick={toggleLanguage}
-            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-slate-600 hover:bg-slate-50 transition-colors mb-0.5"
-          >
-            <Globe size={14} />
-            {i18next.language === 'mk' ? 'EN' : 'MK'}
-          </button>
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-slate-600 hover:bg-slate-50 transition-colors"
-          >
-            <LogOut size={14} />
-            {t('logout')}
-          </button>
-        </div>
       </aside>
-
-      {showPasswordModal && (
-        <ChangePasswordModal onClose={() => setShowPasswordModal(false)} />
-      )}
     </>
   );
 };

@@ -7,40 +7,18 @@ import { useProcedures, useCreateProcedure } from '../hooks/useProcedures.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { isTopManagement } from '../utils/userTier.js';
 
-const DEPT_BADGE_COLORS = {
-  sales: 'bg-blue-100 text-blue-700',
-  finance: 'bg-emerald-100 text-emerald-700',
-  administration: 'bg-violet-100 text-violet-700',
-  hr: 'bg-pink-100 text-pink-700',
-  quality_assurance: 'bg-amber-100 text-amber-700',
-  facility: 'bg-lime-100 text-lime-700',
-  machines: 'bg-slate-100 text-slate-700',
-  r_and_d: 'bg-cyan-100 text-cyan-700',
-  production: 'bg-orange-100 text-orange-700',
-  top_management: 'bg-yellow-100 text-yellow-700',
-  carina: 'bg-indigo-100 text-indigo-700',
-  nabavki: 'bg-teal-100 text-teal-700',
-};
+const BADGE_CLS = 'inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200';
 
 export const DeptBadges = ({ departments, t }) => {
   if (!departments?.length) {
-    return <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600">{t('allEmployees')}</span>;
+    return <span className={BADGE_CLS}>{t('allEmployees')}</span>;
   }
   return departments.map((d) => (
-    <span key={d} className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium ${DEPT_BADGE_COLORS[d] || 'bg-gray-100 text-gray-600'}`}>
+    <span key={d} className={BADGE_CLS}>
       {t(`dept.${d}`)}
     </span>
   ));
 };
-
-const DOC_COLORS = [
-  { bg: 'bg-blue-50',   icon: 'text-blue-600',   ring: 'hover:ring-blue-200' },
-  { bg: 'bg-emerald-50', icon: 'text-emerald-600', ring: 'hover:ring-emerald-200' },
-  { bg: 'bg-violet-50', icon: 'text-violet-600', ring: 'hover:ring-violet-200' },
-  { bg: 'bg-amber-50',  icon: 'text-amber-600',  ring: 'hover:ring-amber-200' },
-  { bg: 'bg-rose-50',   icon: 'text-rose-600',   ring: 'hover:ring-rose-200' },
-  { bg: 'bg-cyan-50',   icon: 'text-cyan-600',   ring: 'hover:ring-cyan-200' },
-];
 
 const DocIcon = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -120,7 +98,7 @@ const Procedures = () => {
                               e.target.checked ? [...prev, d.value] : prev.filter((v) => v !== d.value)
                             )
                           }
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-slate-300 accent-slate-700 focus:ring-slate-300"
                         />
                         {t(`dept.${d.value}`)}
                       </label>
@@ -146,33 +124,30 @@ const Procedures = () => {
                 <p className="text-gray-400 text-sm">{t('noProcedures')}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {procedures.map((p, i) => {
-                  const c = DOC_COLORS[i % DOC_COLORS.length];
-                  return (
-                    <div
-                      key={p._id}
-                      onClick={() => navigate(`/procedures/${p._id}`)}
-                      className={`group card p-4 cursor-pointer transition-all hover:shadow-md hover:ring-2 ${c.ring} flex flex-col items-center text-center`}
-                    >
-                      <div className={`w-14 h-14 rounded-xl ${c.bg} flex items-center justify-center mb-3 transition-transform group-hover:scale-110`}>
-                        <DocIcon className={`w-7 h-7 ${c.icon}`} />
-                      </div>
-                      <h3 className="text-sm font-semibold text-gray-800 leading-snug line-clamp-2 mb-2">
-                        {p.title}
-                      </h3>
-                      <div className="flex flex-wrap justify-center gap-1 mb-1.5">
-                        <DeptBadges departments={p.departments} t={t} />
-                      </div>
-                      <p className="text-[11px] text-gray-400 mt-auto leading-tight">
-                        {p.createdBy?.name ?? '—'}
-                      </p>
-                      <p className="text-[11px] text-gray-400 leading-tight">
-                        {new Date(p.createdAt).toLocaleDateString()}
-                      </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                {procedures.map((p) => (
+                  <div
+                    key={p._id}
+                    onClick={() => navigate(`/procedures/${p._id}`)}
+                    className="group card p-4 cursor-pointer transition-colors hover:bg-slate-50 hover:border-slate-300 flex flex-col items-center text-center"
+                  >
+                    <div className="w-12 h-12 rounded-md bg-slate-100 flex items-center justify-center mb-3">
+                      <DocIcon className="w-6 h-6 text-slate-600" />
                     </div>
-                  );
-                })}
+                    <h3 className="text-sm font-medium text-slate-900 leading-snug line-clamp-2 mb-2">
+                      {p.title}
+                    </h3>
+                    <div className="flex flex-wrap justify-center gap-1 mb-1.5">
+                      <DeptBadges departments={p.departments} t={t} />
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-auto leading-tight">
+                      {p.createdBy?.name ?? '—'}
+                    </p>
+                    <p className="text-[11px] text-slate-400 leading-tight">
+                      {new Date(p.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
