@@ -136,6 +136,7 @@
   "procedureDeleted": "Процедурата е избришана",
   "confirmDeleteProcedure": "Дали сте сигурни дека сакате да ја избришете оваа процедура?",
   "allEmployees": "Сите вработени",
+  "allDepartments": "Сите сектори",
   "procedureDepartments": "Одделенија",
   "procedureDepartmentsHint": "Оставете празно за сите вработени",
   "noProcedures": "Нема процедури",

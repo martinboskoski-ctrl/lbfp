@@ -35,10 +35,10 @@ const NavItem = ({ to, icon, label, end, badge }) => {
       to={to}
       end={end}
       className={({ isActive }) =>
-        `relative flex items-center gap-2.5 pl-4 pr-3 py-2 rounded-md text-sm transition-all cursor-pointer ${
+        `relative flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${
           isActive
-            ? 'bg-slate-900 text-white font-semibold shadow-sm before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:rounded-full before:bg-white/40'
-            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:translate-x-0.5'
+            ? 'bg-slate-100 text-slate-900 font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-r-full before:bg-slate-700'
+            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
         }`
       }
     >
@@ -48,7 +48,7 @@ const NavItem = ({ to, icon, label, end, badge }) => {
           <span className="truncate flex-1">{label}</span>
           {badge > 0 && (
             <span className={`text-[10px] font-semibold min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full ${
-              isActive ? 'bg-white/25 text-white' : 'bg-slate-700 text-white'
+              isActive ? 'bg-slate-700 text-white' : 'bg-slate-700 text-white'
             }`}>
               {badge > 99 ? '99+' : badge}
             </span>

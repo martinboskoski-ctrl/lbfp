@@ -7,11 +7,29 @@ import { useProcedures, useCreateProcedure } from '../hooks/useProcedures.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { isTopManagement } from '../utils/userTier.js';
 
-const BADGE_CLS = 'inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200';
+const BADGE_CLS = 'inline-block px-1.5 py-0.5 rounded text-[10px] text-slate-500 bg-slate-50 border border-slate-200';
 
-export const DeptBadges = ({ departments, t }) => {
+// `compact` mode: caps at 2 visible chips and adds a "+N" tail.
+// "All depts" (length === total - 1, excluding top_management) collapses to one neutral pill.
+export const DeptBadges = ({ departments, t, compact = false, max = 2 }) => {
   if (!departments?.length) {
     return <span className={BADGE_CLS}>{t('allEmployees')}</span>;
+  }
+  const totalDepts = DEPARTMENTS.filter((d) => d.value !== 'top_management').length;
+  if (departments.length >= totalDepts) {
+    return <span className={BADGE_CLS}>{t('allDepartments', { defaultValue: t('allEmployees') })}</span>;
+  }
+  if (compact && departments.length > max) {
+    const shown = departments.slice(0, max);
+    const rest = departments.length - shown.length;
+    return (
+      <>
+        {shown.map((d) => (
+          <span key={d} className={BADGE_CLS}>{t(`dept.${d}`)}</span>
+        ))}
+        <span className={BADGE_CLS}>+{rest}</span>
+      </>
+    );
   }
   return departments.map((d) => (
     <span key={d} className={BADGE_CLS}>
@@ -138,7 +156,7 @@ const Procedures = () => {
                       {p.title}
                     </h3>
                     <div className="flex flex-wrap justify-center gap-1 mb-1.5">
-                      <DeptBadges departments={p.departments} t={t} />
+                      <DeptBadges departments={p.departments} t={t} compact />
                     </div>
                     <p className="text-[11px] text-slate-400 mt-auto leading-tight">
                       {p.createdBy?.name ?? '—'}
