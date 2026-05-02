@@ -21,9 +21,6 @@ const Topbar = ({ title, onMenuClick }) => {
       <h1 className="text-sm sm:text-base font-semibold text-slate-800 truncate">{title}</h1>
 
       <div className="ml-auto flex items-center gap-1 sm:gap-2">
-        <UserMenu />
-        <LanguageSwitcher />
-
         <div className="relative">
           <button
             onClick={() => setShowNotifications((prev) => !prev)}
@@ -42,6 +39,9 @@ const Topbar = ({ title, onMenuClick }) => {
             <NotificationPanel onClose={() => setShowNotifications(false)} />
           )}
         </div>
+
+        <LanguageSwitcher />
+        <UserMenu />
       </div>
     </header>
   );
