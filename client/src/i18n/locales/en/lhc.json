@@ -1,0 +1,205 @@
+{
+  "title": "Legal Health Check",
+  "subtitle": "Periodic review of company compliance with laws and internal procedures.",
+  "createCampaign": "Create review",
+  "manageQuestions": "Manage questions",
+  "categoriesTitle": "Compliance areas",
+  "campaignsTitle": "Campaigns",
+  "noCampaigns": "No campaigns have been created yet.",
+  "myCampaigns": "My reviews",
+  "questionsCount": "{{count}} questions",
+  "categoriesCount": "{{count}} areas",
+  "questionsComingSoon": "Questions coming soon.",
+  "openAssignmentBanner": {
+    "one": "You have 1 open review to complete.",
+    "other": "You have {{count}} open reviews to complete."
+  },
+  "deadline": "Due: {{date}}",
+  "footerNote": "Only Top Management sees aggregated results. Each employee sees only their own answers.",
+
+  "status": {
+    "draft": "Draft",
+    "open": "Open",
+    "closed": "Closed",
+    "archived": "Archived"
+  },
+  "asnStatus": {
+    "not_started": "Not started",
+    "in_progress": "In progress",
+    "completed": "Completed"
+  },
+  "audience": {
+    "all": "All employees",
+    "managers_only": "Managers only",
+    "departments": "Selected departments"
+  },
+  "pickStrategy": {
+    "random": "Random pick",
+    "all": "All questions"
+  },
+  "sanction": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "none": "None"
+  },
+
+  "answer": {
+    "title": "Complete review",
+    "answeredOf": "Answered {{answered}} of {{total}} questions.",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "viewResult": "View result",
+    "savePill": {
+      "saving": "Saving...",
+      "saved": "Saved",
+      "error": "Error",
+      "idle": "Auto-save"
+    },
+    "submitConfirmTitle": "Submit review?",
+    "submitConfirmBody": "Once submitted, answers cannot be changed. They will be used to compute your score after the campaign closes.",
+    "approxBadge": "machine translation"
+  },
+
+  "options": {
+    "yes": "Yes",
+    "no": "No",
+    "partial": "Partial",
+    "na": "Not applicable",
+    "true": "True",
+    "false": "False"
+  },
+
+  "campaign": {
+    "title": "Compliance — Campaign",
+    "open": "Open",
+    "closeNow": "Close now",
+    "results": "Results",
+    "reopen": "Reopen",
+    "archive": "Archive",
+    "deleteConfirm": "Are you sure?",
+    "fillSurvey": "Complete review",
+    "myResultBtn": "My result",
+    "createNew": "New campaign",
+    "fields": {
+      "title": "Title",
+      "description": "Description (optional)",
+      "categories": "Areas",
+      "categoriesEmptyHint": "Areas with no questions are hidden (coming soon).",
+      "audience": "Audience",
+      "strategy": "Strategy",
+      "departments": "Departments",
+      "questionsPerCategory": "Questions per area",
+      "openAt": "Opens on",
+      "closeAt": "Closes on",
+      "openedOn": "Opened",
+      "closedOn": "Closed",
+      "saveDraft": "Save draft",
+      "saving": "Saving..."
+    },
+    "props": {
+      "categories": "Areas",
+      "audience": "Audience",
+      "questionsPerCategory": "Questions per area",
+      "all": "all",
+      "strategy": "Strategy"
+    },
+    "participation": {
+      "title": "Participation",
+      "invited": "Invited",
+      "started": "Started",
+      "completed": "Completed"
+    }
+  },
+
+  "results": {
+    "title": "Results — Compliance",
+    "summaryNotReady": "Results will be available once the campaign closes.",
+    "closedOn": "Closed {{date}} · {{completed}}/{{invited}} participants completed it",
+    "overallTitle": "Overall compliance",
+    "ofPoints": "{{score}} of {{max}} points",
+    "byCategory": "By area",
+    "categoryLine": "{{score}}/{{max}} ({{pct}}%) · {{violations}} violations",
+    "topViolations": "Top violations",
+    "noViolations": "No violations.",
+    "perEmployee": "Per employee",
+    "noCompleted": "Nobody has completed the review.",
+    "table": {
+      "employee": "Employee",
+      "department": "Department",
+      "compliance": "Compliance",
+      "violations": "Violations"
+    },
+    "exportCsv": "Export CSV",
+    "recommendation": "Recommendation"
+  },
+
+  "myResult": {
+    "title": "My result",
+    "stillOpen": "The review is still open — only Top Management sees the company-level aggregate.",
+    "yourScore": "Your score",
+    "summaryLine": "{{score}} of {{max}} points · {{correct}} correct / {{violations}} violations",
+    "byCategory": "By area",
+    "improvements": "Points to improve",
+    "noImprovements": "All your answers are compliant.",
+    "yourAnswer": "Your answer",
+    "privacyNote": "These results are visible only to you. Top Management sees aggregated data."
+  },
+
+  "admin": {
+    "title": "Question management",
+    "subtitle": "Add, edit, or deactivate questions here. Deactivated questions are not used in new campaigns.",
+    "newQuestion": "New question",
+    "emptyCategory": "No questions in this area yet. Click \"New question\" to add one.",
+    "deactivated": "deactivated",
+    "deactivateConfirm": "Deactivate this question?",
+    "deactivate": "Deactivate",
+    "weight": "Weight",
+    "form": {
+      "category": "Area",
+      "subCategory": "Sub-area",
+      "subCategoryHint": "e.g. recruitment",
+      "type": "Type",
+      "typeOptions": {
+        "yes_no": "Yes / No",
+        "yes_no_na": "Yes / No / N/A",
+        "yes_partial_no": "Yes / Partial / No",
+        "true_false": "True / False",
+        "choice": "Single choice",
+        "multi_check": "Multi-check"
+      },
+      "text": "Question text",
+      "textEn": "Question text (EN)",
+      "article": "Article / legal source",
+      "articleEn": "Article / legal source (EN)",
+      "weight": "Weight",
+      "correctAnswer": "Correct answer",
+      "correctAnswerHint": "option value",
+      "sanction": "Sanction level",
+      "options": "Options",
+      "optionValueHint": "value (internal)",
+      "optionLabelHint": "label (what users see)",
+      "optionLabelEnHint": "label (EN)",
+      "addOption": "Add option",
+      "recommendation": "Recommendation (when answer is incorrect)",
+      "recommendationEn": "Recommendation (EN)",
+      "active": "Active (visible in new campaigns)",
+      "save": "Save",
+      "saving": "Saving...",
+      "addBtn": "Add"
+    }
+  },
+
+  "approxNote": "English text is an approximate machine translation. Macedonian is the authoritative source.",
+
+  "categoryNames": {
+    "labour": "Labour Relations",
+    "gdpr": "Personal Data Protection",
+    "health_safety": "Health & Safety at Work",
+    "tax": "Taxation",
+    "contracts": "Contract Law",
+    "organization": "Organization & Operations",
+    "systems": "Systems & IT",
+    "cyber": "Cyber Security"
+  }
+}

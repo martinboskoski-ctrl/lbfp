@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, CheckCircle2, Send, Cloud, CloudOff, Loader2 } from 'lucide-react';
 import Sidebar from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
@@ -10,49 +11,40 @@ import {
   useSubmitLhcAssignment,
   useLhcCategories,
 } from '../hooks/useLhc.js';
+import { qText, qArticle, oLabel, isApprox } from '../utils/lhcLang.js';
 
-const ANSWER_LABELS = {
-  yes: 'Да',
-  no: 'Не',
-  partial: 'Делумно',
-  na: 'Не е применливо',
-  not_applicable: 'Не е применливо',
-  true: 'Точно',
-  false: 'Неточно',
-};
-
-const yesNoOptions = [
-  { value: 'yes', label: 'Да' },
-  { value: 'no',  label: 'Не' },
-];
-const yesNoNaOptions = [
-  ...yesNoOptions,
-  { value: 'na', label: 'Не е применливо' },
-];
-const yesPartialNoOptions = [
-  { value: 'yes',     label: 'Да' },
-  { value: 'partial', label: 'Делумно' },
-  { value: 'no',      label: 'Не' },
-];
-const trueFalseOptions = [
-  { value: 'true',  label: 'Точно' },
-  { value: 'false', label: 'Неточно' },
-];
-
-const renderOptions = (q) => {
-  if (q.options && q.options.length) return q.options;
-  switch (q.type) {
-    case 'yes_no':         return yesNoOptions;
-    case 'yes_no_na':      return yesNoNaOptions;
-    case 'yes_partial_no': return yesPartialNoOptions;
-    case 'true_false':     return trueFalseOptions;
+const fallbackOptions = (type, t) => {
+  const yn = [
+    { value: 'yes', label: t('options.yes') },
+    { value: 'no',  label: t('options.no') },
+  ];
+  switch (type) {
+    case 'yes_no':         return yn;
+    case 'yes_no_na':      return [...yn, { value: 'na', label: t('options.na') }];
+    case 'yes_partial_no': return [
+      { value: 'yes',     label: t('options.yes') },
+      { value: 'partial', label: t('options.partial') },
+      { value: 'no',      label: t('options.no') },
+    ];
+    case 'true_false':     return [
+      { value: 'true',  label: t('options.true') },
+      { value: 'false', label: t('options.false') },
+    ];
     default:               return [];
   }
 };
 
-const QuestionCard = ({ q, value, onChange, disabled }) => {
-  const options = renderOptions(q);
+const renderOptions = (q, t) => {
+  if (q.options && q.options.length) {
+    return q.options.map((o) => ({ value: o.value, label: oLabel(o) }));
+  }
+  return fallbackOptions(q.type, t);
+};
+
+const QuestionCard = ({ q, value, onChange, disabled, t }) => {
+  const options = renderOptions(q, t);
   const isMulti = q.type === 'multi_check';
+  const approx = isApprox(q);
 
   const handleSingle = (val) => onChange(val);
   const handleMulti = (optVal) => {
@@ -62,11 +54,18 @@ const QuestionCard = ({ q, value, onChange, disabled }) => {
 
   return (
     <div className="card p-4 sm:p-5">
-      {q.subCategory && (
-        <div className="text-[11px] uppercase tracking-wide text-slate-400 mb-1">{q.subCategory}</div>
-      )}
-      <p className="text-sm text-slate-900 leading-relaxed">{q.text}</p>
-      {q.article && <p className="text-xs text-slate-500 mt-1 italic">{q.article}</p>}
+      <div className="flex items-center justify-between gap-2 mb-1">
+        {q.subCategory && (
+          <span className="text-[11px] uppercase tracking-wide text-slate-400">{q.subCategory}</span>
+        )}
+        {approx && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500" title={t('approxNote')}>
+            {t('answer.approxBadge')}
+          </span>
+        )}
+      </div>
+      <p className="text-sm text-slate-900 leading-relaxed">{qText(q)}</p>
+      {qArticle(q) && <p className="text-xs text-slate-500 mt-1 italic">{qArticle(q)}</p>}
 
       <div className="mt-3 flex flex-col gap-2">
         {!isMulti && options.map((o) => {
@@ -110,6 +109,8 @@ const QuestionCard = ({ q, value, onChange, disabled }) => {
 };
 
 const LhcAnswer = () => {
+  const { t } = useTranslation('lhc');
+  const { t: tc } = useTranslation('common');
   const { id } = useParams();
   const navigate = useNavigate();
   const { data, isLoading, error } = useLhcMyAssignment(id);
@@ -122,16 +123,13 @@ const LhcAnswer = () => {
   const [page, setPage] = useState(1);
   const PAGE = 10;
 
-  // Local mirror so radio toggles feel snappy
   const [local, setLocal] = useState({});
   const merged = useMemo(() => ({ ...(data?.answers || {}), ...local }), [data, local]);
 
-  // Save indicator state
-  const [saveState, setSaveState] = useState('idle'); // 'idle' | 'saving' | 'saved' | 'error'
+  const [saveState, setSaveState] = useState('idle');
   const savedTimer = useRef(null);
   const pendingCount = useRef(0);
 
-  // Beforeunload guard while requests are in-flight
   useEffect(() => {
     const onBeforeUnload = (e) => {
       if (pendingCount.current > 0) {
@@ -175,12 +173,12 @@ const LhcAnswer = () => {
       <div className="flex min-h-screen">
         <Sidebar />
         <div className="flex-1 flex flex-col">
-          <Topbar title="Грешка" />
+          <Topbar title={tc('error')} />
           <main className="flex-1 p-6">
             <div className="card p-6 max-w-xl mx-auto text-center">
-              <p className="text-red-700 mb-3">Не сте поканети или прегледот не постои.</p>
+              <p className="text-red-700 mb-3">{tc('noResults')}</p>
               <Link to="/lhc" className="btn-secondary inline-flex items-center gap-1">
-                <ArrowLeft size={14} /> Назад
+                <ArrowLeft size={14} /> {tc('back')}
               </Link>
             </div>
           </main>
@@ -221,17 +219,19 @@ const LhcAnswer = () => {
     });
   };
 
-  const catName = (key) => categories.find((c) => c.key === key)?.name || key;
+  const catName = (key) => t(`categoryNames.${key}`, {
+    defaultValue: categories.find((c) => c.key === key)?.name || key,
+  });
 
   return (
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <Topbar title="Пополни преглед" />
+        <Topbar title={t('answer.title')} />
         <main className="flex-1 p-4 sm:p-6">
           <div className="max-w-3xl mx-auto">
             <Link to={`/lhc/campaigns/${id}`} className="text-sm text-slate-500 hover:text-slate-800 inline-flex items-center gap-1 mb-3">
-              <ArrowLeft size={14} /> Назад
+              <ArrowLeft size={14} /> {tc('back')}
             </Link>
 
             <div className="card p-4 sm:p-5 mb-4">
@@ -239,7 +239,7 @@ const LhcAnswer = () => {
                 <div className="min-w-0 flex-1">
                   <h1 className="text-lg sm:text-xl font-semibold text-slate-900 truncate">{campaign.title}</h1>
                   <p className="text-sm text-slate-500 mt-0.5">
-                    Одговорено {answeredCount} од {total} прашања.
+                    {t('answer.answeredOf', { answered: answeredCount, total })}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -250,10 +250,10 @@ const LhcAnswer = () => {
                       saveState === 'saved'  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
                                                'text-slate-400'
                     }`}>
-                      {saveState === 'saving' && <><Loader2 size={11} className="animate-spin" /> Се зачувува...</>}
-                      {saveState === 'saved'  && <><Cloud size={11} /> Зачувано</>}
-                      {saveState === 'error'  && <><CloudOff size={11} /> Грешка</>}
-                      {saveState === 'idle'   && <><Cloud size={11} /> Авто-зачувување</>}
+                      {saveState === 'saving' && <><Loader2 size={11} className="animate-spin" /> {t('answer.savePill.saving')}</>}
+                      {saveState === 'saved'  && <><Cloud size={11} /> {t('answer.savePill.saved')}</>}
+                      {saveState === 'error'  && <><CloudOff size={11} /> {t('answer.savePill.error')}</>}
+                      {saveState === 'idle'   && <><Cloud size={11} /> {t('answer.savePill.idle')}</>}
                     </span>
                   )}
                   {!disabled && (
@@ -262,12 +262,12 @@ const LhcAnswer = () => {
                       disabled={answeredCount < total || submit.isPending}
                       className="btn-primary inline-flex items-center gap-1.5 text-sm"
                     >
-                      <Send size={13} /> Поднеси
+                      <Send size={13} /> {t('answer.submit')}
                     </button>
                   )}
                   {disabled && (
                     <Link to={`/lhc/campaigns/${id}/my-result`} className="btn-secondary text-sm">
-                      Види резултат
+                      {t('answer.viewResult')}
                     </Link>
                   )}
                 </div>
@@ -310,6 +310,7 @@ const LhcAnswer = () => {
                         value={merged[q.qid]}
                         onChange={(v) => onAnswer(q.qid, v)}
                         disabled={disabled}
+                        t={t}
                       />
                     ))}
                   </div>
@@ -321,14 +322,12 @@ const LhcAnswer = () => {
             {confirmSubmit && (
               <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-md border border-slate-200 max-w-md w-full p-5">
-                  <h3 className="font-semibold text-slate-900 mb-2">Поднеси преглед?</h3>
-                  <p className="text-sm text-slate-600 mb-4">
-                    По поднесувањето одговорите не можат да се менуваат. Ќе бидат користени за пресметка на резултатот по затворање на кампањата.
-                  </p>
+                  <h3 className="font-semibold text-slate-900 mb-2">{t('answer.submitConfirmTitle')}</h3>
+                  <p className="text-sm text-slate-600 mb-4">{t('answer.submitConfirmBody')}</p>
                   <div className="flex justify-end gap-2">
-                    <button onClick={() => setConfirmSubmit(false)} className="btn-secondary text-sm">Откажи</button>
+                    <button onClick={() => setConfirmSubmit(false)} className="btn-secondary text-sm">{tc('cancel')}</button>
                     <button onClick={submitFinal} className="btn-primary text-sm" disabled={submit.isPending}>
-                      {submit.isPending ? 'Се поднесува...' : 'Поднеси'}
+                      {submit.isPending ? t('answer.submitting') : t('answer.submit')}
                     </button>
                   </div>
                 </div>

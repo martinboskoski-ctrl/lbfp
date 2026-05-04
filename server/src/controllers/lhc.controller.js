@@ -51,7 +51,9 @@ const projectQuestion = (q) => ({
   category: q.category,
   subCategory: q.subCategory,
   text: q.text,
+  textEn: q.textEn,
   article: q.article,
+  articleEn: q.articleEn,
   type: q.type,
   options: q.options,
 });
@@ -565,13 +567,16 @@ export const getMyResult = async (req, res) => {
         category: q.category,
         subCategory: q.subCategory,
         text: q.text,
+        textEn: q.textEn,
         article: q.article,
+        articleEn: q.articleEn,
         type: q.type,
         options: q.options,
         userAnswer: ans.answer,
         isCorrect: ans.isCorrect,
         sanctionLevel: ans.sanctionLevel || q.sanctionLevel,
         recommendation: q.recommendation,
+        recommendationEn: q.recommendationEn,
       };
     }).filter(Boolean);
 
@@ -596,8 +601,8 @@ export const getMyResult = async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const QUESTION_FIELDS = [
-  'category', 'subCategory', 'text', 'article', 'type', 'options',
-  'correctAnswer', 'weight', 'sanctionLevel', 'recommendation', 'active',
+  'category', 'subCategory', 'text', 'textEn', 'article', 'articleEn', 'type', 'options',
+  'correctAnswer', 'weight', 'sanctionLevel', 'recommendation', 'recommendationEn', 'active',
 ];
 
 const VALID_TYPES = ['yes_no', 'yes_no_na', 'yes_partial_no', 'choice', 'multi_check', 'true_false'];

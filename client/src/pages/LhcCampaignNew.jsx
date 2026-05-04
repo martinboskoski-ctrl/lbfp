@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save } from 'lucide-react';
 import Sidebar, { DEPARTMENTS } from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
@@ -14,6 +15,8 @@ const todayPlus = (d) => {
 };
 
 const LhcCampaignNew = () => {
+  const { t } = useTranslation('lhc');
+  const { t: tc } = useTranslation('common');
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: categories = [] } = useLhcCategories();
@@ -71,26 +74,26 @@ const LhcCampaignNew = () => {
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <Topbar title="Нова кампања — Усогласеност" />
+        <Topbar title={t('campaign.createNew')} />
         <main className="flex-1 p-4 sm:p-6">
           <div className="max-w-3xl mx-auto">
             <Link to="/lhc" className="text-sm text-slate-500 hover:text-slate-800 inline-flex items-center gap-1 mb-3">
-              <ArrowLeft size={14} /> Назад
+              <ArrowLeft size={14} /> {tc('back')}
             </Link>
 
             <form onSubmit={submit} className="card p-4 sm:p-6 space-y-5">
               <div>
-                <label className="label">Наслов</label>
-                <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Q2 2026 Преглед на усогласеност" required />
+                <label className="label">{t('campaign.fields.title')}</label>
+                <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} required />
               </div>
 
               <div>
-                <label className="label">Опис (опционално)</label>
+                <label className="label">{t('campaign.fields.description')}</label>
                 <textarea className="input" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
               </div>
 
               <div>
-                <label className="label">Области</label>
+                <label className="label">{t('campaign.fields.categories')}</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {eligibleCategories.map((c) => (
                     <label key={c.key} className={`flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer text-sm ${chosen.includes(c.key) ? 'bg-slate-100 border-slate-400' : 'border-slate-200 hover:bg-slate-50'}`}>
@@ -101,37 +104,37 @@ const LhcCampaignNew = () => {
                         className="accent-slate-700"
                       />
                       <span aria-hidden>{c.icon}</span>
-                      <span className="flex-1">{c.name}</span>
-                      <span className="text-xs text-slate-500">{c.questionCount} прашања</span>
+                      <span className="flex-1">{t(`categoryNames.${c.key}`, { defaultValue: c.name })}</span>
+                      <span className="text-xs text-slate-500">{t('questionsCount', { count: c.questionCount })}</span>
                     </label>
                   ))}
                 </div>
                 {categories.some((c) => c.questionCount === 0) && (
-                  <p className="text-xs text-slate-400 mt-2">Областите без прашања не се покажани (во подготовка).</p>
+                  <p className="text-xs text-slate-400 mt-2">{t('campaign.fields.categoriesEmptyHint')}</p>
                 )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="label">Целна група</label>
+                  <label className="label">{t('campaign.fields.audience')}</label>
                   <select className="input" value={audienceMode} onChange={(e) => setAudienceMode(e.target.value)}>
-                    <option value="all">Сите вработени</option>
-                    <option value="managers_only">Само менаџери</option>
-                    <option value="departments">Одредени сектори</option>
+                    <option value="all">{t('audience.all')}</option>
+                    <option value="managers_only">{t('audience.managers_only')}</option>
+                    <option value="departments">{t('audience.departments')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="label">Стратегија</label>
+                  <label className="label">{t('campaign.fields.strategy')}</label>
                   <select className="input" value={pickStrategy} onChange={(e) => setPickStrategy(e.target.value)}>
-                    <option value="random">Случаен избор</option>
-                    <option value="all">Сите прашања</option>
+                    <option value="random">{t('pickStrategy.random')}</option>
+                    <option value="all">{t('pickStrategy.all')}</option>
                   </select>
                 </div>
               </div>
 
               {audienceMode === 'departments' && (
                 <div>
-                  <label className="label">Сектори</label>
+                  <label className="label">{t('campaign.fields.departments')}</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {DEPARTMENTS.map((d) => (
                       <label key={d.value} className={`flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm cursor-pointer ${audienceDepartments.includes(d.value) ? 'bg-slate-100 border-slate-400' : 'border-slate-200 hover:bg-slate-50'}`}>
@@ -141,7 +144,7 @@ const LhcCampaignNew = () => {
                           onChange={() => toggle(d.value, audienceDepartments, setAudienceDepartments)}
                           className="accent-slate-700"
                         />
-                        <span>{d.value}</span>
+                        <span>{tc(`dept.${d.value}`, { defaultValue: d.value })}</span>
                       </label>
                     ))}
                   </div>
@@ -150,26 +153,26 @@ const LhcCampaignNew = () => {
 
               {pickStrategy === 'random' && (
                 <div>
-                  <label className="label">Прашања по област</label>
+                  <label className="label">{t('campaign.fields.questionsPerCategory')}</label>
                   <input type="number" min={1} max={100} className="input sm:w-40" value={questionsPerCategory} onChange={(e) => setQuestionsPerCategory(e.target.value)} />
                 </div>
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="label">Отвара се на</label>
+                  <label className="label">{t('campaign.fields.openAt')}</label>
                   <input type="date" className="input" value={openAt} onChange={(e) => setOpenAt(e.target.value)} />
                 </div>
                 <div>
-                  <label className="label">Затвора се на</label>
+                  <label className="label">{t('campaign.fields.closeAt')}</label>
                   <input type="date" className="input" value={closeAt} onChange={(e) => setCloseAt(e.target.value)} />
                 </div>
               </div>
 
               <div className="flex gap-2 justify-end pt-3 border-t border-slate-100">
-                <Link to="/lhc" className="btn-secondary">Откажи</Link>
+                <Link to="/lhc" className="btn-secondary">{tc('cancel')}</Link>
                 <button type="submit" className="btn-primary inline-flex items-center gap-1.5" disabled={create.isPending || !title.trim() || chosen.length === 0}>
-                  <Save size={14} /> {create.isPending ? 'Зачувување...' : 'Зачувај драфт'}
+                  <Save size={14} /> {create.isPending ? t('campaign.fields.saving') : t('campaign.fields.saveDraft')}
                 </button>
               </div>
             </form>

@@ -1,0 +1,205 @@
+{
+  "title": "Правен здравствен преглед",
+  "subtitle": "Периодичен преглед на усогласеноста на компанијата со закони и интерни процедури.",
+  "createCampaign": "Креирај преглед",
+  "manageQuestions": "Управувај со прашања",
+  "categoriesTitle": "Области на усогласеност",
+  "campaignsTitle": "Кампањи",
+  "noCampaigns": "Сè уште нема креирани кампањи.",
+  "myCampaigns": "Мои прегледи",
+  "questionsCount": "{{count}} прашања",
+  "categoriesCount": "{{count}} области",
+  "questionsComingSoon": "Прашања во подготовка.",
+  "openAssignmentBanner": {
+    "one": "Имате 1 отворен преглед за пополнување.",
+    "other": "Имате {{count}} отворени прегледи за пополнување."
+  },
+  "deadline": "Рок: {{date}}",
+  "footerNote": "Резултатите од прегледот ги гледа само Топ менаџментот. Секој вработен ги гледа само своите одговори.",
+
+  "status": {
+    "draft": "Драфт",
+    "open": "Отворен",
+    "closed": "Затворен",
+    "archived": "Архивиран"
+  },
+  "asnStatus": {
+    "not_started": "Незапочнат",
+    "in_progress": "Во тек",
+    "completed": "Завршен"
+  },
+  "audience": {
+    "all": "Сите вработени",
+    "managers_only": "Само менаџери",
+    "departments": "Одредени сектори"
+  },
+  "pickStrategy": {
+    "random": "Случаен избор",
+    "all": "Сите прашања"
+  },
+  "sanction": {
+    "high": "Висока",
+    "medium": "Средна",
+    "low": "Ниска",
+    "none": "Нема"
+  },
+
+  "answer": {
+    "title": "Пополни преглед",
+    "answeredOf": "Одговорено {{answered}} од {{total}} прашања.",
+    "submit": "Поднеси",
+    "submitting": "Се поднесува...",
+    "viewResult": "Види резултат",
+    "savePill": {
+      "saving": "Се зачувува...",
+      "saved": "Зачувано",
+      "error": "Грешка",
+      "idle": "Авто-зачувување"
+    },
+    "submitConfirmTitle": "Поднеси преглед?",
+    "submitConfirmBody": "По поднесувањето одговорите не можат да се менуваат. Ќе бидат користени за пресметка на резултатот по затворање на кампањата.",
+    "approxBadge": "машински превод"
+  },
+
+  "options": {
+    "yes": "Да",
+    "no": "Не",
+    "partial": "Делумно",
+    "na": "Не е применливо",
+    "true": "Точно",
+    "false": "Неточно"
+  },
+
+  "campaign": {
+    "title": "Кампања — Усогласеност",
+    "open": "Отвори",
+    "closeNow": "Затвори сега",
+    "results": "Резултати",
+    "reopen": "Повторно отвори",
+    "archive": "Архивирај",
+    "deleteConfirm": "Сигурно?",
+    "fillSurvey": "Пополни преглед",
+    "myResultBtn": "Мој резултат",
+    "createNew": "Нова кампања",
+    "fields": {
+      "title": "Наслов",
+      "description": "Опис (опционално)",
+      "categories": "Области",
+      "categoriesEmptyHint": "Областите без прашања не се покажани (во подготовка).",
+      "audience": "Целна група",
+      "strategy": "Стратегија",
+      "departments": "Сектори",
+      "questionsPerCategory": "Прашања по област",
+      "openAt": "Отвара се на",
+      "closeAt": "Затвора се на",
+      "openedOn": "Отворена",
+      "closedOn": "Затворена",
+      "saveDraft": "Зачувај драфт",
+      "saving": "Зачувување..."
+    },
+    "props": {
+      "categories": "Области",
+      "audience": "Целна група",
+      "questionsPerCategory": "Прашања по област",
+      "all": "сите",
+      "strategy": "Стратегија"
+    },
+    "participation": {
+      "title": "Учество",
+      "invited": "Поканети",
+      "started": "Започнале",
+      "completed": "Завршиле"
+    }
+  },
+
+  "results": {
+    "title": "Резултати — Усогласеност",
+    "summaryNotReady": "Резултатите ќе бидат достапни по затворање на кампањата.",
+    "closedOn": "Затворена {{date}} · {{completed}}/{{invited}} учесници ја пополниле",
+    "overallTitle": "Вкупна усогласеност",
+    "ofPoints": "{{score}} од {{max}} поени",
+    "byCategory": "Преглед по област",
+    "categoryLine": "{{score}}/{{max}} ({{pct}}%) · {{violations}} прекршоци",
+    "topViolations": "Главни прекршоци",
+    "noViolations": "Нема прекршоци.",
+    "perEmployee": "По вработен",
+    "noCompleted": "Никој не го комплетирал прегледот.",
+    "table": {
+      "employee": "Вработен",
+      "department": "Сектор",
+      "compliance": "Усогласеност",
+      "violations": "Прекршоци"
+    },
+    "exportCsv": "Експорт CSV",
+    "recommendation": "Препорака"
+  },
+
+  "myResult": {
+    "title": "Мој резултат",
+    "stillOpen": "Прегледот е сè уште отворен — резултатите ги гледа само Топ менаџментот.",
+    "yourScore": "Ваш резултат",
+    "summaryLine": "{{score}} од {{max}} поени · {{correct}} точни / {{violations}} прекршоци",
+    "byCategory": "По област",
+    "improvements": "Точки за подобрување",
+    "noImprovements": "Сите ваши одговори се во согласност.",
+    "yourAnswer": "Ваш одговор",
+    "privacyNote": "Овие резултати се видливи само за Вас. Топ менаџментот ги гледа агрегираните податоци."
+  },
+
+  "admin": {
+    "title": "Управување со прашања",
+    "subtitle": "Овде можете да додавате, менувате и деактивирате прашања. Деактивираните не се користат во нови кампањи.",
+    "newQuestion": "Ново прашање",
+    "emptyCategory": "Нема прашања за оваа област. Кликнете „Ново прашање" за да додадете.",
+    "deactivated": "деактивирано",
+    "deactivateConfirm": "Да се деактивира ова прашање?",
+    "deactivate": "Деактивирај",
+    "weight": "Тежина",
+    "form": {
+      "category": "Област",
+      "subCategory": "Под-област",
+      "subCategoryHint": "напр. recruitment",
+      "type": "Тип",
+      "typeOptions": {
+        "yes_no": "Да / Не",
+        "yes_no_na": "Да / Не / Н/А",
+        "yes_partial_no": "Да / Делумно / Не",
+        "true_false": "Точно / Неточно",
+        "choice": "Избор (со опции)",
+        "multi_check": "Повеќе избор (чекбокс)"
+      },
+      "text": "Текст на прашањето",
+      "textEn": "Текст на прашањето (EN)",
+      "article": "Член / правен извор",
+      "articleEn": "Член / правен извор (EN)",
+      "weight": "Тежина",
+      "correctAnswer": "Точен одговор",
+      "correctAnswerHint": "value од опциите",
+      "sanction": "Ниво на санкција",
+      "options": "Опции",
+      "optionValueHint": "value (внатрешно)",
+      "optionLabelHint": "label (што го гледа корисникот)",
+      "optionLabelEnHint": "label (EN)",
+      "addOption": "Додади опција",
+      "recommendation": "Препорака (ако одговорот не е точен)",
+      "recommendationEn": "Препорака (EN)",
+      "active": "Активно (видливо за нови кампањи)",
+      "save": "Зачувај",
+      "saving": "Зачувување...",
+      "addBtn": "Додади"
+    }
+  },
+
+  "approxNote": "Англискиот превод е приближен (машински превод). Македонскиот текст е официјален.",
+
+  "categoryNames": {
+    "labour": "Работни односи",
+    "gdpr": "Лични податоци",
+    "health_safety": "Безбедност и здравје",
+    "tax": "Даноци",
+    "contracts": "Договорно право",
+    "organization": "Организација и операции",
+    "systems": "Системи и ИТ",
+    "cyber": "Сајбер безбедност"
+  }
+}

@@ -146,10 +146,13 @@ export const aggregateCampaign = (assignments, answers, questionsByQid) => {
             qid,
             count,
             text: q.text,
+            textEn: q.textEn,
             article: q.article,
+            articleEn: q.articleEn,
             category: q.category,
             sanctionLevel: q.sanctionLevel,
             recommendation: q.recommendation,
+            recommendationEn: q.recommendationEn,
           }
         : null;
     })

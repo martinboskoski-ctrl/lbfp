@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ShieldCheck, BookOpen, ChevronRight, AlertCircle } from 'lucide-react';
 import Sidebar from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
@@ -20,18 +21,19 @@ const usePaginated = (items) => {
   return { page, setPage, pageCount, visible };
 };
 
-const StatusPill = ({ status }) => {
-  const map = {
-    draft:    { label: 'Драфт',     cls: 'bg-slate-100 text-slate-600' },
-    open:     { label: 'Отворен',   cls: 'bg-emerald-50 text-emerald-800 border border-emerald-200' },
-    closed:   { label: 'Затворен',  cls: 'bg-slate-100 text-slate-700' },
-    archived: { label: 'Архивиран', cls: 'bg-slate-50 text-slate-500' },
-  };
-  const v = map[status] || map.draft;
-  return <span className={`text-[11px] px-2 py-0.5 rounded ${v.cls}`}>{v.label}</span>;
+const StatusPill = ({ status, t }) => {
+  const cls = {
+    draft:    'bg-slate-100 text-slate-600',
+    open:     'bg-emerald-50 text-emerald-800 border border-emerald-200',
+    closed:   'bg-slate-100 text-slate-700',
+    archived: 'bg-slate-50 text-slate-500',
+  }[status] || 'bg-slate-100 text-slate-600';
+  const label = t(`status.${status}`, { defaultValue: status });
+  return <span className={`text-[11px] px-2 py-0.5 rounded ${cls}`}>{label}</span>;
 };
 
 const Lhc = () => {
+  const { t } = useTranslation('lhc');
   const { user } = useAuth();
   const isAdmin = isTopManagement(user);
   const { data: categories = [], isLoading: catsLoading } = useLhcCategories();
@@ -49,25 +51,23 @@ const Lhc = () => {
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <Topbar title="Правен здравствен преглед" />
+        <Topbar title={t('title')} />
         <main className="flex-1 p-4 sm:p-6">
           <div className="max-w-5xl mx-auto">
 
             {/* Header */}
             <div className="flex flex-col gap-3 mb-5">
               <div>
-                <h2 className="text-lg sm:text-xl font-semibold text-slate-900">Правен здравствен преглед</h2>
-                <p className="text-sm text-slate-500 mt-0.5">
-                  Периодичен преглед на усогласеноста на компанијата со закони и интерни процедури.
-                </p>
+                <h2 className="text-lg sm:text-xl font-semibold text-slate-900">{t('title')}</h2>
+                <p className="text-sm text-slate-500 mt-0.5">{t('subtitle')}</p>
               </div>
               {isAdmin && (
                 <div className="flex flex-wrap gap-2">
                   <Link to="/lhc/admin/questions" className="btn-secondary text-sm">
-                    Управувај со прашања
+                    {t('manageQuestions')}
                   </Link>
                   <Link to="/lhc/campaigns/new" className="btn-primary text-sm">
-                    Креирај преглед
+                    {t('createCampaign')}
                   </Link>
                 </div>
               )}
@@ -80,12 +80,12 @@ const Lhc = () => {
                   <AlertCircle size={18} className="text-amber-700 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-amber-900">
-                      Имате {openAssignments.length} отворен{openAssignments.length === 1 ? '' : 'и'} преглед{openAssignments.length === 1 ? '' : 'и'} за пополнување.
+                      {t('openAssignmentBanner', { count: openAssignments.length })}
                     </p>
                     <ul className="mt-2 space-y-1">
                       {openAssignments.map((a) => (
                         <li key={a._id} className="text-sm text-slate-700">
-                          • {a.campaign?.title || 'Преглед'} — рок: {fmtDate(a.campaign?.closeAt)}
+                          • {a.campaign?.title || ''} — {t('deadline', { date: fmtDate(a.campaign?.closeAt) })}
                         </li>
                       ))}
                     </ul>
@@ -97,7 +97,7 @@ const Lhc = () => {
             {/* Categories overview */}
             <div className="mb-5">
               <h3 className="section-title mb-2 inline-flex items-center gap-2">
-                <BookOpen size={14} /> Области на усогласеност
+                <BookOpen size={14} /> {t('categoriesTitle')}
               </h3>
               {catsLoading && (
                 <div className="flex items-center justify-center py-12">
@@ -108,22 +108,23 @@ const Lhc = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {categories.map((c) => {
                     const empty = c.questionCount === 0;
+                    const localizedName = t(`categoryNames.${c.key}`, { defaultValue: c.name });
                     return (
                       <div key={c.key} className="card p-4">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <span className="text-lg" aria-hidden>{c.icon}</span>
-                              <h4 className="font-medium text-slate-900 text-sm">{c.name}</h4>
+                              <h4 className="font-medium text-slate-900 text-sm">{localizedName}</h4>
                             </div>
                             <p className="text-xs text-slate-500 mt-1 line-clamp-2">{c.description}</p>
                           </div>
                           <span className={`text-[11px] px-2 py-0.5 rounded ${empty ? 'bg-slate-50 text-slate-400' : 'bg-slate-100 text-slate-700'}`}>
-                            {c.questionCount} прашања
+                            {t('questionsCount', { count: c.questionCount })}
                           </span>
                         </div>
                         {empty && (
-                          <p className="mt-2 text-[11px] text-slate-400 italic">Прашања во подготовка.</p>
+                          <p className="mt-2 text-[11px] text-slate-400 italic">{t('questionsComingSoon')}</p>
                         )}
                       </div>
                     );
@@ -135,7 +136,7 @@ const Lhc = () => {
             {/* Past assignments */}
             {myAssignments.length > 0 && (
               <div className="mb-5">
-                <h3 className="section-title mb-2">Мои прегледи ({myAssignments.length})</h3>
+                <h3 className="section-title mb-2">{t('myCampaigns')} ({myAssignments.length})</h3>
                 <div className="card divide-y divide-slate-100">
                   {myAsnPager.visible.map((a) => {
                     const target = a.campaign?.status === 'open' && a.status !== 'completed'
@@ -144,12 +145,12 @@ const Lhc = () => {
                     return (
                       <Link key={a._id} to={target} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50">
                         <div className="min-w-0 flex-1">
-                          <div className="text-sm font-medium text-slate-900 truncate">{a.campaign?.title || 'Преглед'}</div>
+                          <div className="text-sm font-medium text-slate-900 truncate">{a.campaign?.title || ''}</div>
                           <div className="text-xs text-slate-500">
-                            Статус: {a.status} · Рок: {fmtDate(a.campaign?.closeAt)}
+                            {t(`asnStatus.${a.status}`, { defaultValue: a.status })} · {t('deadline', { date: fmtDate(a.campaign?.closeAt) })}
                           </div>
                         </div>
-                        <StatusPill status={a.campaign?.status} />
+                        <StatusPill status={a.campaign?.status} t={t} />
                       </Link>
                     );
                   })}
@@ -162,7 +163,7 @@ const Lhc = () => {
             {isAdmin && (
               <div className="mb-5">
                 <h3 className="section-title mb-2 inline-flex items-center gap-2">
-                  <ShieldCheck size={14} /> Кампањи
+                  <ShieldCheck size={14} /> {t('campaignsTitle')}
                 </h3>
                 {ovLoading ? (
                   <div className="flex items-center justify-center py-8">
@@ -170,7 +171,7 @@ const Lhc = () => {
                   </div>
                 ) : campaigns.length === 0 ? (
                   <div className="card p-8 text-center text-slate-500 text-sm">
-                    Сè уште нема креирани кампањи.
+                    {t('noCampaigns')}
                   </div>
                 ) : (
                   <>
@@ -180,11 +181,11 @@ const Lhc = () => {
                           <div className="min-w-0 flex-1">
                             <div className="text-sm font-medium text-slate-900 truncate">{c.title}</div>
                             <div className="text-xs text-slate-500">
-                              {c.categories?.length || 0} области · {fmtDate(c.openAt)} → {fmtDate(c.closeAt)}
+                              {t('categoriesCount', { count: c.categories?.length || 0 })} · {fmtDate(c.openAt)} → {fmtDate(c.closeAt)}
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <StatusPill status={c.status} />
+                            <StatusPill status={c.status} t={t} />
                             <ChevronRight size={14} className="text-slate-400" />
                           </div>
                         </Link>
@@ -196,9 +197,7 @@ const Lhc = () => {
               </div>
             )}
 
-            <p className="text-xs text-slate-500 mt-6">
-              Резултатите од прегледот ги гледа само Топ менаџментот. Секој вработен ги гледа само своите одговори.
-            </p>
+            <p className="text-xs text-slate-500 mt-6">{t('footerNote')}</p>
           </div>
         </main>
       </div>

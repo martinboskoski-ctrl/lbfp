@@ -2,8 +2,9 @@ import mongoose from 'mongoose';
 
 const optionSchema = new mongoose.Schema(
   {
-    value: { type: String, required: true },
-    label: { type: String, required: true },
+    value:   { type: String, required: true },
+    label:   { type: String, required: true },
+    labelEn: { type: String, default: '' },
   },
   { _id: false }
 );
@@ -14,7 +15,9 @@ const lhcQuestionSchema = new mongoose.Schema(
     category:     { type: String, required: true, index: true },               // FK by key to LhcCategory
     subCategory:  { type: String, trim: true },                                // e.g. "recruitment"
     text:         { type: String, required: true, trim: true },
+    textEn:       { type: String, default: '' },
     article:      { type: String, trim: true },
+    articleEn:    { type: String, default: '' },
     type: {
       type: String,
       enum: ['yes_no', 'yes_no_na', 'yes_partial_no', 'choice', 'multi_check', 'true_false'],
@@ -32,7 +35,8 @@ const lhcQuestionSchema = new mongoose.Schema(
       enum: ['high', 'medium', 'low', 'none'],
       default: 'none',
     },
-    recommendation: { type: String, trim: true },
+    recommendation:   { type: String, trim: true },
+    recommendationEn: { type: String, default: '' },
     sourceMeta:     { type: mongoose.Schema.Types.Mixed, default: {} }, // free-form snapshot from importer
     active:         { type: Boolean, default: true },
   },
