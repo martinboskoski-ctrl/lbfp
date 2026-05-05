@@ -3,7 +3,7 @@ import {
   TrendingUp, DollarSign, Building2,
   Users, ShieldCheck, Wrench, Settings, FlaskConical,
   Factory, Crown, Users2,
-  ChevronDown, ChevronRight, ClipboardList, GraduationCap, FileText,
+  ChevronRight, ClipboardList, GraduationCap, FileText,
   Megaphone, CalendarClock, Wrench as WrenchIcon, BarChart3,
   Scale,
 } from 'lucide-react';
@@ -53,7 +53,11 @@ const NavItem = ({ to, icon, label, end, badge }) => {
   );
 };
 
-const NavGroup = ({ icon, label, items, onItemClick }) => {
+// `variant` = 'default' | 'header'
+//   default → icon + label + chevron, indented like a NavItem.
+//   header  → uppercase tracking-wider text, top hairline border, no icon — used for
+//             the Departments rail header. Same hover-flyout behavior.
+const NavGroup = ({ icon, label, items, onItemClick, variant = 'default' }) => {
   const IconCmp = icon;
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
@@ -62,33 +66,36 @@ const NavGroup = ({ icon, label, items, onItemClick }) => {
     (it) => pathname === it.to || pathname.startsWith(it.to + '/')
   );
 
+  const isHeader = variant === 'header';
+  const triggerCls = isHeader
+    ? `flex items-center justify-between w-full px-3 pt-3 pb-2 mt-1 border-t border-slate-200 cursor-pointer text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors ${
+        anyActive ? 'text-slate-900' : 'text-slate-600 hover:text-slate-900'
+      }`
+    : `relative flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors cursor-pointer w-full ${
+        anyActive
+          ? 'bg-slate-100 text-slate-900 font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-r-full before:bg-slate-700'
+          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+      }`;
+
   return (
     <div className="group relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={`relative flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors cursor-pointer w-full ${
-          anyActive
-            ? 'bg-slate-100 text-slate-900 font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-r-full before:bg-slate-700'
-            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-        }`}
-      >
-        <IconCmp size={15} className="flex-shrink-0" />
-        <span className="truncate flex-1 text-left">{label}</span>
-        {totalBadge > 0 && (
+      <button type="button" onClick={() => setOpen((v) => !v)} className={triggerCls}>
+        {!isHeader && IconCmp && <IconCmp size={15} className="flex-shrink-0" />}
+        <span className={`truncate text-left ${isHeader ? '' : 'flex-1'}`}>{label}</span>
+        {!isHeader && totalBadge > 0 && (
           <span className="text-[10px] font-semibold min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-slate-700 text-white">
             {totalBadge > 99 ? '99+' : totalBadge}
           </span>
         )}
         <ChevronRight
-          size={14}
+          size={isHeader ? 13 : 14}
           className={`text-slate-400 transition-transform md:group-hover:rotate-90 ${open ? 'rotate-90 md:rotate-0' : ''}`}
         />
       </button>
 
       {/* Mobile inline submenu */}
       {open && (
-        <div className="md:hidden pl-7 mt-0.5 space-y-0.5">
+        <div className={`md:hidden mt-0.5 space-y-0.5 ${isHeader ? 'pl-2' : 'pl-7'}`}>
           {items.map((item) => (
             <div key={item.to} onClick={onItemClick}>
               <NavItem to={item.to} icon={item.icon} label={item.label} badge={item.badge} />
@@ -97,9 +104,9 @@ const NavGroup = ({ icon, label, items, onItemClick }) => {
         </div>
       )}
 
-      {/* Desktop hover flyout — sits flush against the sidebar so the mouse can travel into it */}
+      {/* Desktop hover flyout */}
       <div className="hidden md:group-hover:block md:absolute md:left-full md:top-0 md:pl-1 md:z-50">
-        <div className="w-56 bg-white border border-slate-200 rounded-md shadow-lg p-1.5 space-y-0.5">
+        <div className="w-56 bg-white border border-slate-200 rounded-md shadow-lg p-1.5 space-y-0.5 max-h-[80vh] overflow-y-auto">
           <div className="px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
             {label}
           </div>
@@ -117,7 +124,6 @@ const NavGroup = ({ icon, label, items, onItemClick }) => {
 const Sidebar = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const { t } = useTranslation('common');
-  const [deptsOpen, setDeptsOpen] = useState(false);
 
   const { data: lhcOverview } = useLhcOverview();
   const lhcBadge = (lhcOverview?.myAssignments || []).filter(
@@ -134,9 +140,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   // ── Submenus ───────────────────────────────────────────────────
   const legalItems = [
     { to: '/procedures', icon: ClipboardList,  label: t('procedures') },
-    { to: '/trainings',  icon: GraduationCap,  label: t('trainings') },
     { to: '/lhc',        icon: Scale,          label: t('compliance'), badge: lhcBadge },
-    { to: '/agreements', icon: FileText,       label: t('agreements') },
   ];
 
   const productionItems = [
@@ -146,6 +150,12 @@ const Sidebar = ({ isOpen, onClose }) => {
       ? [{ to: '/production-report', icon: BarChart3, label: t('productionReport') }]
       : []),
   ];
+
+  const departmentItems = DEPARTMENTS.map((d) => ({
+    to:    `/dashboard?dept=${d.value}`,
+    icon:  d.icon,
+    label: t(`dept.${d.value}`),
+  }));
 
   return (
     <>
@@ -178,35 +188,15 @@ const Sidebar = ({ isOpen, onClose }) => {
         </NavLink>
 
         <nav className="flex-1 p-2 overflow-y-auto md:overflow-y-visible space-y-0.5">
-          {/* Departments */}
+          {/* Departments — top mgmt sees a hover-flyout to the right;
+              other users see only their own dept inline. */}
           {isTopManagement(user) ? (
-            <>
-              <button
-                onClick={() => setDeptsOpen((v) => !v)}
-                className="flex items-center justify-between w-full pt-2 pb-1 px-3 group"
-              >
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider group-hover:text-slate-600 transition-colors">
-                  {t('departments')}
-                </span>
-                <ChevronDown
-                  size={14}
-                  className={`text-slate-400 transition-transform duration-200 ${deptsOpen ? 'rotate-180' : ''}`}
-                />
-              </button>
-              {deptsOpen && (
-                <div className="space-y-0.5">
-                  {DEPARTMENTS.map((dept) => (
-                    <div key={dept.value} onClick={handleNavClick}>
-                      <NavItem
-                        to={`/dashboard?dept=${dept.value}`}
-                        icon={dept.icon}
-                        label={t(`dept.${dept.value}`)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
+            <NavGroup
+              variant="header"
+              label={t('departments')}
+              items={departmentItems}
+              onItemClick={handleNavClick}
+            />
           ) : (
             <div className="space-y-0.5 pt-1">
               {DEPARTMENTS.filter((d) => d.value === user?.department).map((dept) => (
@@ -229,13 +219,18 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div onClick={handleNavClick}>
               <NavItem to="/requests" icon={FileText} label={t('requests')} />
             </div>
+            <div onClick={handleNavClick}>
+              <NavItem to="/trainings" icon={GraduationCap} label={t('trainings')} />
+            </div>
+            <div onClick={handleNavClick}>
+              <NavItem to="/agreements" icon={FileText} label={t('agreements')} />
+            </div>
 
-            <NavGroup
-              icon={Scale}
-              label={t('navGroup.legal')}
-              items={legalItems}
-              onItemClick={handleNavClick}
-            />
+            {showEmployeesItem && (
+              <div onClick={handleNavClick}>
+                <NavItem to="/employees" icon={Users2} label={t('employeesNav')} />
+              </div>
+            )}
 
             <NavGroup
               icon={Factory}
@@ -244,11 +239,12 @@ const Sidebar = ({ isOpen, onClose }) => {
               onItemClick={handleNavClick}
             />
 
-            {showEmployeesItem && (
-              <div onClick={handleNavClick}>
-                <NavItem to="/employees" icon={Users2} label={t('employeesNav')} />
-              </div>
-            )}
+            <NavGroup
+              icon={Scale}
+              label={t('navGroup.legal')}
+              items={legalItems}
+              onItemClick={handleNavClick}
+            />
           </div>
 
           {user?.role === 'admin' && (
