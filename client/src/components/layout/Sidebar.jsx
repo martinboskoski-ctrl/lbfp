@@ -1,9 +1,9 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
   TrendingUp, DollarSign, Building2,
   Users, ShieldCheck, Wrench, Settings, FlaskConical,
   Factory, Crown, Users2,
-  ChevronDown, ClipboardList, GraduationCap, FileText,
+  ChevronDown, ChevronRight, ClipboardList, GraduationCap, FileText,
   Megaphone, CalendarClock, Wrench as WrenchIcon, BarChart3,
   Scale,
 } from 'lucide-react';
@@ -42,20 +42,75 @@ const NavItem = ({ to, icon, label, end, badge }) => {
         }`
       }
     >
-      {({ isActive }) => (
-        <>
-          <IconCmp size={15} className="flex-shrink-0" />
-          <span className="truncate flex-1">{label}</span>
-          {badge > 0 && (
-            <span className={`text-[10px] font-semibold min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full ${
-              isActive ? 'bg-slate-700 text-white' : 'bg-slate-700 text-white'
-            }`}>
-              {badge > 99 ? '99+' : badge}
-            </span>
-          )}
-        </>
+      <IconCmp size={15} className="flex-shrink-0" />
+      <span className="truncate flex-1">{label}</span>
+      {badge > 0 && (
+        <span className="text-[10px] font-semibold min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-slate-700 text-white">
+          {badge > 99 ? '99+' : badge}
+        </span>
       )}
     </NavLink>
+  );
+};
+
+const NavGroup = ({ icon, label, items, onItemClick }) => {
+  const IconCmp = icon;
+  const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+  const totalBadge = items.reduce((sum, it) => sum + (it.badge || 0), 0);
+  const anyActive = items.some(
+    (it) => pathname === it.to || pathname.startsWith(it.to + '/')
+  );
+
+  return (
+    <div className="group relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={`relative flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors cursor-pointer w-full ${
+          anyActive
+            ? 'bg-slate-100 text-slate-900 font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-r-full before:bg-slate-700'
+            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+        }`}
+      >
+        <IconCmp size={15} className="flex-shrink-0" />
+        <span className="truncate flex-1 text-left">{label}</span>
+        {totalBadge > 0 && (
+          <span className="text-[10px] font-semibold min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-slate-700 text-white">
+            {totalBadge > 99 ? '99+' : totalBadge}
+          </span>
+        )}
+        <ChevronRight
+          size={14}
+          className={`text-slate-400 transition-transform md:group-hover:rotate-90 ${open ? 'rotate-90 md:rotate-0' : ''}`}
+        />
+      </button>
+
+      {/* Mobile inline submenu */}
+      {open && (
+        <div className="md:hidden pl-7 mt-0.5 space-y-0.5">
+          {items.map((item) => (
+            <div key={item.to} onClick={onItemClick}>
+              <NavItem to={item.to} icon={item.icon} label={item.label} badge={item.badge} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Desktop hover flyout — sits flush against the sidebar so the mouse can travel into it */}
+      <div className="hidden md:group-hover:block md:absolute md:left-full md:top-0 md:pl-1 md:z-50">
+        <div className="w-56 bg-white border border-slate-200 rounded-md shadow-lg p-1.5 space-y-0.5">
+          <div className="px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+            {label}
+          </div>
+          {items.map((item) => (
+            <div key={item.to} onClick={onItemClick}>
+              <NavItem to={item.to} icon={item.icon} label={item.label} badge={item.badge} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -72,6 +127,25 @@ const Sidebar = ({ isOpen, onClose }) => {
   const handleNavClick = () => {
     if (onClose) onClose();
   };
+
+  const showProductionReports = isTopManagement(user) || user?.department === 'production';
+  const showEmployeesItem = canManage(user) || user?.department === 'hr';
+
+  // ── Submenus ───────────────────────────────────────────────────
+  const legalItems = [
+    { to: '/procedures', icon: ClipboardList,  label: t('procedures') },
+    { to: '/trainings',  icon: GraduationCap,  label: t('trainings') },
+    { to: '/lhc',        icon: Scale,          label: t('compliance'), badge: lhcBadge },
+    { to: '/agreements', icon: FileText,       label: t('agreements') },
+  ];
+
+  const productionItems = [
+    { to: '/maintenance', icon: WrenchIcon,    label: t('maintenance') },
+    { to: '/shifts',      icon: CalendarClock, label: t('shifts') },
+    ...(showProductionReports
+      ? [{ to: '/production-report', icon: BarChart3, label: t('productionReport') }]
+      : []),
+  ];
 
   return (
     <>
@@ -103,8 +177,8 @@ const Sidebar = ({ isOpen, onClose }) => {
           </div>
         </NavLink>
 
-        <nav className="flex-1 p-2 overflow-y-auto space-y-0.5">
-          {/* Departments section */}
+        <nav className="flex-1 p-2 overflow-y-auto md:overflow-y-visible space-y-0.5">
+          {/* Departments */}
           {isTopManagement(user) ? (
             <>
               <button
@@ -147,40 +221,32 @@ const Sidebar = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {/* Static nav items */}
+          {/* Static nav — new structured order */}
           <div className="pt-3 space-y-0.5">
-            <div onClick={handleNavClick}>
-              <NavItem to="/procedures" icon={ClipboardList} label={t('procedures')} />
-            </div>
-            <div onClick={handleNavClick}>
-              <NavItem to="/trainings" icon={GraduationCap} label={t('trainings')} />
-            </div>
-            <div onClick={handleNavClick}>
-              <NavItem to="/requests" icon={FileText} label={t('requests')} />
-            </div>
             <div onClick={handleNavClick}>
               <NavItem to="/announcements" icon={Megaphone} label={t('announcements')} />
             </div>
             <div onClick={handleNavClick}>
-              <NavItem to="/shifts" icon={CalendarClock} label={t('shifts')} />
+              <NavItem to="/requests" icon={FileText} label={t('requests')} />
             </div>
-            <div onClick={handleNavClick}>
-              <NavItem to="/maintenance" icon={WrenchIcon} label={t('maintenance')} />
-            </div>
-            <div onClick={handleNavClick}>
-              <NavItem to="/agreements" icon={FileText} label="Договори" />
-            </div>
-            <div onClick={handleNavClick}>
-              <NavItem to="/lhc" icon={Scale} label="Усогласеност" badge={lhcBadge} />
-            </div>
-            {(isTopManagement(user) || user?.department === 'production') && (
+
+            <NavGroup
+              icon={Scale}
+              label={t('navGroup.legal')}
+              items={legalItems}
+              onItemClick={handleNavClick}
+            />
+
+            <NavGroup
+              icon={Factory}
+              label={t('navGroup.production')}
+              items={productionItems}
+              onItemClick={handleNavClick}
+            />
+
+            {showEmployeesItem && (
               <div onClick={handleNavClick}>
-                <NavItem to="/production-report" icon={BarChart3} label={t('productionReport')} />
-              </div>
-            )}
-            {(canManage(user) || user?.department === 'hr') && (
-              <div onClick={handleNavClick}>
-                <NavItem to="/employees" icon={Users2} label="Вработени" />
+                <NavItem to="/employees" icon={Users2} label={t('employeesNav')} />
               </div>
             )}
           </div>

@@ -42,7 +42,14 @@
   "announcements": "Соопштенија",
   "shifts": "Распоред на смени",
   "maintenance": "Одржување",
-  "productionReport": "Производство",
+  "productionReport": "Извештаи",
+  "navGroup": {
+    "legal": "Правни",
+    "production": "Производство"
+  },
+  "agreements": "Договори",
+  "compliance": "Усогласеност",
+  "employeesNav": "Вработени",
   "language": "Јазик",
 
   "dept": {
