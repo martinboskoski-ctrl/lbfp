@@ -17,6 +17,15 @@ const isSales   = (u) => u.department === 'sales';
 const canActAsSales = (u) => isSales(u) || isTopMgmt(u);
 const isPODept  = (u) => PO_DEPARTMENTS.includes(u.department) || isTopMgmt(u);
 
+// Sales-side write actions are restricted to the PO creator (and top mgmt).
+// Other sales users can read but not act.
+const isOwner = (user, po) => {
+  if (!user || !po) return false;
+  if (isTopMgmt(user)) return true;
+  const creatorId = po.createdBy?._id || po.createdBy;
+  return String(creatorId) === String(user._id);
+};
+
 // r_and_d users also handle packaging questions (no separate `packaging` user dept).
 const canAnswerTarget = (user, targetDepartment) => {
   if (isTopMgmt(user)) return true;
@@ -130,12 +139,11 @@ export const getPO = async (req, res) => {
   res.json({ po });
 };
 
-// ── Update overview (sales only) ──────────────────────────────────────────────
+// ── Update overview (owner only) ─────────────────────────────────────────────
 export const updatePO = async (req, res) => {
-  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can edit inquiries' });
-
   const po = await PurchaseOrder.findById(req.params.id);
   if (!po) return res.status(404).json({ message: 'Pre-Order Inquiry not found' });
+  if (!isOwner(req.user, po)) return res.status(403).json({ message: 'Only the inquiry creator can edit' });
 
   const { clientName, stage, currentPhase, dateExpected, moq, description, products } = req.body;
 
@@ -163,12 +171,11 @@ export const updatePO = async (req, res) => {
   res.json({ po });
 };
 
-// ── Toggle status (sales only) ────────────────────────────────────────────────
+// ── Toggle status (owner only) ───────────────────────────────────────────────
 export const toggleStatus = async (req, res) => {
-  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can change status' });
-
   const po = await PurchaseOrder.findById(req.params.id);
   if (!po) return res.status(404).json({ message: 'Pre-Order Inquiry not found' });
+  if (!isOwner(req.user, po)) return res.status(403).json({ message: 'Only the inquiry creator can change status' });
 
   po.status = po.status === 'open' ? 'closed' : 'open';
   await po.save();
@@ -176,12 +183,11 @@ export const toggleStatus = async (req, res) => {
   res.json({ po });
 };
 
-// ── Add question (sales only) ─────────────────────────────────────────────────
+// ── Add question (owner only) ────────────────────────────────────────────────
 export const addQuestion = async (req, res) => {
-  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can add questions' });
-
   const po = await PurchaseOrder.findById(req.params.id);
   if (!po) return res.status(404).json({ message: 'Pre-Order Inquiry not found' });
+  if (!isOwner(req.user, po)) return res.status(403).json({ message: 'Only the inquiry creator can add questions' });
   if (po.status === 'closed') return res.status(400).json({ message: 'Cannot add questions to a closed inquiry' });
 
   const { text, targetDepartment, phase, productRef, deadline, priority } = req.body;
@@ -231,8 +237,13 @@ export const postThread = async (req, res) => {
   const question = po.questions.id(req.params.qid);
   if (!question) return res.status(404).json({ message: 'Question not found' });
 
-  const canPost = canActAsSales(req.user) || canAnswerTarget(req.user, question.targetDepartment);
-  if (!canPost) return res.status(403).json({ message: 'Not allowed to post on this question' });
+  // Sales side: only the inquiry creator can post. Other sales users are read-only.
+  // Dept side: anyone who can answer the target dept can post.
+  const canPostAsSales = isOwner(req.user, po);
+  const canPostAsDept  = canAnswerTarget(req.user, question.targetDepartment);
+  if (!canPostAsSales && !canPostAsDept) {
+    return res.status(403).json({ message: 'Not allowed to post on this question' });
+  }
 
   const { body } = req.body;
   if (!body?.trim())     return res.status(400).json({ message: 'Body cannot be empty' });
@@ -367,12 +378,11 @@ export const markFinalAnswer = async (req, res) => {
   res.json({ po });
 };
 
-// ── Sales review (accept or needs-more) ───────────────────────────────────────
+// ── Sales review (owner only) ────────────────────────────────────────────────
 export const salesReview = async (req, res) => {
-  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can review answers' });
-
   const po = await PurchaseOrder.findById(req.params.id);
   if (!po) return res.status(404).json({ message: 'Pre-Order Inquiry not found' });
+  if (!isOwner(req.user, po)) return res.status(403).json({ message: 'Only the inquiry creator can review answers' });
 
   const question = po.questions.id(req.params.qid);
   if (!question) return res.status(404).json({ message: 'Question not found' });
@@ -440,12 +450,11 @@ export const salesReview = async (req, res) => {
   res.json({ po });
 };
 
-// ── Log client approval / rejection (sales only) ─────────────────────────────
+// ── Log client approval / rejection (owner only) ─────────────────────────────
 export const clientApproval = async (req, res) => {
-  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can log client approval' });
-
   const po = await PurchaseOrder.findById(req.params.id);
   if (!po) return res.status(404).json({ message: 'Pre-Order Inquiry not found' });
+  if (!isOwner(req.user, po)) return res.status(403).json({ message: 'Only the inquiry creator can log client decisions' });
 
   const question = po.questions.id(req.params.qid);
   if (!question) return res.status(404).json({ message: 'Question not found' });
@@ -514,12 +523,11 @@ export const answerQuestion = async (req, res) => {
   res.json({ po });
 };
 
-// ── Legacy resolve (sales only) ───────────────────────────────────────────────
+// ── Legacy resolve (owner only) ──────────────────────────────────────────────
 export const resolveQuestion = async (req, res) => {
-  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can resolve questions' });
-
   const po = await PurchaseOrder.findById(req.params.id);
   if (!po) return res.status(404).json({ message: 'Pre-Order Inquiry not found' });
+  if (!isOwner(req.user, po)) return res.status(403).json({ message: 'Only the inquiry creator can resolve questions' });
 
   const question = po.questions.id(req.params.qid);
   if (!question) return res.status(404).json({ message: 'Question not found' });
@@ -580,12 +588,11 @@ export const deptInbox = async (req, res) => {
   res.json({ items });
 };
 
-// ── Client digest (markdown) ──────────────────────────────────────────────────
+// ── Client digest (owner only) ───────────────────────────────────────────────
 export const digest = async (req, res) => {
-  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can generate the digest' });
-
   const po = await PurchaseOrder.findById(req.params.id).populate(POPULATE);
   if (!po) return res.status(404).json({ message: 'Pre-Order Inquiry not found' });
+  if (!isOwner(req.user, po)) return res.status(403).json({ message: 'Only the inquiry creator can generate the digest' });
 
   const eligible = po.questions.filter((q) =>
     q.status === 'awaiting_sales_review' ||
@@ -615,12 +622,11 @@ export const digest = async (req, res) => {
   res.json({ markdown: lines.join('\n'), count: eligible.length });
 };
 
-// ── Delete PO (sales only) ────────────────────────────────────────────────────
+// ── Delete PO (owner only) ───────────────────────────────────────────────────
 export const deletePO = async (req, res) => {
-  if (!canActAsSales(req.user)) return res.status(403).json({ message: 'Only Sales can delete inquiries' });
-
   const po = await PurchaseOrder.findById(req.params.id);
   if (!po) return res.status(404).json({ message: 'Pre-Order Inquiry not found' });
+  if (!isOwner(req.user, po)) return res.status(403).json({ message: 'Only the inquiry creator can delete' });
 
   await po.deleteOne();
   res.json({ message: 'Pre-Order Inquiry deleted' });

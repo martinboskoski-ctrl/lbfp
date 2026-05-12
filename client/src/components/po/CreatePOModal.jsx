@@ -19,7 +19,7 @@ const PHASE_KEYS = [
   'phase_9_production_verification',
 ];
 
-const emptyProduct = () => ({ productType: '', weight: '', description: '' });
+const emptyProduct = () => ({ productType: '' });
 
 const CreatePOModal = ({ onClose }) => {
   const { t }     = useTranslation('po');
@@ -33,7 +33,6 @@ const CreatePOModal = ({ onClose }) => {
     currentPhase: 'phase_1_idea',
     dateExpected: '',
     moq: '',
-    description: '',
   });
   const [products, setProducts] = useState([emptyProduct()]);
   const [errors, setErrors]     = useState({});
@@ -58,13 +57,10 @@ const CreatePOModal = ({ onClose }) => {
     } else {
       if (form.moq && isNaN(form.moq)) e.moq   = t('modal.requiredNumber');
     }
-    if (!isEnglish(form.description)) e.description = t('modal.englishOnly');
 
     products.forEach((p, i) => {
-      if (!p.productType.trim()) e[`pt_${i}`] = t('modal.required');
+      if (!p.productType.trim())     e[`pt_${i}`] = t('modal.required');
       if (!isEnglish(p.productType)) e[`pt_${i}`] = t('modal.englishOnly');
-      if (!isEnglish(p.weight))      e[`pw_${i}`] = t('modal.englishOnly');
-      if (!isEnglish(p.description)) e[`pd_${i}`] = t('modal.englishOnly');
     });
 
     setErrors(e);
@@ -80,7 +76,6 @@ const CreatePOModal = ({ onClose }) => {
       currentPhase: form.currentPhase,
       dateExpected: form.dateExpected || undefined,
       moq:          form.moq ? Number(form.moq) : undefined,
-      description:  form.description.trim(),
       products: products.filter((p) => p.productType.trim()),
     });
     onClose();
@@ -173,18 +168,6 @@ const CreatePOModal = ({ onClose }) => {
             </div>
           </div>
 
-          {/* Description */}
-          <div>
-            <label className="label">{t('modal.descriptionLabel')}</label>
-            <input
-              className={`input ${errors.description ? 'border-red-400' : ''}`}
-              placeholder={t('modal.descriptionPlaceholder')}
-              value={form.description}
-              onChange={(e) => setField('description', e.target.value)}
-            />
-            {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
-          </div>
-
           {/* Products */}
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -205,35 +188,13 @@ const CreatePOModal = ({ onClose }) => {
                       </button>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <input
-                        className={`input text-sm ${errors[`pt_${i}`] ? 'border-red-400' : ''}`}
-                        placeholder={t('modal.typePlaceholder')}
-                        value={p.productType}
-                        onChange={(e) => setProduct(i, 'productType', e.target.value)}
-                      />
-                      {errors[`pt_${i}`] && <p className="text-red-500 text-xs mt-0.5">{errors[`pt_${i}`]}</p>}
-                    </div>
-                    <div>
-                      <input
-                        className={`input text-sm ${errors[`pw_${i}`] ? 'border-red-400' : ''}`}
-                        placeholder={t('modal.weightPlaceholder')}
-                        value={p.weight}
-                        onChange={(e) => setProduct(i, 'weight', e.target.value)}
-                      />
-                      {errors[`pw_${i}`] && <p className="text-red-500 text-xs mt-0.5">{errors[`pw_${i}`]}</p>}
-                    </div>
-                  </div>
-                  <div>
-                    <input
-                      className={`input text-sm ${errors[`pd_${i}`] ? 'border-red-400' : ''}`}
-                      placeholder={t('modal.productDescPlaceholder')}
-                      value={p.description}
-                      onChange={(e) => setProduct(i, 'description', e.target.value)}
-                    />
-                    {errors[`pd_${i}`] && <p className="text-red-500 text-xs mt-0.5">{errors[`pd_${i}`]}</p>}
-                  </div>
+                  <input
+                    className={`input text-sm ${errors[`pt_${i}`] ? 'border-red-400' : ''}`}
+                    placeholder={t('modal.typePlaceholder')}
+                    value={p.productType}
+                    onChange={(e) => setProduct(i, 'productType', e.target.value)}
+                  />
+                  {errors[`pt_${i}`] && <p className="text-red-500 text-xs mt-0.5">{errors[`pt_${i}`]}</p>}
                 </div>
               ))}
             </div>

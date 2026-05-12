@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft, CheckCircle2, Loader2, Send, Lock, Unlock, Trash2,
-  Flag, Clock, MessageSquare, ThumbsUp, ThumbsDown, FileText, Copy,
+  MessageSquare, ThumbsUp, ThumbsDown, FileText, Copy,
 } from 'lucide-react';
 import {
   usePO, useToggleStatus, useAddQuestion, usePostThread, useMarkFinal,
@@ -34,12 +34,6 @@ const STATUS_COLORS = {
   sent_to_client:        'bg-indigo-50 text-indigo-700',
   client_approved:       'bg-green-50 text-green-700',
   client_rejected:       'bg-red-50 text-red-700',
-};
-
-const PRIORITY_COLORS = {
-  low:    'bg-gray-50 text-gray-500',
-  normal: 'bg-blue-50 text-blue-600',
-  high:   'bg-red-50 text-red-600',
 };
 
 const canAnswerFor = (user, target) => {
@@ -81,8 +75,7 @@ const RequiredFieldsChecklist = ({ fields, onToggle, disabled, t }) => {
 };
 
 // ── One question card ───────────────────────────────────────────────────────
-const QuestionCard = ({ question, po, user, t }) => {
-  const isSales       = user?.department === 'sales' || user?.department === 'top_management';
+const QuestionCard = ({ question, po, user, isOwner, t }) => {
   const canAnswer     = canAnswerFor(user, question.targetDepartment);
   const isClosed      = po.status === 'closed';
 
@@ -146,17 +139,8 @@ const QuestionCard = ({ question, po, user, t }) => {
           <p className="text-sm font-medium text-gray-900">{question.text}</p>
           <div className="flex items-center gap-2 mt-1 flex-wrap text-xs text-gray-400">
             <span>{t('question.askedBy', { name: question.createdBy?.name, date: fmtDateShort(question.createdAt) })}</span>
-            {question.productRef && <span className="text-gray-500">· {question.productRef}</span>}
             <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">
               {t(`phase.${question.phase}`)}
-            </span>
-            {question.deadline && (
-              <span className="flex items-center gap-1 text-gray-500">
-                <Clock size={11} /> {fmtDateShort(question.deadline)}
-              </span>
-            )}
-            <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${PRIORITY_COLORS[question.priority || 'normal']}`}>
-              <Flag size={10} /> {t(`priority.${question.priority || 'normal'}`)}
             </span>
           </div>
         </div>
@@ -197,8 +181,8 @@ const QuestionCard = ({ question, po, user, t }) => {
         />
       )}
 
-      {/* Reply box — any participant can post on an open question */}
-      {!isClosed && (canAnswer || isSales) && question.status !== 'client_approved' && (
+      {/* Reply box — answerers always; sales side only the inquiry owner. */}
+      {!isClosed && (canAnswer || isOwner) && question.status !== 'client_approved' && (
         <div className="mt-3">
           <textarea
             className="input resize-none text-sm"
@@ -233,8 +217,8 @@ const QuestionCard = ({ question, po, user, t }) => {
         </div>
       )}
 
-      {/* Sales review controls */}
-      {isSales && question.status === 'awaiting_sales_review' && (
+      {/* Sales review controls (owner only) */}
+      {isOwner && question.status === 'awaiting_sales_review' && (
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
           <p className="text-xs font-semibold text-amber-800 mb-2">{t('question.reviewBlock')}</p>
           <input
@@ -270,8 +254,8 @@ const QuestionCard = ({ question, po, user, t }) => {
         </div>
       )}
 
-      {/* Sales: log client decision */}
-      {isSales && question.status === 'sent_to_client' && (
+      {/* Log client decision (owner only) */}
+      {isOwner && question.status === 'sent_to_client' && (
         <div className="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 p-3">
           <p className="text-xs font-semibold text-indigo-800 mb-2">{t('question.clientDecisionBlock')}</p>
           <input
@@ -328,17 +312,14 @@ const QuestionCard = ({ question, po, user, t }) => {
 
 // ── Add-question form ────────────────────────────────────────────────────────
 const AddQuestionForm = ({ po, defaultDept, t }) => {
-  const [open, setOpen]         = useState(false);
-  const [form, setForm]         = useState({
+  const [open, setOpen]   = useState(false);
+  const [form, setForm]   = useState({
     text: '',
     targetDepartment: defaultDept,
     phase: po.currentPhase || 'phase_1_idea',
-    productRef: '',
-    deadline: '',
-    priority: 'normal',
   });
-  const [error, setError]       = useState('');
-  const addQuestion             = useAddQuestion(po._id);
+  const [error, setError] = useState('');
+  const addQuestion       = useAddQuestion(po._id);
 
   const setF = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -346,12 +327,8 @@ const AddQuestionForm = ({ po, defaultDept, t }) => {
     if (!form.text.trim())     { setError(t('question.questionEmpty')); return; }
     if (!isEnglish(form.text)) { setError(t('question.englishOnly')); return; }
     setError('');
-    await addQuestion.mutateAsync({
-      ...form,
-      text: form.text.trim(),
-      deadline: form.deadline || undefined,
-    });
-    setForm((f) => ({ ...f, text: '', productRef: '', deadline: '' }));
+    await addQuestion.mutateAsync({ ...form, text: form.text.trim() });
+    setForm((f) => ({ ...f, text: '' }));
     setOpen(false);
   };
 
@@ -384,21 +361,6 @@ const AddQuestionForm = ({ po, defaultDept, t }) => {
         <select className="input text-sm" value={form.phase} onChange={(e) => setF('phase', e.target.value)}>
           {PHASE_KEYS.map((p) => <option key={p} value={p}>{t(`phase.${p}`)}</option>)}
         </select>
-        <input
-          className="input text-sm"
-          placeholder={t('question.productRefPlaceholder')}
-          value={form.productRef}
-          onChange={(e) => setF('productRef', e.target.value)}
-        />
-        <input
-          type="date"
-          className="input text-sm"
-          value={form.deadline}
-          onChange={(e) => setF('deadline', e.target.value)}
-        />
-        <select className="input text-sm col-span-2" value={form.priority} onChange={(e) => setF('priority', e.target.value)}>
-          {['low', 'normal', 'high'].map((p) => <option key={p} value={p}>{t(`priority.${p}`)}</option>)}
-        </select>
       </div>
 
       <div className="flex justify-end gap-2">
@@ -417,8 +379,7 @@ const AddQuestionForm = ({ po, defaultDept, t }) => {
 };
 
 // ── Dept tab panel ───────────────────────────────────────────────────────────
-const DeptPanel = ({ dept, po, user, t }) => {
-  const isSales  = user?.department === 'sales' || user?.department === 'top_management';
+const DeptPanel = ({ dept, po, user, isOwner, t }) => {
   const questions = po.questions.filter((q) => q.targetDepartment === dept);
   const isClosed  = po.status === 'closed';
 
@@ -429,10 +390,10 @@ const DeptPanel = ({ dept, po, user, t }) => {
       )}
 
       {questions.map((q) => (
-        <QuestionCard key={q._id} question={q} po={po} user={user} t={t} />
+        <QuestionCard key={q._id} question={q} po={po} user={user} isOwner={isOwner} t={t} />
       ))}
 
-      {isSales && !isClosed && <AddQuestionForm po={po} defaultDept={dept} t={t} />}
+      {isOwner && !isClosed && <AddQuestionForm po={po} defaultDept={dept} t={t} />}
     </div>
   );
 };
@@ -476,6 +437,10 @@ const PODetail = () => {
   const [digestMd, setDigestMd] = useState(null);
 
   const isSales  = user?.department === 'sales' || user?.department === 'top_management';
+  const isOwner  = !!po && (
+    user?.department === 'top_management' ||
+    String(po.createdBy?._id || po.createdBy) === String(user?._id)
+  );
 
   // Which dept tabs to show
   const visibleTabs = isSales
@@ -539,7 +504,7 @@ const PODetail = () => {
           </span>
         </div>
 
-        {isSales && (
+        {isOwner && (
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handleDigest}
@@ -585,12 +550,6 @@ const PODetail = () => {
                   <p className="font-medium text-gray-800">{po.moq.toLocaleString()}</p>
                 </div>
               )}
-              {po.description && (
-                <div>
-                  <p className="text-xs text-gray-400 mb-0.5">{t('description')}</p>
-                  <p className="text-gray-700 leading-relaxed">{po.description}</p>
-                </div>
-              )}
               {po.stage === 'pre_order' && !po.dateExpected && !po.moq && (
                 <p className="text-xs text-gray-400 italic">{t('preOrderNoDetails')}</p>
               )}
@@ -604,8 +563,6 @@ const PODetail = () => {
                 {po.products.map((p, i) => (
                   <div key={i} className="border-b border-gray-100 last:border-0 pb-3 last:pb-0">
                     <p className="text-xs font-semibold text-gray-800">{p.productType}</p>
-                    {p.weight && <p className="text-xs text-gray-500 mt-0.5">{t('weight', { value: p.weight })}</p>}
-                    {p.description && <p className="text-xs text-gray-400 mt-0.5">{p.description}</p>}
                   </div>
                 ))}
               </div>
@@ -649,7 +606,7 @@ const PODetail = () => {
             </div>
 
             <div className="p-5">
-              <DeptPanel key={activeTab} dept={activeTab} po={po} user={user} t={t} />
+              <DeptPanel key={activeTab} dept={activeTab} po={po} user={user} isOwner={isOwner} t={t} />
             </div>
           </div>
         </div>
