@@ -7,19 +7,38 @@ import { useNavigate } from 'react-router-dom';
 const ASCII_RE = /^[\x20-\x7E]*$/;
 const isEnglish = (s) => !s || ASCII_RE.test(s);
 
+const PHASE_KEYS = [
+  'phase_1_idea',
+  'phase_2_evaluation',
+  'phase_3_plan',
+  'phase_4_client_feedback',
+  'phase_5_design_logistics',
+  'phase_6_industrial_trial',
+  'phase_7_design_approval',
+  'phase_8_production_planning',
+  'phase_9_production_verification',
+];
+
 const emptyProduct = () => ({ productType: '', weight: '', description: '' });
 
 const CreatePOModal = ({ onClose }) => {
-  const { t } = useTranslation('po');
+  const { t }     = useTranslation('po');
   const { t: tc } = useTranslation('common');
-  const navigate    = useNavigate();
-  const createPO    = useCreatePO();
+  const navigate  = useNavigate();
+  const createPO  = useCreatePO();
 
   const [form, setForm] = useState({
-    clientName: '', dateExpected: '', moq: '', description: '',
+    clientName: '',
+    stage: 'pre_order',
+    currentPhase: 'phase_1_idea',
+    dateExpected: '',
+    moq: '',
+    description: '',
   });
   const [products, setProducts] = useState([emptyProduct()]);
   const [errors, setErrors]     = useState({});
+
+  const isPreOrder = form.stage === 'pre_order';
 
   const setField = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -31,17 +50,20 @@ const CreatePOModal = ({ onClose }) => {
 
   const validate = () => {
     const e = {};
-    if (!form.clientName.trim())  e.clientName   = t('modal.required');
-    if (!isEnglish(form.clientName))  e.clientName = t('modal.englishOnly');
-    if (!form.dateExpected)       e.dateExpected  = t('modal.required');
-    if (!form.moq || isNaN(form.moq)) e.moq       = t('modal.requiredNumber');
+    if (!form.clientName.trim())   e.clientName  = t('modal.required');
+    if (!isEnglish(form.clientName)) e.clientName = t('modal.englishOnly');
+    if (!isPreOrder) {
+      if (!form.dateExpected) e.dateExpected = t('modal.required');
+      if (!form.moq || isNaN(form.moq)) e.moq  = t('modal.requiredNumber');
+    } else {
+      if (form.moq && isNaN(form.moq)) e.moq   = t('modal.requiredNumber');
+    }
     if (!isEnglish(form.description)) e.description = t('modal.englishOnly');
 
     products.forEach((p, i) => {
       if (!p.productType.trim()) e[`pt_${i}`] = t('modal.required');
       if (!isEnglish(p.productType)) e[`pt_${i}`] = t('modal.englishOnly');
-      if (!p.weight.trim())      e[`pw_${i}`] = t('modal.required');
-      if (!isEnglish(p.weight))  e[`pw_${i}`] = t('modal.englishOnly');
+      if (!isEnglish(p.weight))      e[`pw_${i}`] = t('modal.englishOnly');
       if (!isEnglish(p.description)) e[`pd_${i}`] = t('modal.englishOnly');
     });
 
@@ -54,10 +76,12 @@ const CreatePOModal = ({ onClose }) => {
     if (!validate()) return;
     const result = await createPO.mutateAsync({
       clientName:   form.clientName.trim(),
-      dateExpected: form.dateExpected,
-      moq:          Number(form.moq),
+      stage:        form.stage,
+      currentPhase: form.currentPhase,
+      dateExpected: form.dateExpected || undefined,
+      moq:          form.moq ? Number(form.moq) : undefined,
       description:  form.description.trim(),
-      products,
+      products: products.filter((p) => p.productType.trim()),
     });
     onClose();
     navigate(`/po/${result.data.po._id}`);
@@ -67,7 +91,6 @@ const CreatePOModal = ({ onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
 
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
           <h2 className="text-base font-bold text-gray-900">{t('modal.title')}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><X size={18} /></button>
@@ -75,7 +98,29 @@ const CreatePOModal = ({ onClose }) => {
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
 
-          {/* Client + Date row */}
+          {/* Stage segmented control */}
+          <div>
+            <label className="label">{t('modal.stageLabel')}</label>
+            <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden text-xs">
+              {['pre_order', 'order'].map((s) => (
+                <button
+                  type="button"
+                  key={s}
+                  onClick={() => setField('stage', s)}
+                  className={`px-4 py-2 font-medium transition-colors ${
+                    form.stage === s ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {t(`stage.${s}`)}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              {isPreOrder ? t('modal.preOrderHint') : t('modal.orderHint')}
+            </p>
+          </div>
+
+          {/* Client + Phase row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="label">{t('modal.clientNameLabel')}</label>
@@ -88,7 +133,25 @@ const CreatePOModal = ({ onClose }) => {
               {errors.clientName && <p className="text-red-500 text-xs mt-1">{errors.clientName}</p>}
             </div>
             <div>
-              <label className="label">{t('modal.dateExpectedLabel')}</label>
+              <label className="label">{t('modal.currentPhaseLabel')}</label>
+              <select
+                className="input"
+                value={form.currentPhase}
+                onChange={(e) => setField('currentPhase', e.target.value)}
+              >
+                {PHASE_KEYS.map((p) => (
+                  <option key={p} value={p}>{t(`phase.${p}`)}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Date + MOQ row */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="label">
+                {t('modal.dateExpectedLabel')}{isPreOrder ? '' : ' *'}
+              </label>
               <input
                 type="date"
                 className={`input ${errors.dateExpected ? 'border-red-400' : ''}`}
@@ -97,12 +160,8 @@ const CreatePOModal = ({ onClose }) => {
               />
               {errors.dateExpected && <p className="text-red-500 text-xs mt-1">{errors.dateExpected}</p>}
             </div>
-          </div>
-
-          {/* MOQ + Description row */}
-          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="label">{t('modal.moqLabel')}</label>
+              <label className="label">{t('modal.moqLabel')}{isPreOrder ? '' : ' *'}</label>
               <input
                 type="number"
                 className={`input ${errors.moq ? 'border-red-400' : ''}`}
@@ -112,16 +171,18 @@ const CreatePOModal = ({ onClose }) => {
               />
               {errors.moq && <p className="text-red-500 text-xs mt-1">{errors.moq}</p>}
             </div>
-            <div>
-              <label className="label">{t('modal.descriptionLabel')}</label>
-              <input
-                className={`input ${errors.description ? 'border-red-400' : ''}`}
-                placeholder={t('modal.descriptionPlaceholder')}
-                value={form.description}
-                onChange={(e) => setField('description', e.target.value)}
-              />
-              {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
-            </div>
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="label">{t('modal.descriptionLabel')}</label>
+            <input
+              className={`input ${errors.description ? 'border-red-400' : ''}`}
+              placeholder={t('modal.descriptionPlaceholder')}
+              value={form.description}
+              onChange={(e) => setField('description', e.target.value)}
+            />
+            {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
           </div>
 
           {/* Products */}
@@ -178,7 +239,6 @@ const CreatePOModal = ({ onClose }) => {
             </div>
           </div>
 
-          {/* Footer */}
           <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
             <button type="button" onClick={onClose} className="btn-secondary">{tc('cancel')}</button>
             <button type="submit" disabled={createPO.isPending} className="btn-primary flex items-center gap-2">

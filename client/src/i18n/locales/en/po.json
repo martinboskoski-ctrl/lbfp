@@ -1,9 +1,11 @@
 {
-  "title": "Purchase Orders",
+  "title": "Pre-Order Inquiries",
   "totalCount": "{{count}} total",
-  "newPO": "New Purchase Order",
-  "noPOs": "No purchase orders yet",
-  "notFound": "Purchase Order not found.",
+  "newPO": "New Inquiry",
+  "noPOs": "No inquiries yet",
+  "notFound": "Inquiry not found.",
+  "cancel": "Cancel",
+  "close": "Close",
 
   "expected": "Expected: {{date}}",
   "moqShort": "MOQ: {{value}}",
@@ -16,10 +18,15 @@
     "open": "open",
     "closed": "closed"
   },
-  "closePO": "Close PO",
-  "reopenPO": "Reopen PO",
+  "stage": {
+    "pre_order": "Pre-Order",
+    "order": "Order"
+  },
+  "closePO": "Close",
+  "reopenPO": "Reopen",
   "deletePO": "Delete",
-  "deleteConfirm": "Delete this Purchase Order?",
+  "deleteConfirm": "Delete this inquiry?",
+  "clientDigest": "Client digest",
 
   "overview": "Overview",
   "dateExpected": "Date Expected",
@@ -29,11 +36,41 @@
   "productsCount": "Products ({{count}})",
   "weight": "Weight: {{value}}",
   "createdBy": "Created by",
+  "preOrderNoDetails": "Pre-order — MOQ and dates not yet fixed.",
 
   "deptTab": {
     "quality_assurance": "Quality Assurance",
     "r_and_d": "R&D",
-    "nabavki": "Procurement"
+    "nabavki": "Procurement",
+    "packaging": "Packaging"
+  },
+
+  "phase": {
+    "phase_1_idea": "1 · Idea",
+    "phase_2_evaluation": "2 · Evaluation",
+    "phase_3_plan": "3 · Plan",
+    "phase_4_client_feedback": "4 · Client feedback",
+    "phase_5_design_logistics": "5 · Design / Logistics",
+    "phase_6_industrial_trial": "6 · Industrial trial",
+    "phase_7_design_approval": "7 · Design approval",
+    "phase_8_production_planning": "8 · Production planning",
+    "phase_9_production_verification": "9 · Production verification"
+  },
+
+  "qstatus": {
+    "pending": "pending",
+    "in_progress": "in progress",
+    "awaiting_sales_review": "awaiting sales review",
+    "needs_more": "needs more info",
+    "sent_to_client": "sent to client",
+    "client_approved": "client approved",
+    "client_rejected": "client rejected"
+  },
+
+  "priority": {
+    "low": "low",
+    "normal": "normal",
+    "high": "high"
   },
 
   "question": {
@@ -42,35 +79,76 @@
     "answeredBy": "— {{name}} · {{date}}",
     "noAnswer": "No answer yet",
     "noQuestions": "No questions yet for this department",
-    "answerPlaceholder": "Type your answer in English...",
-    "answerEmpty": "Answer cannot be empty",
+    "replyPlaceholder": "Type a reply in English…",
+    "answerEmpty": "Cannot be empty",
     "englishOnly": "English only (ASCII characters)",
     "submitAnswer": "Submit Answer",
+    "postReply": "Post reply",
+    "markFinal": "Mark as final answer",
+    "fillAllFirst": "Fill in all required fields first",
+    "missingFields": "Missing fields",
+    "finalAnswer": "final",
+    "requiredFields": "Required fields for a complete answer",
     "markResolved": "Mark as Resolved",
     "addQuestion": "Add question for this department",
-    "questionPlaceholder": "Type question in English...",
+    "addQuestionBtn": "Add Question",
+    "questionPlaceholder": "Type question in English…",
     "questionEmpty": "Question cannot be empty",
-    "addQuestionBtn": "Add Question"
+    "productRefPlaceholder": "Product / SKU (optional)",
+
+    "reviewBlock": "Sales review required",
+    "reviewNotesPlaceholder": "Optional notes for the dept…",
+    "acceptAndSend": "Accept & send to client",
+    "acceptOnly": "Accept (keep internal)",
+    "needsMore": "Needs more info",
+
+    "clientDecisionBlock": "Log client decision",
+    "clientNotesPlaceholder": "Optional client notes…",
+    "clientApproved": "Client approved",
+    "clientRejected": "Client rejected",
+
+    "reviewAccepted": "Accepted by {{name}} · {{date}}",
+    "reviewRejected": "Returned for more info by {{name}} · {{date}}",
+    "clientLoggedApproved": "Client approved · {{date}}",
+    "clientLoggedRejected": "Client rejected · {{date}}",
+    "fullyResolved": "Fully resolved"
+  },
+
+  "digest": {
+    "title": "Auto-generated client digest",
+    "copy": "Copy to clipboard",
+    "copied": "Copied"
+  },
+
+  "inbox": {
+    "title": "Inquiry Inbox",
+    "subtitle": "{{dept}} · {{count}} items",
+    "empty": "Nothing waiting on you here.",
+    "allStatuses": "All"
   },
 
   "modal": {
-    "title": "New Purchase Order",
+    "title": "New Pre-Order Inquiry",
+    "stageLabel": "Stage",
+    "preOrderHint": "Pre-order: MOQ and date are optional — useful while the client is still asking questions.",
+    "orderHint": "Order: MOQ and expected date are required.",
+    "currentPhaseLabel": "Current NPD phase",
     "clientNameLabel": "Client Name *",
     "clientNamePlaceholder": "Acme Corp",
-    "dateExpectedLabel": "Date Expected *",
-    "moqLabel": "MOQ *",
+    "dateExpectedLabel": "Date Expected",
+    "moqLabel": "MOQ",
     "moqPlaceholder": "1000",
     "descriptionLabel": "Description",
-    "descriptionPlaceholder": "Optional notes...",
+    "descriptionPlaceholder": "Optional notes…",
     "productsLabel": "Products",
     "addProduct": "Add product",
     "productNum": "Product {{num}}",
     "typePlaceholder": "Type *",
-    "weightPlaceholder": "Weight *",
+    "weightPlaceholder": "Weight",
     "productDescPlaceholder": "Description (optional)",
     "required": "Required",
     "requiredNumber": "Required (number)",
     "englishOnly": "English only (ASCII)",
-    "submitButton": "Create PO"
+    "submitButton": "Create Inquiry"
   }
 }

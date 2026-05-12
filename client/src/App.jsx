@@ -11,6 +11,7 @@ import ProjectCreate from './pages/ProjectCreate.jsx';
 import ProjectDetail from './pages/ProjectDetail.jsx';
 import AdminUsers from './pages/AdminUsers.jsx';
 import PODetail from './pages/PODetail.jsx';
+import InquiryInbox from './pages/InquiryInbox.jsx';
 import Procedures from './pages/Procedures.jsx';
 import Trainings from './pages/Trainings.jsx';
 import AnticorruptionTraining from './pages/AnticorruptionTraining.jsx';
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/projects/:id" element={<ProjectDetail />} />
             <Route path="/po/:id"       element={<PODetail />} />
+            <Route path="/inquiries/inbox" element={<InquiryInbox />} />
             <Route path="/register" element={<Register />} />
             <Route path="/procedures" element={<Procedures />} />
             <Route path="/procedures/:id" element={<ProcedureDetail />} />

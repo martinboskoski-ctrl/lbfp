@@ -1,9 +1,11 @@
 {
-  "title": "Purchase Orders",
+  "title": "Пред-нарачки / Прашања",
   "totalCount": "{{count}} вкупно",
-  "newPO": "Нова нарачка",
-  "noPOs": "Нема нарачки",
-  "notFound": "Purchase Order не е пронајден.",
+  "newPO": "Ново барање",
+  "noPOs": "Нема барања",
+  "notFound": "Барањето не е пронајдено.",
+  "cancel": "Откажи",
+  "close": "Затвори",
 
   "expected": "Очекуван: {{date}}",
   "moqShort": "MOQ: {{value}}",
@@ -13,13 +15,18 @@
   "openQuestions_other": "{{count}} отворени",
 
   "status": {
-    "open": "отворен",
-    "closed": "затворен"
+    "open": "отворено",
+    "closed": "затворено"
   },
-  "closePO": "Затвори PO",
-  "reopenPO": "Отвори PO",
+  "stage": {
+    "pre_order": "Пред-нарачка",
+    "order": "Нарачка"
+  },
+  "closePO": "Затвори",
+  "reopenPO": "Отвори",
   "deletePO": "Избриши",
-  "deleteConfirm": "Избриши ја оваа нарачка?",
+  "deleteConfirm": "Избриши го ова барање?",
+  "clientDigest": "Резиме за клиент",
 
   "overview": "Преглед",
   "dateExpected": "Очекуван датум",
@@ -29,11 +36,41 @@
   "productsCount": "Производи ({{count}})",
   "weight": "Тежина: {{value}}",
   "createdBy": "Креирано од",
+  "preOrderNoDetails": "Пред-нарачка — MOQ и датумот сè уште не се фиксни.",
 
   "deptTab": {
     "quality_assurance": "Обезбедување квалитет",
     "r_and_d": "Истражување и развој",
-    "nabavki": "Набавки"
+    "nabavki": "Набавки",
+    "packaging": "Пакување"
+  },
+
+  "phase": {
+    "phase_1_idea": "1 · Идеја",
+    "phase_2_evaluation": "2 · Оценка",
+    "phase_3_plan": "3 · План",
+    "phase_4_client_feedback": "4 · Повратни информации",
+    "phase_5_design_logistics": "5 · Дизајн / Логистика",
+    "phase_6_industrial_trial": "6 · Индустриски тест",
+    "phase_7_design_approval": "7 · Одобрување дизајн",
+    "phase_8_production_planning": "8 · Планирање производство",
+    "phase_9_production_verification": "9 · Верификација производство"
+  },
+
+  "qstatus": {
+    "pending": "чека",
+    "in_progress": "во тек",
+    "awaiting_sales_review": "за преглед од продажба",
+    "needs_more": "недоволно информации",
+    "sent_to_client": "испратено до клиент",
+    "client_approved": "одобрено од клиент",
+    "client_rejected": "одбиено од клиент"
+  },
+
+  "priority": {
+    "low": "ниска",
+    "normal": "нормална",
+    "high": "висока"
   },
 
   "question": {
@@ -42,23 +79,64 @@
     "answeredBy": "— {{name}} · {{date}}",
     "noAnswer": "Нема одговор",
     "noQuestions": "Нема прашања за ова одделение",
-    "answerPlaceholder": "Внесете го одговорот на англиски…",
-    "answerEmpty": "Одговорот не може да биде празен",
+    "replyPlaceholder": "Напишете одговор на англиски…",
+    "answerEmpty": "Не може да биде празно",
     "englishOnly": "Само англиски (ASCII карактери)",
     "submitAnswer": "Одговори",
+    "postReply": "Прати одговор",
+    "markFinal": "Означи како финален одговор",
+    "fillAllFirst": "Прво пополнете ги сите задолжителни полиња",
+    "missingFields": "Недостасуваат полиња",
+    "finalAnswer": "финално",
+    "requiredFields": "Задолжителни полиња за комплетен одговор",
     "markResolved": "Означи како решено",
     "addQuestion": "Додај прашање за ова одделение",
+    "addQuestionBtn": "Додај прашање",
     "questionPlaceholder": "Напишете прашање на англиски…",
     "questionEmpty": "Прашањето не може да биде празно",
-    "addQuestionBtn": "Додај прашање"
+    "productRefPlaceholder": "Производ / SKU (опционално)",
+
+    "reviewBlock": "Потребен е преглед од продажба",
+    "reviewNotesPlaceholder": "Опционални белешки за одделението…",
+    "acceptAndSend": "Прифати и испрати до клиент",
+    "acceptOnly": "Прифати (интерно)",
+    "needsMore": "Бара повеќе информации",
+
+    "clientDecisionBlock": "Запиши одлука од клиент",
+    "clientNotesPlaceholder": "Опционални белешки од клиент…",
+    "clientApproved": "Клиентот одобри",
+    "clientRejected": "Клиентот одби",
+
+    "reviewAccepted": "Прифатено од {{name}} · {{date}}",
+    "reviewRejected": "Вратено за дополнителни информации од {{name}} · {{date}}",
+    "clientLoggedApproved": "Клиентот одобри · {{date}}",
+    "clientLoggedRejected": "Клиентот одби · {{date}}",
+    "fullyResolved": "Целосно решено"
+  },
+
+  "digest": {
+    "title": "Автоматско резиме за клиент",
+    "copy": "Копирај",
+    "copied": "Копирано"
+  },
+
+  "inbox": {
+    "title": "Влезна пошта за прашања",
+    "subtitle": "{{dept}} · {{count}} ставки",
+    "empty": "Нема прашања што чекаат за вас.",
+    "allStatuses": "Сите"
   },
 
   "modal": {
-    "title": "Нова нарачка",
+    "title": "Ново пред-нарачко барање",
+    "stageLabel": "Фаза",
+    "preOrderHint": "Пред-нарачка: MOQ и датумот се опционални — корисно додека клиентот сè уште поставува прашања.",
+    "orderHint": "Нарачка: MOQ и очекуваниот датум се задолжителни.",
+    "currentPhaseLabel": "Тековна NPD фаза",
     "clientNameLabel": "Име на клиент *",
     "clientNamePlaceholder": "Acme Corp",
-    "dateExpectedLabel": "Очекуван датум *",
-    "moqLabel": "MOQ *",
+    "dateExpectedLabel": "Очекуван датум",
+    "moqLabel": "MOQ",
     "moqPlaceholder": "1000",
     "descriptionLabel": "Опис",
     "descriptionPlaceholder": "Дополнителни белешки…",
@@ -66,11 +144,11 @@
     "addProduct": "Додај производ",
     "productNum": "Производ {{num}}",
     "typePlaceholder": "Тип *",
-    "weightPlaceholder": "Тежина *",
+    "weightPlaceholder": "Тежина",
     "productDescPlaceholder": "Опис (опционално)",
     "required": "Задолжително",
     "requiredNumber": "Задолжително (број)",
     "englishOnly": "Само англиски (ASCII)",
-    "submitButton": "Креирај PO"
+    "submitButton": "Креирај барање"
   }
 }
