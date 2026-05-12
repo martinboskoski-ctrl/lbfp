@@ -1,5 +1,17 @@
 {
-  "title": "Pre-Order Inquiries",
+  "title": "Client Inquiries",
+  "searchPlaceholder": "Search by client name…",
+  "sort": {
+    "dateDesc":   "Newest first",
+    "dateAsc":    "Oldest first",
+    "clientAsc":  "Client A → Z",
+    "clientDesc": "Client Z → A"
+  },
+  "section": {
+    "active":   "Active",
+    "finished": "Finished"
+  },
+  "noActive": "No active inquiries.",
   "totalCount": "{{count}} total",
   "newPO": "New Inquiry",
   "noPOs": "No inquiries yet",
