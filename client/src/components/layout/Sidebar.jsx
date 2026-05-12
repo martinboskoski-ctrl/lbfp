@@ -255,23 +255,16 @@ const Sidebar = ({ isOpen, onClose }) => {
             />
           </div>
 
-          {(user?.role === 'admin' || isTopManagement(user)) && (
+          {user?.role === 'admin' && (
             <>
               <div className="pt-3 pb-1 px-3">
                 <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                   {t('administration')}
                 </span>
               </div>
-              {isTopManagement(user) && (
-                <div onClick={handleNavClick}>
-                  <NavItem to="/admin/user-management" icon={Users} label={t('userManagement')} />
-                </div>
-              )}
-              {user?.role === 'admin' && (
-                <div onClick={handleNavClick}>
-                  <NavItem to="/admin/users" icon={Users} label={t('users')} />
-                </div>
-              )}
+              <div onClick={handleNavClick}>
+                <NavItem to="/admin/users" icon={Users} label={t('users')} />
+              </div>
             </>
           )}
 

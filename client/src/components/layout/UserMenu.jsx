@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, KeyRound, UserPlus, LogOut } from 'lucide-react';
+import { ChevronDown, KeyRound, Users, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { isTopManagement } from '../../utils/userTier.js';
 import ChangePasswordModal from './ChangePasswordModal.jsx';
@@ -65,12 +65,12 @@ const UserMenu = () => {
 
               {isTopManagement(user) && (
                 <Link
-                  to="/register"
+                  to="/admin/user-management"
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                 >
-                  <UserPlus size={14} className="text-slate-400" />
-                  {t('registerUser')}
+                  <Users size={14} className="text-slate-400" />
+                  {t('userManagement')}
                 </Link>
               )}
             </div>

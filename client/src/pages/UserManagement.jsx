@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Search, ShieldOff, Trash2, CheckCircle2, ChevronRight, Users as UsersIcon } from 'lucide-react';
+import { Search, ShieldOff, Trash2, CheckCircle2, ChevronRight, Users as UsersIcon, UserPlus } from 'lucide-react';
 import Sidebar from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
 import { useAdminUsers } from '../hooks/useUserAdmin.js';
@@ -58,12 +58,19 @@ const UserManagement = () => {
 
         <main className="flex-1 p-4 sm:p-6">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-5">
+            <div className="flex items-center gap-3 mb-5 flex-wrap">
               <UsersIcon size={20} className="text-blue-600" />
-              <div>
+              <div className="flex-1 min-w-0">
                 <h1 className="text-lg font-bold text-gray-900">{t('title')}</h1>
                 <p className="text-xs text-gray-400">{t('subtitle', { count: users.length })}</p>
               </div>
+              <button
+                onClick={() => navigate('/register')}
+                className="btn-primary flex items-center gap-2"
+              >
+                <UserPlus size={14} />
+                {t('addUser')}
+              </button>
             </div>
 
             {/* Toolbar */}

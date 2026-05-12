@@ -1,6 +1,7 @@
 {
   "title": "User Management",
   "subtitle": "{{count}} users",
+  "addUser": "Add user",
   "topMgmtOnly": "Top management only.",
   "searchPlaceholder": "Search by name, email, department…",
   "empty": "No users match.",
