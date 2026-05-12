@@ -3,11 +3,17 @@ import User, { DEPARTMENTS } from '../models/User.js';
 import { logActivity, logActivityMany } from '../services/userActivity.js';
 
 const isTopMgmt = (u) => u?.department === 'top_management';
+const isAdmin   = (u) => u?.role === 'admin';
+const canManageUsers = (u) => isTopMgmt(u) || isAdmin(u);
 const sameId    = (a, b) => String(a) === String(b);
 
 const guard = (req, res) => {
-  if (!isTopMgmt(req.user)) {
-    res.status(403).json({ message: 'Top management only' });
+  if (!canManageUsers(req.user)) {
+    res.status(403).json({
+      message: 'Top management only',
+      // Diagnostic — remove once trust is established; helps debug stale tokens / dept mismatches.
+      youAre: { department: req.user?.department, role: req.user?.role, isManager: req.user?.isManager },
+    });
     return false;
   }
   return true;
