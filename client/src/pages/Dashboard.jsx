@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { PlusCircle, ShieldCheck } from 'lucide-react';
 import KanbanBoard from '../components/tasks/KanbanBoard.jsx';
 import Whiteboard from '../components/Whiteboard.jsx';
-import POList from '../components/po/POList.jsx';
 import TerkoviGallery from '../components/terkovi/TerkoviGallery.jsx';
 import LeadsPage from '../components/leads/LeadsPage.jsx';
 import { useProjects } from '../hooks/useProjects.js';
@@ -22,9 +21,6 @@ const DEPT_TABS = [
   { value: 'nabavki',   key: 'tabs.nabavki' },
   { value: 'vraboteni', key: 'tabs.vraboteni' },
 ];
-
-// Departments that have the Purchase Order tab
-const PO_DEPTS = ['sales', 'quality_assurance', 'r_and_d', 'nabavki', 'top_management'];
 
 // Departments that have the Leads (Потенцијални клиенти) tab
 const LEADS_DEPTS = ['sales', 'top_management'];
@@ -112,7 +108,6 @@ const Dashboard = () => {
             <nav className="flex gap-1 overflow-x-auto">
               {[
                 ...DEPT_TABS,
-                ...(PO_DEPTS.includes(dept) ? [{ value: 'po', key: 'tabs.po' }] : []),
                 ...(LEADS_DEPTS.includes(dept) ? [{ value: 'leads', key: 'tabs.leads' }] : []),
               ].map((tabItem) => (
                 <button
@@ -138,15 +133,8 @@ const Dashboard = () => {
             <KanbanBoard dept={dept} />
           )}
 
-          {/* Purchase Order list */}
-          {dept && tab === 'po' && (
-            <div className="max-w-3xl mx-auto">
-              <POList />
-            </div>
-          )}
-
           {/* All other tabs — constrained to readable width */}
-          {!(dept && (tab === 'tasks' || tab === 'po')) && (
+          {!(dept && tab === 'tasks') && (
             <div className="max-w-3xl mx-auto">
 
               {/* No dept selected → Whiteboard */}

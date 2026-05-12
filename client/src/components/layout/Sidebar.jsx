@@ -138,6 +138,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const showEmployeesItem = canManage(user) || user?.department === 'hr';
   const showInquiryInbox = isTopManagement(user) ||
     ['sales', 'quality_assurance', 'r_and_d', 'nabavki'].includes(user?.department);
+  const showInquiries = showInquiryInbox; // same audience: top mgmt + sales + qa + r&d + nabavki
 
   // ── Submenus ───────────────────────────────────────────────────
   const legalItems = [
@@ -189,7 +190,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           </div>
         </NavLink>
 
-        <nav className="flex-1 p-2 overflow-y-auto md:overflow-y-visible space-y-0.5">
+        <nav className="flex-1 flex flex-col p-2 overflow-y-auto md:overflow-y-visible space-y-0.5">
           {/* Departments — top mgmt sees a hover-flyout to the right;
               other users see only their own dept inline. */}
           {isTopManagement(user) ? (
@@ -265,6 +266,20 @@ const Sidebar = ({ isOpen, onClose }) => {
                 <NavItem to="/admin/users" icon={Users} label={t('users')} />
               </div>
             </>
+          )}
+
+          {/* Pre-Order Inquiries — pinned to the bottom with a faint accent backdrop */}
+          {showInquiries && (
+            <div className="mt-auto pt-3">
+              <div className="border-t border-slate-100 pt-2">
+                <div
+                  className="rounded-md bg-gradient-to-br from-slate-50 to-blue-50/40 p-0.5"
+                  onClick={handleNavClick}
+                >
+                  <NavItem to="/inquiries" icon={ClipboardList} label={t('inquiriesNav')} />
+                </div>
+              </div>
+            </div>
           )}
         </nav>
       </aside>
