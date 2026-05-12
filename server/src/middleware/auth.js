@@ -12,6 +12,12 @@ const authenticate = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId);
     if (!user) return res.status(401).json({ message: 'User not found' });
+    if (user.status === 'suspended') {
+      return res.status(403).json({ message: 'Account suspended. Contact top management.' });
+    }
+    if (user.status === 'deleted') {
+      return res.status(403).json({ message: 'Account deactivated.' });
+    }
     req.user = user;
     next();
   } catch {

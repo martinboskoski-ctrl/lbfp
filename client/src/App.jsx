@@ -13,6 +13,8 @@ import AdminUsers from './pages/AdminUsers.jsx';
 import PODetail from './pages/PODetail.jsx';
 import InquiryInbox from './pages/InquiryInbox.jsx';
 import Inquiries from './pages/Inquiries.jsx';
+import UserManagement from './pages/UserManagement.jsx';
+import UserDetail from './pages/UserDetail.jsx';
 import Procedures from './pages/Procedures.jsx';
 import Trainings from './pages/Trainings.jsx';
 import AnticorruptionTraining from './pages/AnticorruptionTraining.jsx';
@@ -58,6 +60,8 @@ const App = () => (
             <Route path="/po/:id"       element={<PODetail />} />
             <Route path="/inquiries"       element={<Inquiries />} />
             <Route path="/inquiries/inbox" element={<InquiryInbox />} />
+            <Route path="/admin/user-management"     element={<UserManagement />} />
+            <Route path="/admin/user-management/:id" element={<UserDetail />} />
             <Route path="/register" element={<Register />} />
             <Route path="/procedures" element={<Procedures />} />
             <Route path="/procedures/:id" element={<ProcedureDetail />} />

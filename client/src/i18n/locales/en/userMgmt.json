@@ -1,0 +1,72 @@
+{
+  "title": "User Management",
+  "subtitle": "{{count}} users",
+  "topMgmtOnly": "Top management only.",
+  "searchPlaceholder": "Search by name, email, department…",
+  "empty": "No users match.",
+  "joined": "joined",
+  "backToList": "Back to user list",
+
+  "filter": { "all": "All" },
+
+  "status": {
+    "active":    "Active",
+    "suspended": "Suspended",
+    "deleted":   "Deleted"
+  },
+
+  "actions": {
+    "suspend":       "Suspend account",
+    "reactivate":    "Reactivate account",
+    "delete":        "Delete account",
+    "resetPassword": "Reset password"
+  },
+
+  "confirm": {
+    "suspend":       "Suspend {{name}}? They will not be able to log in.",
+    "delete":        "Permanently delete {{name}}? They will lose access immediately.",
+    "resetPassword": "Generate a new temporary password for {{name}}?"
+  },
+
+  "fields": {
+    "name":       "Full name",
+    "department": "Department",
+    "role":       "Role",
+    "isManager":  "Manager"
+  },
+
+  "saveChanges": "Save changes",
+  "dangerZone": "Access controls",
+
+  "suspendIntro":       "A suspended user cannot log in. They keep their data and can be reactivated later.",
+  "reactivateIntro":    "Restore the user's access.",
+  "resetIntro":         "Generate a one-time temporary password. Share it with the user out of band.",
+  "deleteIntro":        "Soft-delete the account. Their history is preserved but they can no longer log in.",
+
+  "suspendReasonPlaceholder": "Reason (optional)",
+  "passwordCopied":     "Copied",
+
+  "suspendedBanner":    "Suspended by {{by}} on {{date}}",
+  "deletedBanner":      "Deleted by {{by}} on {{date}}",
+
+  "activityLog": "Activity log",
+  "noActivity":  "No recorded activity yet.",
+  "details":     "details",
+
+  "action": {
+    "auth.login":               "Logged in",
+    "auth.password_changed":    "Changed own password",
+    "po.create":                "Created inquiry",
+    "po.add_question":          "Added question",
+    "po.post_reply":            "Posted reply",
+    "po.mark_final":            "Marked final answer",
+    "po.sales_review":          "Reviewed answer",
+    "po.client_decision":       "Logged client decision",
+    "po.delete":                "Deleted inquiry",
+    "admin.update_user":        "Updated user profile",
+    "admin.suspend_user":       "Suspended user",
+    "admin.reactivate_user":    "Reactivated user",
+    "admin.delete_user":        "Deleted user",
+    "admin.reset_password":     "Reset user password"
+  }
+}

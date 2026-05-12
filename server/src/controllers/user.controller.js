@@ -1,6 +1,9 @@
 import User from '../models/User.js';
 import Company from '../models/Company.js';
 import bcrypt from 'bcryptjs';
+import { logActivity } from '../services/userActivity.js';
+
+const reqIp = (req) => req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || '';
 
 export const listUsers = async (req, res) => {
   const users = await User.find().select('-passwordHash');
@@ -32,6 +35,7 @@ export const changePassword = async (req, res) => {
 
   req.user.passwordHash = await bcrypt.hash(newPassword, 12);
   await req.user.save();
+  await logActivity(req.user._id, 'auth.password_changed', { ip: reqIp(req) });
   res.json({ message: 'Password changed' });
 };
 

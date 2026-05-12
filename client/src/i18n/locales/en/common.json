@@ -31,6 +31,7 @@
   "departments": "Departments",
   "administration": "Administration",
   "users": "Users",
+  "userManagement": "User Management",
   "manager": "Manager",
   "employee": "Employee",
   "logout": "Log out",

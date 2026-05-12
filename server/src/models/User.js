@@ -16,6 +16,17 @@ const DEPARTMENTS = [
   'nabavki',
 ];
 
+export const USER_STATUSES = ['active', 'suspended', 'deleted'];
+
+const activityEntrySchema = new mongoose.Schema({
+  action:     { type: String, required: true },
+  at:         { type: Date, default: Date.now },
+  target:     { type: String, default: '' },     // e.g. "User:<id>" or "PurchaseOrder:<id>"
+  targetType: { type: String, default: '' },
+  metadata:   { type: mongoose.Schema.Types.Mixed, default: {} },
+  ip:         { type: String, default: '' },
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   passwordHash: { type: String, required: true },
@@ -28,6 +39,18 @@ const userSchema = new mongoose.Schema({
   language: { type: String, enum: ['mk', 'en'], default: 'mk' },
   manager: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   active: { type: Boolean, default: true },
+
+  // Lifecycle
+  status: { type: String, enum: USER_STATUSES, default: 'active' },
+  suspendedAt:     { type: Date,   default: null },
+  suspendedBy:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  suspendedReason: { type: String, default: '' },
+  deletedAt:       { type: Date,   default: null },
+  deletedBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+
+  // Embedded, capped activity trail of THIS user's actions in the app.
+  // Pushed via $push + $slice:-200 to keep growth bounded.
+  activityLog: { type: [activityEntrySchema], default: [] },
 }, { timestamps: true });
 
 userSchema.methods.comparePassword = async function (password) {

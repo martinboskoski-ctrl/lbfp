@@ -18,6 +18,7 @@ import mkShifts from './locales/mk/shifts.json';
 import mkMaintenance from './locales/mk/maintenance.json';
 import mkProduction from './locales/mk/production.json';
 import mkLhc from './locales/mk/lhc.json';
+import mkUserMgmt from './locales/mk/userMgmt.json';
 
 // EN namespaces
 import enCommon from './locales/en/common.json';
@@ -36,6 +37,7 @@ import enShifts from './locales/en/shifts.json';
 import enMaintenance from './locales/en/maintenance.json';
 import enProduction from './locales/en/production.json';
 import enLhc from './locales/en/lhc.json';
+import enUserMgmt from './locales/en/userMgmt.json';
 
 i18n.use(initReactI18next).init({
   lng: localStorage.getItem('packflow_lang') || 'mk',
@@ -59,6 +61,7 @@ i18n.use(initReactI18next).init({
       maintenance: mkMaintenance,
       production: mkProduction,
       lhc: mkLhc,
+      userMgmt: mkUserMgmt,
     },
     en: {
       common: enCommon,
@@ -77,6 +80,7 @@ i18n.use(initReactI18next).init({
       maintenance: enMaintenance,
       production: enProduction,
       lhc: enLhc,
+      userMgmt: enUserMgmt,
     },
   },
   defaultNS: 'common',

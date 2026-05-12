@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { logActivity } from '../services/userActivity.js';
+
+const reqIp = (req) => req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || '';
 
 const DEPARTMENTS = [
   'sales','finance','administration','hr','quality_assurance',
@@ -78,7 +81,15 @@ export const login = async (req, res) => {
   const valid = await user.comparePassword(password);
   if (!valid) return res.status(401).json({ message: INVALID });
 
+  if (user.status === 'suspended') {
+    return res.status(403).json({ message: 'Account suspended. Contact top management.' });
+  }
+  if (user.status === 'deleted') {
+    return res.status(403).json({ message: 'Account deactivated.' });
+  }
+
   const token = signToken(user._id);
+  await logActivity(user._id, 'auth.login', { ip: reqIp(req) });
   res.json({ token, user: user.toSafeObject() });
 };
 

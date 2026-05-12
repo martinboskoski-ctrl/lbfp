@@ -7,6 +7,9 @@ import PurchaseOrder, {
 import User from '../models/User.js';
 import { getRequiredFields } from '../config/poRequiredFields.js';
 import { notifyMany, notify } from '../services/notification.js';
+import { logActivity } from '../services/userActivity.js';
+
+const reqIp = (req) => req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || '';
 
 // Only printable ASCII — no Cyrillic or other non-ASCII characters
 const ASCII_RE = /^[\x20-\x7E]*$/;
@@ -118,6 +121,10 @@ export const createPO = async (req, res) => {
   });
 
   await po.populate('createdBy', 'name');
+  await logActivity(req.user._id, 'po.create', {
+    target: `PurchaseOrder:${po._id}`, targetType: 'PurchaseOrder',
+    metadata: { clientName: po.clientName, stage: po.stage }, ip: reqIp(req),
+  });
   res.status(201).json({ po });
 };
 
@@ -225,6 +232,12 @@ export const addQuestion = async (req, res) => {
     }
   );
 
+  await logActivity(req.user._id, 'po.add_question', {
+    target: `PurchaseOrder:${po._id}`, targetType: 'PurchaseOrder',
+    metadata: { questionId: String(newQ._id), targetDepartment, phase: effectivePhase, clientName: po.clientName },
+    ip: reqIp(req),
+  });
+
   res.json({ po });
 };
 
@@ -292,6 +305,12 @@ export const postThread = async (req, res) => {
     );
   }
 
+  await logActivity(req.user._id, 'po.post_reply', {
+    target: `PurchaseOrder:${po._id}`, targetType: 'PurchaseOrder',
+    metadata: { questionId: String(question._id), clientName: po.clientName },
+    ip: reqIp(req),
+  });
+
   res.json({ po });
 };
 
@@ -350,6 +369,12 @@ export const markFinalAnswer = async (req, res) => {
   await po.save();
   await po.populate(POPULATE);
 
+  await logActivity(req.user._id, 'po.mark_final', {
+    target: `PurchaseOrder:${po._id}`, targetType: 'PurchaseOrder',
+    metadata: { questionId: String(question._id), targetDepartment: question.targetDepartment, clientName: po.clientName },
+    ip: reqIp(req),
+  });
+
   // Notify sales — the question creator if known, otherwise all sales users.
   const recipient = question.createdBy?._id || question.createdBy;
   if (recipient && String(recipient) !== String(req.user._id)) {
@@ -406,6 +431,12 @@ export const salesReview = async (req, res) => {
 
   await po.save();
   await po.populate(POPULATE);
+
+  await logActivity(req.user._id, 'po.sales_review', {
+    target: `PurchaseOrder:${po._id}`, targetType: 'PurchaseOrder',
+    metadata: { questionId: String(question._id), accepted, sendToClient, clientName: po.clientName },
+    ip: reqIp(req),
+  });
 
   // Notify the answerer (dept) about the review outcome.
   const answererId = question.answeredBy?._id || question.answeredBy;
@@ -478,6 +509,12 @@ export const clientApproval = async (req, res) => {
 
   await po.save();
   await po.populate(POPULATE);
+
+  await logActivity(req.user._id, 'po.client_decision', {
+    target: `PurchaseOrder:${po._id}`, targetType: 'PurchaseOrder',
+    metadata: { questionId: String(question._id), approved, clientName: po.clientName },
+    ip: reqIp(req),
+  });
 
   // Notify the answerer dept so they see the client outcome.
   const answerers = await findAnswererUsers(question.targetDepartment);
@@ -629,5 +666,9 @@ export const deletePO = async (req, res) => {
   if (!isOwner(req.user, po)) return res.status(403).json({ message: 'Only the inquiry creator can delete' });
 
   await po.deleteOne();
+  await logActivity(req.user._id, 'po.delete', {
+    target: `PurchaseOrder:${po._id}`, targetType: 'PurchaseOrder',
+    metadata: { clientName: po.clientName }, ip: reqIp(req),
+  });
   res.json({ message: 'Pre-Order Inquiry deleted' });
 };
