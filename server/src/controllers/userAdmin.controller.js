@@ -21,6 +21,22 @@ const guard = (req, res) => {
 
 const reqIp = (req) => req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || '';
 
+// ── Whoami (diagnostic; auth only, no guard) ─────────────────────────────────
+// Hit /api/users/admin/whoami in the browser to see what the server reads.
+export const whoami = async (req, res) => {
+  res.json({
+    youAre: {
+      _id:        req.user?._id,
+      name:       req.user?.name,
+      email:      req.user?.email,
+      department: req.user?.department,
+      role:       req.user?.role,
+      isManager:  req.user?.isManager,
+      status:     req.user?.status,
+    },
+  });
+};
+
 // ── List ──────────────────────────────────────────────────────────────────────
 // Excludes deleted users by default; pass ?includeDeleted=1 to see them.
 export const listUsers = async (req, res) => {

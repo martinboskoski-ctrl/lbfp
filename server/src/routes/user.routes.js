@@ -10,6 +10,7 @@ import {
   reactivateUser,
   deleteUser  as adminDeleteUser,
   resetPassword as adminResetPassword,
+  whoami      as adminWhoami,
 } from '../controllers/userAdmin.controller.js';
 
 const router = Router();
@@ -22,6 +23,7 @@ router.patch('/me/language', updateLanguage);
 router.patch('/me/password', changePassword);
 
 // Top-management user management (gated inside each handler)
+router.get   ('/admin/whoami',                adminWhoami);
 router.get   ('/admin',                       adminListUsers);
 router.get   ('/admin/:id',                   adminGetUser);
 router.patch ('/admin/:id',                   adminUpdateUser);
