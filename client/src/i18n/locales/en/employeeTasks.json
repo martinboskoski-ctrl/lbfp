@@ -1,0 +1,30 @@
+{
+  "subtitle": "{{count}} tasks total",
+  "addTask": "Add task",
+  "modalTitle": "New task for this employee",
+  "loadFailed": "Failed to load tasks.",
+  "viewAllOnKanban": "See them all on the Kanban",
+
+  "emptyMix": "No tasks yet.",
+  "emptyUpcoming": "No deadlines in the next 14 days.",
+  "emptyActive": "No active tasks.",
+  "emptyCompleted": "Nothing completed yet.",
+
+  "kpi": {
+    "open":        "Open",
+    "completed30": "Done (30 days)",
+    "overdue":     "Overdue",
+    "onTime":      "On time",
+    "onTimeSub":   "of the last 30 days",
+    "cycle":       "Avg cycle",
+    "cycleSub":    "creation → done",
+    "cycleDays":   "{{days}} days"
+  },
+
+  "section": {
+    "statusMix":  "Status mix",
+    "upcoming":   "Upcoming deadlines",
+    "active":     "Active tasks",
+    "completed":  "Recently completed"
+  }
+}

@@ -12,14 +12,21 @@ const isManager  = (u) => u.isManager || isTopMgmt(u);
 
 export const listTasks = async (req, res) => {
   const u = req.user;
+  const { dept, assignedTo } = req.query;
   let query = {};
 
   if (isTopMgmt(u)) {
-    if (req.query.dept) query.department = req.query.dept;
+    if (dept)       query.department = dept;
+    if (assignedTo) query.assignedTo = assignedTo;
   } else if (u.isManager) {
     query.department = u.department;
+    if (assignedTo) {
+      // Manager can ask for one assignee, but they must be in their dept.
+      // Verify lazily via the existing department lock above + a final assignedTo filter.
+      query.assignedTo = assignedTo;
+    }
   } else {
-    // Plain employee — own tasks only
+    // Plain employee — own tasks only, regardless of any assignedTo passed.
     query.assignedTo = u._id;
   }
 
@@ -27,7 +34,13 @@ export const listTasks = async (req, res) => {
     .populate(POPULATE_FIELDS)
     .sort({ createdAt: -1 });
 
-  res.json({ tasks });
+  // Manager + assignedTo: enforce that the target belongs to the manager's dept,
+  // by checking the populated task data. Anything outside the dept gets filtered.
+  const filtered = (!isTopMgmt(u) && u.isManager && assignedTo)
+    ? tasks.filter((t) => t.assignedTo?.department === u.department)
+    : tasks;
+
+  res.json({ tasks: filtered });
 };
 
 export const createTask = async (req, res) => {

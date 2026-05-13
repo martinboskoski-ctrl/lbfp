@@ -1,6 +1,7 @@
 import api from './axios.js';
 
 export const listTasksApi   = (dept) => api.get('/tasks', { params: dept ? { dept } : {} });
+export const listTasksForUserApi = (userId) => api.get('/tasks', { params: { assignedTo: userId } });
 export const createTaskApi  = (data) => api.post('/tasks', data);
 export const updateStatusApi = (id, direction) => api.patch(`/tasks/${id}/status`, { direction });
 export const approveTaskApi = (id)   => api.patch(`/tasks/${id}/approve`);

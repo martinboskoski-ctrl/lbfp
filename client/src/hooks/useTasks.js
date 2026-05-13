@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  listTasksApi, createTaskApi, updateStatusApi, approveTaskApi, deleteTaskApi,
+  listTasksApi, listTasksForUserApi, createTaskApi, updateStatusApi, approveTaskApi, deleteTaskApi,
 } from '../api/tasks.api.js';
 import toast from 'react-hot-toast';
 
@@ -13,6 +13,13 @@ export const useTasks = (dept) =>
   useQuery({
     queryKey: ['tasks', dept ?? 'all'],
     queryFn:  () => listTasksApi(dept).then((r) => r.data.tasks),
+  });
+
+export const useEmployeeTasks = (userId) =>
+  useQuery({
+    queryKey: ['tasks', 'user', userId],
+    queryFn:  () => listTasksForUserApi(userId).then((r) => r.data.tasks),
+    enabled:  !!userId,
   });
 
 export const useCreateTask = () => {

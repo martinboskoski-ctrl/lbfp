@@ -3,11 +3,13 @@ import { Link, useParams } from 'react-router-dom';
 import {
   ArrowLeft, User as UserIcon, Briefcase, DollarSign, Calendar, GraduationCap,
   ShieldAlert, Heart, Package, FileText, Lock, CheckCircle2, AlertTriangle,
-  Activity, Users as UsersIcon,
+  Activity, Users as UsersIcon, ListChecks,
 } from 'lucide-react';
 import Sidebar from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
 import { useEmployeeFile } from '../hooks/useEmployees.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import EmployeeTasksTab from '../components/employee/EmployeeTasksTab.jsx';
 
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('mk-MK') : '—');
 const fmtMoney = (n, c = 'MKD') =>
@@ -47,6 +49,7 @@ const Section = ({ title, icon: Icon, children, action }) => (
 
 const TABS = [
   { key: 'overview',     label: 'Преглед',           icon: UserIcon },
+  { key: 'tasks',        label: 'Задачи',            icon: ListChecks,    needs: 'tasks' },
   { key: 'employment',   label: 'Вработување',       icon: Briefcase },
   { key: 'compensation', label: 'Плата',             icon: DollarSign,    needs: 'salary' },
   { key: 'leave',        label: 'Одмор',             icon: Calendar },
@@ -60,6 +63,7 @@ const TABS = [
 
 const EmployeeDetail = () => {
   const { id } = useParams();
+  const { user: viewer } = useAuth();
   const { data, isLoading, error } = useEmployeeFile(id);
   const [tab, setTab] = useState('overview');
 
@@ -98,9 +102,16 @@ const EmployeeDetail = () => {
   const u = f.user;
   const p = f.profile || {};
 
+  // Tasks tab — top mgmt, same-dept manager, or the employee themselves
+  const isTopMgmt = viewer?.department === 'top_management';
+  const isSameDeptManager = viewer?.isManager && viewer?.department === u.department;
+  const canViewTasks = isTopMgmt || isSameDeptManager || perms.isSelf;
+  const canAddTasks  = isTopMgmt || isSameDeptManager;
+
   const visibleTabs = TABS.filter((t) => {
     if (t.needs === 'salary' && !perms.canViewSalary) return false;
     if (t.needs === 'confidential' && !perms.canViewConfidential) return false;
+    if (t.needs === 'tasks' && !canViewTasks) return false;
     return true;
   });
 
@@ -220,6 +231,10 @@ const EmployeeDetail = () => {
                   </Section>
                 )}
               </>
+            )}
+
+            {tab === 'tasks' && canViewTasks && (
+              <EmployeeTasksTab employee={u} canAddTasks={canAddTasks} />
             )}
 
             {tab === 'employment' && (
