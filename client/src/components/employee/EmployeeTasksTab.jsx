@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useEmployeeTasks } from '../../hooks/useTasks.js';
 import AddEmployeeTaskModal from './AddEmployeeTaskModal.jsx';
+import TaskDetailModal from '../tasks/TaskDetailModal.jsx';
 
 const DAY = 86_400_000;
 const fmtShort = (d) => (d ? new Date(d).toLocaleDateString('mk-MK') : '—');
@@ -119,17 +120,21 @@ const StatusMixBar = ({ tasks, t, tt }) => {
   );
 };
 
-// ── Task row (compact) ───────────────────────────────────────────────────────
-const TaskRow = ({ task, accent = false, tc, tt }) => {
+// ── Task row (compact, clickable) ────────────────────────────────────────────
+const TaskRow = ({ task, accent = false, tc, tt, onOpen }) => {
   const overdue = task.deadline && new Date(task.deadline) < new Date()
     && (task.status === 'todo' || task.status === 'in_progress');
   const dueToday = task.deadline &&
     new Date(task.deadline).toDateString() === new Date().toDateString();
 
   return (
-    <div className={`flex items-center gap-3 rounded-lg border px-3 py-2 ${
-      accent ? 'border-blue-100 bg-blue-50/30' : 'border-slate-200 bg-white'
-    }`}>
+    <button
+      type="button"
+      onClick={() => onOpen?.(task)}
+      className={`w-full text-left flex items-center gap-3 rounded-lg border px-3 py-2 hover:shadow-sm transition-shadow ${
+        accent ? 'border-blue-100 bg-blue-50/30 hover:bg-blue-50/60' : 'border-slate-200 bg-white hover:bg-slate-50'
+      }`}
+    >
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-slate-900 truncate">{task.title}</p>
         <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500 flex-wrap">
@@ -151,7 +156,7 @@ const TaskRow = ({ task, accent = false, tc, tt }) => {
           </span>
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 
@@ -173,7 +178,8 @@ const EmployeeTasksTab = ({ employee, canAddTasks }) => {
   const { t }     = useTranslation('employeeTasks');
   const { t: tc } = useTranslation('common');
   const { t: tt } = useTranslation('tasks');
-  const [showAdd, setShowAdd] = useState(false);
+  const [showAdd, setShowAdd]       = useState(false);
+  const [activeTask, setActiveTask] = useState(null);
 
   const { data: tasks = [], isLoading, error } = useEmployeeTasks(employee?._id);
 
@@ -272,7 +278,7 @@ const EmployeeTasksTab = ({ employee, canAddTasks }) => {
         ) : (
           <div className="space-y-1.5">
             {upcoming.map((task) => (
-              <TaskRow key={task._id} task={task} accent tc={tc} tt={tt} />
+              <TaskRow key={task._id} task={task} accent tc={tc} tt={tt} onOpen={setActiveTask} />
             ))}
           </div>
         )}
@@ -285,7 +291,7 @@ const EmployeeTasksTab = ({ employee, canAddTasks }) => {
         ) : (
           <div className="space-y-1.5">
             {active.map((task) => (
-              <TaskRow key={task._id} task={task} tc={tc} tt={tt} />
+              <TaskRow key={task._id} task={task} tc={tc} tt={tt} onOpen={setActiveTask} />
             ))}
           </div>
         )}
@@ -298,7 +304,7 @@ const EmployeeTasksTab = ({ employee, canAddTasks }) => {
         ) : (
           <div className="space-y-1.5">
             {completed.map((task) => (
-              <TaskRow key={task._id} task={task} tc={tc} tt={tt} />
+              <TaskRow key={task._id} task={task} tc={tc} tt={tt} onOpen={setActiveTask} />
             ))}
             <Link
               to={`/dashboard?dept=${employee.department}&tab=tasks`}
@@ -314,6 +320,14 @@ const EmployeeTasksTab = ({ employee, canAddTasks }) => {
         <AddEmployeeTaskModal
           employee={employee}
           onClose={() => setShowAdd(false)}
+        />
+      )}
+
+      {activeTask && (
+        <TaskDetailModal
+          /* Re-look-up the live task by id so the modal sees fresh data after mutations. */
+          task={tasks.find((x) => x._id === activeTask._id) || activeTask}
+          onClose={() => setActiveTask(null)}
         />
       )}
     </div>

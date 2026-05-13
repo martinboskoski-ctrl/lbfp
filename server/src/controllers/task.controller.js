@@ -92,6 +92,40 @@ export const createTask = async (req, res) => {
   res.status(201).json({ task });
 };
 
+// Update editable fields (title, description, priority, deadline, project).
+// Allowed: task creator, manager in the task's dept, or top management.
+export const updateTask = async (req, res) => {
+  const u = req.user;
+  const task = await Task.findById(req.params.id);
+  if (!task) return res.status(404).json({ message: 'Task not found' });
+
+  const isCreator = String(task.createdBy) === String(u._id);
+  const isDeptMgr = u.isManager && task.department === u.department;
+  if (!isCreator && !isDeptMgr && !isTopMgmt(u)) {
+    return res.status(403).json({ message: 'Немате дозвола за оваа задача' });
+  }
+
+  const { title, description, priority, deadline, project } = req.body;
+
+  if (title !== undefined) {
+    if (!String(title).trim()) return res.status(400).json({ message: 'title cannot be empty' });
+    task.title = String(title).trim();
+  }
+  if (description !== undefined) task.description = String(description).trim();
+  if (priority !== undefined) {
+    if (!['low', 'medium', 'high', 'urgent'].includes(priority)) {
+      return res.status(400).json({ message: 'invalid priority' });
+    }
+    task.priority = priority;
+  }
+  if (deadline !== undefined) task.deadline = deadline || undefined;
+  if (project  !== undefined) task.project  = project  || undefined;
+
+  await task.save();
+  await task.populate(POPULATE_FIELDS);
+  res.json({ task });
+};
+
 export const updateStatus = async (req, res) => {
   const u    = req.user;
   const task = await Task.findById(req.params.id);

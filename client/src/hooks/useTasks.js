@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  listTasksApi, listTasksForUserApi, createTaskApi, updateStatusApi, approveTaskApi, deleteTaskApi,
+  listTasksApi, listTasksForUserApi, createTaskApi, updateTaskApi,
+  updateStatusApi, approveTaskApi, deleteTaskApi,
 } from '../api/tasks.api.js';
 import toast from 'react-hot-toast';
 
@@ -27,6 +28,15 @@ export const useCreateTask = () => {
   return useMutation({
     mutationFn: createTaskApi,
     onSuccess: () => { invalidateAll(qc); toast.success('Задачата е додадена'); },
+    onError: onErr,
+  });
+};
+
+export const useUpdateTask = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => updateTaskApi(id, data),
+    onSuccess: () => { invalidateAll(qc); toast.success('Задачата е ажурирана'); },
     onError: onErr,
   });
 };

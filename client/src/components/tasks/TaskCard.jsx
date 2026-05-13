@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { ChevronLeft, ChevronRight, CheckCircle2, Trash2, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUpdateTaskStatus, useApproveTask, useDeleteTask } from '../../hooks/useTasks.js';
 import { fmtDateShort } from '../../utils/formatDate.js';
+import TaskDetailModal from './TaskDetailModal.jsx';
 
 const PRIORITY_CLS = {
   low:    'bg-gray-100 text-gray-500',
@@ -16,9 +18,13 @@ const TaskCard = ({ task, currentUser, isManager }) => {
   const { t } = useTranslation('tasks');
   const { t: tc } = useTranslation('common');
 
+  const [showDetail, setShowDetail] = useState(false);
+
   const updateStatus = useUpdateTaskStatus();
   const approveTask  = useApproveTask();
   const deleteTask   = useDeleteTask();
+
+  const stop = (e) => e.stopPropagation();
 
   const statusIdx  = STATUSES.indexOf(task.status);
   const isAssignee = String(task.assignedTo?._id || task.assignedTo) === String(currentUser._id);
@@ -38,14 +44,17 @@ const TaskCard = ({ task, currentUser, isManager }) => {
   const priorityLabel = tc(`priority.${task.priority}`) || tc('priority.medium');
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
+    <div
+      onClick={() => setShowDetail(true)}
+      className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+    >
 
       {/* Title row */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <p className="text-sm font-medium text-gray-900 leading-snug">{task.title}</p>
         {canDelete && (
           <button
-            onClick={() => deleteTask.mutate(task._id)}
+            onClick={(e) => { stop(e); deleteTask.mutate(task._id); }}
             disabled={deleteTask.isPending}
             className="flex-shrink-0 text-gray-300 hover:text-red-500 transition-colors mt-0.5"
             title={t('deleteTooltip')}
@@ -94,9 +103,9 @@ const TaskCard = ({ task, currentUser, isManager }) => {
       )}
 
       {/* Actions row */}
-      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+      <div className="flex items-center justify-between pt-2 border-t border-gray-100" onClick={stop}>
         <button
-          onClick={() => updateStatus.mutate({ id: task._id, direction: 'backward' })}
+          onClick={(e) => { stop(e); updateStatus.mutate({ id: task._id, direction: 'backward' }); }}
           disabled={!canGoBack || updateStatus.isPending}
           className={`p-2 rounded transition-colors ${
             canGoBack ? 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' : 'text-gray-200 cursor-not-allowed'
@@ -108,7 +117,7 @@ const TaskCard = ({ task, currentUser, isManager }) => {
 
         {canApprove && (
           <button
-            onClick={() => approveTask.mutate(task._id)}
+            onClick={(e) => { stop(e); approveTask.mutate(task._id); }}
             disabled={approveTask.isPending}
             className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 text-xs font-medium transition-colors"
             title={t('approveTooltip')}
@@ -119,7 +128,7 @@ const TaskCard = ({ task, currentUser, isManager }) => {
         )}
 
         <button
-          onClick={() => updateStatus.mutate({ id: task._id, direction: 'forward' })}
+          onClick={(e) => { stop(e); updateStatus.mutate({ id: task._id, direction: 'forward' }); }}
           disabled={!canGoForward || updateStatus.isPending}
           className={`p-2 rounded transition-colors ${
             canGoForward ? 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' : 'text-gray-200 cursor-not-allowed'
@@ -129,6 +138,10 @@ const TaskCard = ({ task, currentUser, isManager }) => {
           <ChevronRight size={16} />
         </button>
       </div>
+
+      {showDetail && (
+        <TaskDetailModal task={task} onClose={() => setShowDetail(false)} />
+      )}
     </div>
   );
 };
