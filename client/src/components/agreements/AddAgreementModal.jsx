@@ -110,7 +110,6 @@ export default function AddAgreementModal({ onClose, initial = null, mode = 'cre
     const payload = {
       documentType:          data.documentType,
       contractClass:         data.contractClass || '',
-      contractNumber:        data.contractNumber || null,
       title:                 data.title || '',
       description:           data.description || '',
       otherParty:            data.otherParty,
@@ -124,14 +123,12 @@ export default function AddAgreementModal({ onClose, initial = null, mode = 'cre
       category:              data.category,
       tags,
       signedDate:            data.signedDate || null,
-      startDate:             data.startDate || null,
       endDate:               openEnded ? null : (data.endDate || null),
       durationType:          openEnded ? 'indefinite' : 'fixed',
       autoRenew:             !!data.autoRenew,
       autoRenewMonths:       Number(data.autoRenewMonths) || 12,
       reminderDays:          Number(data.reminderDays) || 30,
       terminationNoticeDays: Number(data.terminationNoticeDays) || 30,
-      reviewDate:            data.reviewDate || null,
       reviewComment:         data.reviewComment || '',
       archiveNumber:         data.archiveNumber || '',
       driveLink:             data.driveLink || '',
@@ -203,8 +200,18 @@ export default function AddAgreementModal({ onClose, initial = null, mode = 'cre
             </Field>
           )}
 
-          {/* Register essentials */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Counterparty + classification */}
+          <Field label="Договорна страна (полн назив)" error={errors.otherParty?.message}>
+            <input className={`input ${errors.otherParty ? 'border-red-400' : ''}`}
+              placeholder="Целосен правен назив на другата страна"
+              {...register('otherParty', { required: 'Договорната страна е задолжителна' })} />
+          </Field>
+
+          <Field label="Назив / краток опис" hint="Опционално — пр. „Производство на приватна марка вафли“">
+            <input className="input" {...register('title')} />
+          </Field>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Тип на документ">
               <select className="input" {...register('documentType')}>
                 {DOCUMENT_TYPES.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
@@ -216,32 +223,21 @@ export default function AddAgreementModal({ onClose, initial = null, mode = 'cre
                 {classOptions.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </Field>
-            <Field label="Бр. на договор">
-              <input className="input" placeholder="напр. 2026-001" {...register('contractNumber')} />
-            </Field>
           </div>
 
-          <Field label="Договорна страна (полн назив)" error={errors.otherParty?.message}>
-            <input className={`input ${errors.otherParty ? 'border-red-400' : ''}`}
-              placeholder="Целосен правен назив на другата страна"
-              {...register('otherParty', { required: 'Договорната страна е задолжителна' })} />
-          </Field>
-
-          <Field label="Назив / краток опис" hint="Опционално — пр. „Производство на приватна марка вафли“">
-            <input className="input" {...register('title')} />
-          </Field>
+          {isEdit && (
+            <Field label="Статус">
+              <select className="input" {...register('status')}>
+                {REGISTER_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+            </Field>
+          )}
 
           {/* Dates & duration */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Датум на потпишување">
               <input type="date" className="input" {...register('signedDate')} />
             </Field>
-            <Field label="Датум на стапување во сила" hint="ако се разликува од потпишувањето">
-              <input type="date" className="input" {...register('startDate')} />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="label mb-0">Датум на истек</label>
@@ -256,36 +252,19 @@ export default function AddAgreementModal({ onClose, initial = null, mode = 'cre
                 disabled={openEnded}
                 {...register('endDate')} />
             </div>
+          </div>
+
+          {/* Archiving & responsibility */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="Архивски број / печат">
+              <input className="input" placeholder="напр. 03-118/2026" {...register('archiveNumber')} />
+            </Field>
             <Field label="Рок за отказ (денови)">
               <input type="number" min={0} className="input" {...register('terminationNoticeDays')} />
             </Field>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Field label="Датум за преглед (пред истек)" hint="навремен преглед за нови понуди / преговори">
-              <input type="date" className="input" {...register('reviewDate')} />
-            </Field>
-            {isEdit && (
-              <Field label="Статус">
-                <select className="input" {...register('status')}>
-                  {REGISTER_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                </select>
-              </Field>
-            )}
-          </div>
-
-          <Field label="Преглед — коментар">
-            <input className="input" placeholder="забелешка за прегледот" {...register('reviewComment')} />
-          </Field>
-
-          {/* Archiving & responsibility */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Field label="Архивски број / печат">
-              <input className="input" placeholder="напр. 03-118/2026" {...register('archiveNumber')} />
-            </Field>
-            <Field label="Линк до папка (Google Drive)">
-              <input className="input" placeholder="https://drive.google.com/..." {...register('driveLink')} />
-            </Field>
             <Field label="Одговорен (менаџер)">
               <select className="input" {...register('owner')}>
                 <option value="">— нема —</option>
@@ -294,7 +273,14 @@ export default function AddAgreementModal({ onClose, initial = null, mode = 'cre
                 ))}
               </select>
             </Field>
+            <Field label="Линк до папка (Google Drive)">
+              <input className="input" placeholder="https://drive.google.com/..." {...register('driveLink')} />
+            </Field>
           </div>
+
+          <Field label="Коментар за преглед">
+            <input className="input" placeholder="забелешка за прегледот пред истек" {...register('reviewComment')} />
+          </Field>
 
           {/* Auto-renew + reminders */}
           <div className="flex flex-wrap items-center gap-4">
