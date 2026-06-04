@@ -13,6 +13,19 @@
 - Static: First party always LUTHMAN BACKLUND FOODS PRODUCTION DOO Bitola, Manager Ivan Atanasovski
 - Bilingual: Full ENG + MKD text in single document; date formatted per language selection
 
+### Contract Annex — Анекс на договорот за вработување
+- Sector: Тековни Теркови (terkovi tab, hr + top_management depts)
+- Template: `server/src/templates/terkovi/contract-annex.docx` (generated programmatically via script)
+- Script: `server/scripts/create-contract-annex-template.mjs`
+- Fields: `{date}` (x2), `{employeeName}`, `{employeePin}`, `{contractNumber}`, `{contractDate}`, `{newEndDate}`
+- Language: MKD only; dates formatted with `toLocaleDateString('mk-MK', { day:'2-digit', month:'long', year:'numeric' })`
+- Access guard: server-side check `req.user.department !== 'hr' && !== 'top_management'` → 403
+- Schema: `client/src/schemas/terkovi/contractAnnexSchema.js`; uses `.refine()` for newEndDate > contractDate
+- Form: `client/src/components/terkovi/ContractAnnexForm.jsx`; EMBG input: `inputMode="numeric" maxLength={13}`
+- Gallery entry: `TerkoviGallery.jsx` TEMPLATES array, id `contract-annex`, depts `['top_management','hr']`
+- i18n keys added to: `terkovi.json` (mk+en) under `contractAnnex.*`, `template.contractAnnex.*`
+- Validation keys added to: `common.json` (mk+en) under `validation.invalidEmbg`, `validation.endDateAfterContractDate`
+
 ## Key Patterns Established
 
 ### docxtemplater API (v3.68.3)
@@ -44,6 +57,15 @@
 - Use PizZip to read/write; replace specific XML `<w:t>` text content
 - Write modified zip back to `server/src/templates/[sector]/[document].docx`
 - Always smoke-test with render + verify no leftover `{tag}` strings in output XML
+
+### Programmatic Template Generation (new pattern — Contract Annex)
+- For new documents with no pre-existing .docx, generate the template programmatically
+- Use a `server/scripts/create-[document]-template.mjs` script; run once via `node`
+- Build minimal OOXML: `[Content_Types].xml`, `_rels/.rels`, `word/document.xml`, `word/_rels/document.xml.rels`, `word/settings.xml`, `word/styles.xml`
+- Split text at `{tag}` boundaries so each tag is its own `<w:r>` element — docxtemplater requires this
+- A helper `p(text, opts)` that auto-splits on `{tag}` is the key pattern
+- Use a companion `smoke-test-[document].mjs` script to verify zero leftover tags in rendered XML
+- Smoke test checks output XML with regex `/\{[^}]+\}/g` after `doc.render()`
 
 ## File Naming Conventions
 - Template: `server/src/templates/[sector]/[document-name].docx`
