@@ -158,29 +158,24 @@ const Agreements = () => {
                 </div>
               </div>
 
-              {/* Sector tabs */}
-              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
-                {isAdmin && (
-                  <button
-                    onClick={() => setActiveSector('')}
-                    className={`px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${activeSector === '' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                  >
-                    Сите сектори
-                  </button>
-                )}
-                {SECTORS.map((d) => {
-                  const own = d.value === user?.department;
-                  return (
-                    <button
-                      key={d.value}
-                      onClick={() => setActiveSector(d.value)}
-                      className={`px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors inline-flex items-center gap-1.5 ${activeSector === d.value ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                    >
-                      {tc(`dept.${d.value}`, d.value)}
-                      {own && <span className={`w-1.5 h-1.5 rounded-full ${activeSector === d.value ? 'bg-emerald-300' : 'bg-emerald-500'}`} title="Вашиот сектор" />}
-                    </button>
-                  );
-                })}
+              {/* Sector selector */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-slate-500 whitespace-nowrap">Сектор:</label>
+                <select
+                  className="input sm:w-72 text-sm"
+                  value={activeSector}
+                  onChange={(e) => setActiveSector(e.target.value)}
+                >
+                  {isAdmin && <option value="">Сите сектори</option>}
+                  {SECTORS.map((d) => {
+                    const label = tc(`dept.${d.value}`, d.value);
+                    return (
+                      <option key={d.value} value={d.value}>
+                        {d.value === user?.department ? `${label} — мој сектор` : label}
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
             </div>
 
