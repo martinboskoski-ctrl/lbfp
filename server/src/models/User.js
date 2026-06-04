@@ -14,6 +14,7 @@ const DEPARTMENTS = [
   'top_management',
   'carina',
   'nabavki',
+  'safety',
 ];
 
 export const USER_STATUSES = ['active', 'suspended', 'deleted'];

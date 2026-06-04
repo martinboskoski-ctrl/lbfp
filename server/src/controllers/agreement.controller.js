@@ -13,12 +13,14 @@ const POPULATE = [
   { path: 'owner',     select: 'name department isManager' },
 ];
 
-// Apply confidentiality projection: confidential agreements are visible only
-// to the owner, the dept manager, HR managers, or top management.
+// Read access follows the procedure's "гледа сите, уредува само свој" model:
+// every authenticated user may VIEW all sectors' registers. The only exception is
+// agreements flagged `confidential`, which stay restricted to the owning sector's
+// manager, HR managers, the responsible owner, or top management.
 const canSeeAgreement = (agreement, viewer) => {
   if (isTopMgmt(viewer)) return true;
-  if (agreement.department !== viewer.department) return false;
   if (agreement.confidentiality === 'confidential') {
+    if (agreement.department !== viewer.department) return false;
     if (viewer.isManager) return true;
     if (isHRAdmin(viewer)) return true;
     if (agreement.owner && String(agreement.owner._id || agreement.owner) === String(viewer._id)) return true;
@@ -35,6 +37,9 @@ const ALLOWED_FIELDS = [
   'value', 'currency', 'paymentTerms', 'paymentAmount',
   'riskLevel', 'confidentiality', 'owner',
   'status', 'notes',
+  // register fields (procedure)
+  'documentType', 'contractClass', 'durationType',
+  'archiveNumber', 'driveLink', 'reviewDate', 'reviewComment',
 ];
 
 const stripEmpty = (val) => (val === '' ? null : val);
@@ -47,12 +52,10 @@ export const listAgreements = async (req, res) => {
     const u = req.user;
     const { dept, status, category, riskLevel, q } = req.query;
 
+    // Everyone may view every sector's register; an optional `dept` param narrows it.
+    // Confidentiality is enforced per-row below via canSeeAgreement().
     const filter = {};
-    if (isTopMgmt(u)) {
-      if (dept) filter.department = dept;
-    } else {
-      filter.department = u.department;
-    }
+    if (dept) filter.department = dept;
     if (category)  filter.category = category;
     if (riskLevel) filter.riskLevel = riskLevel;
     if (q && q.trim()) {
@@ -101,8 +104,8 @@ export const createAgreement = async (req, res) => {
     }
 
     const body = { ...req.body };
-    if (!body.title || !body.otherParty || !body.startDate) {
-      return res.status(400).json({ message: 'Задолжителни полиња: наслов, друга страна, датум на почеток' });
+    if (!body.otherParty || !String(body.otherParty).trim()) {
+      return res.status(400).json({ message: 'Договорната страна е задолжителна' });
     }
 
     const targetDept = isTopMgmt(u) ? (body.department || u.department) : u.department;
@@ -111,9 +114,20 @@ export const createAgreement = async (req, res) => {
     for (const key of ALLOWED_FIELDS) {
       if (body[key] !== undefined) data[key] = stripEmpty(body[key]);
     }
+    // Fall back to a readable title when none was provided.
+    if (!data.title) {
+      data.title = data.contractClass || data.otherParty;
+    }
     data.department = targetDept;
     data.createdBy  = u._id;
     data.activityLog = [{ user: u._id, action: 'created', text: '' }];
+
+    // Реден број — next sequence number within the sector.
+    const last = await Agreement.findOne({ department: targetDept })
+      .sort({ sequenceNumber: -1 })
+      .select('sequenceNumber')
+      .lean();
+    data.sequenceNumber = (last?.sequenceNumber || 0) + 1;
 
     const agreement = await Agreement.create(data);
     await agreement.populate(POPULATE);

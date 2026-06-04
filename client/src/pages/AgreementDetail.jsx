@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, FileText, Edit2, RefreshCw, Ban, Trash2, Bell,
@@ -17,13 +18,18 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { canManage, isTopManagement } from '../utils/userTier.js';
 import { fmtDate } from '../utils/formatDate.js';
 import AddAgreementModal from '../components/agreements/AddAgreementModal.jsx';
+import { STATUS_LABEL, DOC_TYPE_LABEL, DURATION_LABEL } from '../constants/contractRegister.js';
 
 const STATUS_META = {
   active:        { color: 'bg-emerald-50 text-emerald-800 border border-emerald-200', icon: CheckCircle    },
   expiring_soon: { color: 'bg-amber-50 text-amber-800 border border-amber-200',       icon: AlertTriangle  },
   expired:       { color: 'bg-red-50 text-red-800 border border-red-200',             icon: XCircle        },
+  negotiating:   { color: 'bg-sky-50 text-sky-800 border border-sky-200',             icon: Clock          },
+  for_renewal:   { color: 'bg-violet-50 text-violet-800 border border-violet-200',    icon: RefreshCw      },
+  renewing:      { color: 'bg-violet-50 text-violet-800 border border-violet-200',    icon: RefreshCw      },
   terminated:    { color: 'bg-slate-100 text-slate-600',                              icon: Ban            },
   renewed:       { color: 'bg-slate-100 text-slate-700',                              icon: RefreshCw      },
+  archived:      { color: 'bg-slate-100 text-slate-500',                              icon: Clock          },
   draft:         { color: 'bg-slate-100 text-slate-500',                              icon: Clock          },
 };
 
@@ -63,6 +69,8 @@ const AgreementDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t: tc } = useTranslation('common');
+  const tcDept = (d) => tc(`dept.${d}`, d);
   const { data: a, isLoading, error } = useAgreement(id);
   const addNote = useAddAgreementNote();
   const terminate = useTerminateAgreement();
@@ -147,7 +155,7 @@ const AgreementDetail = () => {
                   </p>
                   <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium ${sMeta.color}`}>
-                      <StatusIcon size={11} /> {status}
+                      <StatusIcon size={11} /> {STATUS_LABEL[status] || status}
                     </span>
                     {a.confidentiality === 'confidential' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-slate-200 text-slate-800">
@@ -225,16 +233,32 @@ const AgreementDetail = () => {
             {/* Basic info */}
             <Section title="Основни податоци" icon={FileText}>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6">
-                <Field label="Сектор">{a.department}</Field>
-                <Field label="Категорија">{a.category}</Field>
+                <Field label="Сектор">{tcDept(a.department)}</Field>
+                <Field label="Реден број">{a.sequenceNumber ?? '—'}</Field>
+                <Field label="Тип на документ">{DOC_TYPE_LABEL[a.documentType] || '—'}</Field>
+                <Field label="Класа / Предмет">{a.contractClass || '—'}</Field>
                 <Field label="Број на договор">{a.contractNumber}</Field>
-                <Field label="Датум на потпис">{fmtDate(a.signedDate)}</Field>
-                <Field label="Почеток">{fmtDate(a.startDate)}</Field>
-                <Field label="Крај">{a.endDate ? fmtDate(a.endDate) : 'неограничено'}</Field>
+                <Field label="Архивски број / печат">{a.archiveNumber || '—'}</Field>
+                <Field label="Датум на потпишување">{fmtDate(a.signedDate)}</Field>
+                <Field label="Стапување во сила">{fmtDate(a.startDate)}</Field>
+                <Field label="Датум на истек">{a.endDate ? fmtDate(a.endDate) : 'неопределено'}</Field>
+                <Field label="Времетраење">{DURATION_LABEL[a.durationType] || (a.endDate ? 'Определено' : 'Неопределено')}</Field>
+                <Field label="Датум за преглед">{fmtDate(a.reviewDate)}</Field>
+                <Field label="Откажен рок">{a.terminationNoticeDays} денови</Field>
                 <Field label="Авто-обновување">{a.autoRenew ? `Да (${a.autoRenewMonths || 12} месеци)` : 'Не'}</Field>
                 <Field label="Праг на потсетник">{a.reminderDays} денови</Field>
-                <Field label="Откажен рок">{a.terminationNoticeDays} денови</Field>
+                <Field label="Линк до Drive">
+                  {a.driveLink
+                    ? <a href={a.driveLink} target="_blank" rel="noopener noreferrer" className="text-sky-700 hover:underline inline-flex items-center gap-1">Отвори папка</a>
+                    : '—'}
+                </Field>
               </div>
+              {a.reviewComment && (
+                <div className="mt-4 pt-3 border-t border-slate-100">
+                  <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Преглед — коментар</div>
+                  <p className="text-sm text-slate-800 whitespace-pre-wrap">{a.reviewComment}</p>
+                </div>
+              )}
               {a.description && (
                 <div className="mt-4 pt-3 border-t border-slate-100">
                   <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Опис</div>

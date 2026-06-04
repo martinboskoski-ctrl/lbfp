@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const DEPARTMENTS = [
   'sales','finance','administration','hr','quality_assurance',
-  'facility','machines','r_and_d','production','top_management','carina','nabavki',
+  'facility','machines','r_and_d','production','top_management','carina','nabavki','safety',
 ];
 
 const activitySchema = new mongoose.Schema(
@@ -37,7 +37,7 @@ const agreementSchema = new mongoose.Schema(
   {
     // ── Basic info ───────────────────────────────────────────────
     contractNumber: { type: String, trim: true, index: true }, // external/internal reference
-    title:       { type: String, required: true, trim: true },
+    title:       { type: String, trim: true },                  // optional short name/description
     description: { type: String, trim: true },
     category: {
       type: String,
@@ -45,6 +45,24 @@ const agreementSchema = new mongoose.Schema(
       default: 'other',
     },
     tags: [{ type: String, trim: true }],
+
+    // ── Register fields (procedure / Регистар) ───────────────────
+    sequenceNumber: { type: Number, default: null },            // Реден број (per department)
+    documentType: {                                             // Тип на документ
+      type: String,
+      enum: ['contract', 'annex', 'other'],
+      default: 'contract',
+    },
+    contractClass:  { type: String, trim: true, default: '' },  // Класа / Предмет (sector-specific)
+    durationType: {                                             // Времетраење
+      type: String,
+      enum: ['fixed', 'indefinite'],
+      default: 'fixed',
+    },
+    archiveNumber:  { type: String, trim: true, default: '' },  // Архивски број / печат
+    driveLink:      { type: String, trim: true, default: '' },  // Линк до папка (Google Drive)
+    reviewDate:     { type: Date, default: null },              // Датум за преглед (пред истек)
+    reviewComment:  { type: String, trim: true, default: '' },  // Преглед — коментар
 
     // ── Counterparty ─────────────────────────────────────────────
     otherParty:  { type: String, required: true, trim: true }, // legal name
@@ -57,7 +75,7 @@ const agreementSchema = new mongoose.Schema(
     },
 
     // ── Duration ─────────────────────────────────────────────────
-    startDate:     { type: Date, required: true },
+    startDate:     { type: Date, default: null },   // Датум на стапување во сила (optional)
     endDate:       { type: Date, default: null },   // null = open-ended / indefinite
     signedDate:    { type: Date, default: null },
     autoRenew:     { type: Boolean, default: false },
@@ -91,7 +109,9 @@ const agreementSchema = new mongoose.Schema(
     // ── Workflow state ──────────────────────────────────────────
     status: {
       type: String,
-      enum: ['draft', 'active', 'terminated', 'renewed'],
+      // procedure statuses: Активен / Во преговори / За продолжување / Во продолжување /
+      // Истечен / Раскинат / Архивиран (plus legacy draft/renewed)
+      enum: ['draft', 'active', 'negotiating', 'for_renewal', 'renewing', 'expired', 'terminated', 'renewed', 'archived'],
       default: 'active',
     },
     department:        { type: String, enum: DEPARTMENTS, required: true },
@@ -112,9 +132,11 @@ const agreementSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Computed effective status — overlays date logic on manual status
+// Computed effective status — date logic only overlays the plain `active` status.
+// Explicit manual statuses (negotiating, for_renewal, renewing, archived, terminated,
+// renewed, draft, expired) are authoritative and pass through unchanged.
 agreementSchema.virtual('effectiveStatus').get(function () {
-  if (['terminated', 'renewed', 'draft'].includes(this.status)) return this.status;
+  if (this.status !== 'active') return this.status;
   if (!this.endDate) return 'active';
   const daysLeft = Math.ceil((new Date(this.endDate) - new Date()) / 86_400_000);
   if (daysLeft < 0)                     return 'expired';

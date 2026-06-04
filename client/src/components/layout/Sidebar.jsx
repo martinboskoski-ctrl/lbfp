@@ -5,7 +5,7 @@ import {
   Factory, Crown, Users2,
   ChevronRight, ClipboardList, GraduationCap, FileText,
   Megaphone, CalendarClock, Wrench as WrenchIcon, BarChart3,
-  Scale, Inbox,
+  Scale, Inbox, ShieldAlert,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -26,6 +26,7 @@ export const DEPARTMENTS = [
   { value: 'production',        icon: Factory     },
   { value: 'carina',            icon: Wrench      },
   { value: 'nabavki',           icon: Factory     },
+  { value: 'safety',            icon: ShieldAlert },
 ];
 
 const NavItem = ({ to, icon, label, end, badge }) => {

@@ -67,7 +67,8 @@
     "r_and_d": "Research & Development",
     "production": "Production",
     "carina": "Customs",
-    "nabavki": "Procurement (raw materials & packaging)"
+    "nabavki": "Procurement (raw materials & packaging)",
+    "safety": "Safety & Certifications"
   },
 
   "priority": {
