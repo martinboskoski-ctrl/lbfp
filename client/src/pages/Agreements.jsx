@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   FileText, Plus, Search, XCircle, AlertTriangle,
-  CheckCircle, Clock, Ban, Bell, RefreshCw, ExternalLink, ShieldAlert,
+  CheckCircle, Clock, Ban, Bell, RefreshCw, ExternalLink, ShieldAlert, X,
 } from 'lucide-react';
 import Sidebar, { DEPARTMENTS } from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
@@ -12,7 +12,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { canManage, isTopManagement } from '../utils/userTier.js';
 import { fmtDate } from '../utils/formatDate.js';
 import AddAgreementModal from '../components/agreements/AddAgreementModal.jsx';
-import { STATUS_LABEL, DOC_TYPE_LABEL, REGISTER_STATUSES } from '../constants/contractRegister.js';
+import { STATUS_LABEL, DOC_TYPE_LABEL, REGISTER_STATUSES, DOCUMENT_TYPES } from '../constants/contractRegister.js';
 
 // Tabs are the operating sectors (every department except top management).
 const SECTORS = DEPARTMENTS.filter((d) => d.value !== 'top_management');
@@ -81,7 +81,13 @@ const Agreements = () => {
   const [activeSector, setActiveSector] = useState(isAdmin ? '' : (user?.department ?? ''));
   const [searchQ, setSearchQ] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [filterDocType, setFilterDocType] = useState('');
+  const [signedFrom, setSignedFrom] = useState('');
+  const [signedTo, setSignedTo] = useState('');
   const [modal, setModal] = useState(null);
+
+  const hasExtraFilters = filterDocType || signedFrom || signedTo;
+  const clearExtraFilters = () => { setFilterDocType(''); setSignedFrom(''); setSignedTo(''); };
 
   const params = useMemo(() => {
     const p = {};
@@ -101,9 +107,20 @@ const Agreements = () => {
   }), [agreements]);
 
   const filtered = useMemo(() => {
-    if (!filterStatus) return agreements;
-    return agreements.filter((a) => a.effectiveStatus === filterStatus);
-  }, [agreements, filterStatus]);
+    const fromTs = signedFrom ? new Date(signedFrom).setHours(0, 0, 0, 0) : null;
+    const toTs   = signedTo   ? new Date(signedTo).setHours(23, 59, 59, 999) : null;
+    return agreements.filter((a) => {
+      if (filterStatus && a.effectiveStatus !== filterStatus) return false;
+      if (filterDocType && a.documentType !== filterDocType) return false;
+      if (fromTs || toTs) {
+        if (!a.signedDate) return false;
+        const ts = new Date(a.signedDate).getTime();
+        if (fromTs && ts < fromTs) return false;
+        if (toTs && ts > toTs) return false;
+      }
+      return true;
+    });
+  }, [agreements, filterStatus, filterDocType, signedFrom, signedTo]);
 
   // When viewing "all", group rows by sector; otherwise a single flat list.
   const grouped = useMemo(() => {
@@ -188,21 +205,43 @@ const Agreements = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-2 mb-4">
-              <div className="relative flex-1">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  className="input pl-8 text-sm"
-                  placeholder="Барај по наслов, страна, бр. на договор..."
-                  value={searchQ}
-                  onChange={(e) => setSearchQ(e.target.value)}
-                />
+            <div className="flex flex-col gap-2 mb-4">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    className="input pl-8 text-sm"
+                    placeholder="Барај по договорна страна (клиент), наслов, бр. на договор..."
+                    value={searchQ}
+                    onChange={(e) => setSearchQ(e.target.value)}
+                  />
+                </div>
+                <select className="input sm:w-44 text-sm" value={filterDocType} onChange={(e) => setFilterDocType(e.target.value)}>
+                  <option value="">Сите типови</option>
+                  {DOCUMENT_TYPES.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+                </select>
+                <select className="input sm:w-48 text-sm" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+                  <option value="">Сите статуси</option>
+                  {REGISTER_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  <option value="expiring_soon">Истекува наскоро</option>
+                </select>
               </div>
-              <select className="input sm:w-48 text-sm" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-                <option value="">Сите статуси</option>
-                {REGISTER_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                <option value="expiring_soon">Истекува наскоро</option>
-              </select>
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="text-slate-500 whitespace-nowrap">Потпишан:</span>
+                <input type="date" className="input text-sm w-auto" value={signedFrom} max={signedTo || undefined}
+                  onChange={(e) => setSignedFrom(e.target.value)} aria-label="Потпишан од" />
+                <span className="text-slate-400">–</span>
+                <input type="date" className="input text-sm w-auto" value={signedTo} min={signedFrom || undefined}
+                  onChange={(e) => setSignedTo(e.target.value)} aria-label="Потпишан до" />
+                {(hasExtraFilters || filterStatus || searchQ) && (
+                  <button
+                    onClick={() => { clearExtraFilters(); setFilterStatus(''); setSearchQ(''); }}
+                    className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 px-2 py-1 rounded hover:bg-slate-100"
+                  >
+                    <X size={12} /> Исчисти филтри
+                  </button>
+                )}
+              </div>
             </div>
 
             {isLoading && (
