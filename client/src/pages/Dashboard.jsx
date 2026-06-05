@@ -18,8 +18,13 @@ const DEPT_TABS = [
   { value: 'terkovi',   key: 'tabs.terkovi' },
   { value: 'projects',  key: 'tabs.projects' },
   { value: 'tasks',     key: 'tabs.tasks' },
-  { value: 'nabavki',   key: 'tabs.nabavki' },
-  { value: 'vraboteni', key: 'tabs.vraboteni' },
+];
+
+// Resource links — shown as a slim bar under the header, above the tools tabs.
+// `vraboteni` stays an in-dashboard tab; `procedures` jumps to its own page.
+const RESOURCE_LINKS = [
+  { value: 'vraboteni', key: 'tabs.vraboteni', to: null },
+  { value: 'procedures', key: 'tabs.procedures', to: '/procedures' },
 ];
 
 // Departments that have the Leads (Потенцијални клиенти) tab
@@ -101,6 +106,38 @@ const Dashboard = () => {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar title={title} onMenuClick={() => setSidebarOpen(true)} />
+
+        {/* Resources bar — sector resources, distinct from the task tools below */}
+        {dept && (
+          <div className="bg-white px-4 pt-2.5">
+            <nav className="flex items-center gap-2.5 text-sm">
+              {RESOURCE_LINKS.map((link, i) => (
+                <span key={link.value} className="flex items-center gap-2.5">
+                  {i > 0 && <span className="text-gray-300 select-none">/</span>}
+                  {link.to ? (
+                    <Link
+                      to={link.to}
+                      className="font-medium text-gray-500 hover:text-blue-700 transition-colors"
+                    >
+                      {t(link.key)}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => switchTab(link.value)}
+                      className={`font-medium transition-colors ${
+                        tab === link.value
+                          ? 'text-blue-700'
+                          : 'text-gray-500 hover:text-blue-700'
+                      }`}
+                    >
+                      {t(link.key)}
+                    </button>
+                  )}
+                </span>
+              ))}
+            </nav>
+          </div>
+        )}
 
         {/* Department sub-tabs — only shown when a specific dept is selected */}
         {dept && (
@@ -190,12 +227,6 @@ const Dashboard = () => {
 
               {dept && tab === 'terkovi' && (
                 <TerkoviGallery />
-              )}
-
-              {dept && tab === 'nabavki' && (
-                <div className="text-center py-16 text-gray-400 text-sm">
-                  {t('nabavkiComingSoon')}
-                </div>
               )}
 
               {dept && tab === 'leads' && (

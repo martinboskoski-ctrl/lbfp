@@ -139,6 +139,20 @@
     "allStatuses": "All"
   },
 
+  "hub": {
+    "intro": "One place for every client inquiry. Sales talks to the client; departments supply the info — everyone sees the full picture.",
+    "filterAll": "All",
+    "filterNeedsMe": "Needs my input",
+    "filterOpen": "Open",
+    "filterReview": "For review",
+    "filterClosed": "Closed",
+    "needsYou": "waiting on you",
+    "needsYouCount_one": "{{count}} for you",
+    "needsYouCount_other": "{{count}} for you",
+    "noQuestions": "No questions",
+    "noMatch": "No inquiries for this filter."
+  },
+
   "modal": {
     "title": "New Pre-Order Inquiry",
     "stageLabel": "Stage",

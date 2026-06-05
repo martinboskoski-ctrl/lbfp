@@ -139,6 +139,20 @@
     "allStatuses": "Сите"
   },
 
+  "hub": {
+    "intro": "Едно место за сите барања од клиенти. Продажбата комуницира со клиентот; секторите даваат информации — сите ја гледаат целата слика.",
+    "filterAll": "Сите",
+    "filterNeedsMe": "Бара мој внес",
+    "filterOpen": "Отворени",
+    "filterReview": "За преглед",
+    "filterClosed": "Затворени",
+    "needsYou": "чека тебе",
+    "needsYouCount_one": "{{count}} за тебе",
+    "needsYouCount_other": "{{count}} за тебе",
+    "noQuestions": "Нема прашања",
+    "noMatch": "Нема барања за овој филтер."
+  },
+
   "modal": {
     "title": "Ново пред-нарачко барање",
     "stageLabel": "Фаза",

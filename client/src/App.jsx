@@ -11,7 +11,6 @@ import ProjectCreate from './pages/ProjectCreate.jsx';
 import ProjectDetail from './pages/ProjectDetail.jsx';
 import AdminUsers from './pages/AdminUsers.jsx';
 import PODetail from './pages/PODetail.jsx';
-import InquiryInbox from './pages/InquiryInbox.jsx';
 import Inquiries from './pages/Inquiries.jsx';
 import UserManagement from './pages/UserManagement.jsx';
 import UserDetail from './pages/UserDetail.jsx';
@@ -59,7 +58,7 @@ const App = () => (
             <Route path="/projects/:id" element={<ProjectDetail />} />
             <Route path="/po/:id"       element={<PODetail />} />
             <Route path="/inquiries"       element={<Inquiries />} />
-            <Route path="/inquiries/inbox" element={<InquiryInbox />} />
+            <Route path="/inquiries/inbox" element={<Navigate to="/inquiries" replace />} />
             <Route path="/admin/user-management"     element={<UserManagement />} />
             <Route path="/admin/user-management/:id" element={<UserDetail />} />
             <Route path="/register" element={<Register />} />

@@ -5,7 +5,7 @@ import {
   Factory, Crown, Users2,
   ChevronRight, ClipboardList, GraduationCap, FileText,
   Megaphone, CalendarClock, Wrench as WrenchIcon, BarChart3,
-  Scale, Inbox, ShieldAlert,
+  Scale, ShieldAlert,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -137,9 +137,9 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const showProductionReports = isTopManagement(user) || user?.department === 'production';
   const showEmployeesItem = canManage(user) || user?.department === 'hr';
-  const showInquiryInbox = isTopManagement(user) ||
+  // Top mgmt + sales + the contributor depts that answer inquiry questions.
+  const showInquiries = isTopManagement(user) ||
     ['sales', 'quality_assurance', 'r_and_d', 'nabavki'].includes(user?.department);
-  const showInquiries = showInquiryInbox; // same audience: top mgmt + sales + qa + r&d + nabavki
 
   // ── Submenus ───────────────────────────────────────────────────
   const legalItems = [
@@ -223,11 +223,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div onClick={handleNavClick}>
               <NavItem to="/requests" icon={FileText} label={t('requests')} />
             </div>
-            {showInquiryInbox && (
-              <div onClick={handleNavClick}>
-                <NavItem to="/inquiries/inbox" icon={Inbox} label={t('inquiriesInbox')} />
-              </div>
-            )}
             <div onClick={handleNavClick}>
               <NavItem to="/trainings" icon={GraduationCap} label={t('trainings')} />
             </div>
