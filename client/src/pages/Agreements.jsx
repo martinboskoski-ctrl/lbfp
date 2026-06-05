@@ -153,7 +153,9 @@ const Agreements = () => {
                 <div>
                   <h2 className="text-lg sm:text-xl font-semibold text-slate-900">Регистар на договори</h2>
                   <p className="text-sm text-slate-500 mt-0.5">
-                    Единствен извор на вистина за договорите. Гледате сите сектори; уредувате во својот.
+                    {isAdmin
+                      ? 'Единствен извор на вистина за договорите. Преглед на сите сектори.'
+                      : `Договори за вашиот сектор: ${tc(`dept.${user?.department}`, user?.department)}.`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -175,25 +177,22 @@ const Agreements = () => {
                 </div>
               </div>
 
-              {/* Sector selector */}
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-slate-500 whitespace-nowrap">Сектор:</label>
-                <select
-                  className="input sm:w-72 text-sm"
-                  value={activeSector}
-                  onChange={(e) => setActiveSector(e.target.value)}
-                >
-                  {isAdmin && <option value="">Сите сектори</option>}
-                  {SECTORS.map((d) => {
-                    const label = tc(`dept.${d.value}`, d.value);
-                    return (
-                      <option key={d.value} value={d.value}>
-                        {d.value === user?.department ? `${label} — мој сектор` : label}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
+              {/* Sector selector — only top management can switch sectors */}
+              {isAdmin && (
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-slate-500 whitespace-nowrap">Сектор:</label>
+                  <select
+                    className="input sm:w-72 text-sm"
+                    value={activeSector}
+                    onChange={(e) => setActiveSector(e.target.value)}
+                  >
+                    <option value="">Сите сектори</option>
+                    {SECTORS.map((d) => (
+                      <option key={d.value} value={d.value}>{tc(`dept.${d.value}`, d.value)}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             {/* Stats */}

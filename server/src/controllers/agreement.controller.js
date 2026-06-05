@@ -13,14 +13,13 @@ const POPULATE = [
   { path: 'owner',     select: 'name department isManager' },
 ];
 
-// Read access follows the procedure's "гледа сите, уредува само свој" model:
-// every authenticated user may VIEW all sectors' registers. The only exception is
-// agreements flagged `confidential`, which stay restricted to the owning sector's
-// manager, HR managers, the responsible owner, or top management.
+// Access is sector-scoped: a user may only VIEW agreements from their own
+// department. Only top management sees every sector. Confidential agreements are
+// further restricted within the sector to managers, HR managers, or the owner.
 const canSeeAgreement = (agreement, viewer) => {
   if (isTopMgmt(viewer)) return true;
+  if (agreement.department !== viewer.department) return false;
   if (agreement.confidentiality === 'confidential') {
-    if (agreement.department !== viewer.department) return false;
     if (viewer.isManager) return true;
     if (isHRAdmin(viewer)) return true;
     if (agreement.owner && String(agreement.owner._id || agreement.owner) === String(viewer._id)) return true;
@@ -52,10 +51,14 @@ export const listAgreements = async (req, res) => {
     const u = req.user;
     const { dept, status, category, riskLevel, q } = req.query;
 
-    // Everyone may view every sector's register; an optional `dept` param narrows it.
-    // Confidentiality is enforced per-row below via canSeeAgreement().
+    // Sector scoping: top management sees all (optionally narrowed by `dept`);
+    // everyone else is locked to their own department.
     const filter = {};
-    if (dept) filter.department = dept;
+    if (isTopMgmt(u)) {
+      if (dept) filter.department = dept;
+    } else {
+      filter.department = u.department;
+    }
     if (category)  filter.category = category;
     if (riskLevel) filter.riskLevel = riskLevel;
     if (q && q.trim()) {
