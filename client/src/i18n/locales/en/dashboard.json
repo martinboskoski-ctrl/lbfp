@@ -1,6 +1,19 @@
 {
   "bulletin": "Bulletin Board",
 
+  "home": {
+    "greeting": "Hi, {{name}}",
+    "subtitle": "A quick overview of your tasks and requests",
+    "myTasks": "My Tasks",
+    "myTasksEmpty": "You have no active tasks",
+    "myRequests": "My Requests",
+    "myRequestsEmpty": "You have no active requests",
+    "deadlines": "Upcoming Deadlines",
+    "overdue": "Overdue",
+    "dueToday": "Today",
+    "viewAll": "All"
+  },
+
   "tabs": {
     "terkovi": "Templates",
     "projects": "Projects",

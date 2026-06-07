@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PlusCircle, ShieldCheck } from 'lucide-react';
 import KanbanBoard from '../components/tasks/KanbanBoard.jsx';
-import Whiteboard from '../components/Whiteboard.jsx';
+import HomeDashboard from '../components/home/HomeDashboard.jsx';
 import TerkoviGallery from '../components/terkovi/TerkoviGallery.jsx';
 import LeadsPage from '../components/leads/LeadsPage.jsx';
 import { useProjects } from '../hooks/useProjects.js';
@@ -170,12 +170,12 @@ const Dashboard = () => {
             <KanbanBoard dept={dept} />
           )}
 
-          {/* All other tabs — constrained to readable width */}
-          {!(dept && tab === 'tasks') && (
-            <div className="max-w-3xl mx-auto">
+          {/* No dept selected → quick-access home */}
+          {!dept && <HomeDashboard />}
 
-              {/* No dept selected → Whiteboard */}
-              {!dept && <Whiteboard />}
+          {/* Department tabs — constrained to readable width */}
+          {dept && tab !== 'tasks' && (
+            <div className="max-w-3xl mx-auto">
 
               {(dept && tab === 'projects') && (
                 <>

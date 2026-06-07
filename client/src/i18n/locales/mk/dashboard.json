@@ -1,6 +1,19 @@
 {
   "bulletin": "Огласна табла",
 
+  "home": {
+    "greeting": "Здраво, {{name}}",
+    "subtitle": "Брз преглед на твоите задачи и барања",
+    "myTasks": "Мои задачи",
+    "myTasksEmpty": "Немаш активни задачи",
+    "myRequests": "Мои барања",
+    "myRequestsEmpty": "Немаш активни барања",
+    "deadlines": "Претстојни рокови",
+    "overdue": "Изминат рок",
+    "dueToday": "Денес",
+    "viewAll": "Сите"
+  },
+
   "tabs": {
     "terkovi": "Теркови",
     "projects": "Проекти",
