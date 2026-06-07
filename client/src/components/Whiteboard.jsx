@@ -25,31 +25,31 @@ const Whiteboard = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="card p-4 h-full flex flex-col min-h-0">
 
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
-          <Megaphone size={20} className="text-white" />
+      <div className="flex items-center gap-2.5 mb-3 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+          <Megaphone size={16} className="text-white" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900">{t('bulletin')}</h2>
-          <p className="text-sm text-gray-400">{t('whiteboard.subtitle')}</p>
+          <h3 className="text-sm font-semibold text-gray-800">{t('bulletin')}</h3>
+          <p className="text-xs text-gray-400">{t('whiteboard.subtitle')}</p>
         </div>
       </div>
 
       {/* Compose — top management only */}
       {isTopMgmt && (
-        <form onSubmit={handlePost} className="mb-8">
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-4">
+        <form onSubmit={handlePost} className="mb-3 shrink-0">
+          <div className="border border-gray-200 rounded-xl p-3">
             <textarea
               className="w-full text-sm text-gray-800 placeholder-gray-400 resize-none outline-none"
-              rows={3}
+              rows={2}
               placeholder={t('whiteboard.placeholder')}
               value={text}
               onChange={(e) => setText(e.target.value)}
             />
-            <div className="flex justify-end pt-3 border-t border-gray-100 mt-2">
+            <div className="flex justify-end pt-2 border-t border-gray-100 mt-2">
               <button
                 type="submit"
                 disabled={!text.trim() || createAnnouncement.isPending}
@@ -65,23 +65,23 @@ const Whiteboard = () => {
         </form>
       )}
 
-      {/* Announcements list */}
-      {isLoading && (
-        <div className="flex justify-center py-16">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-        </div>
-      )}
+      {/* Announcements list — scrolls within the panel */}
+      <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1 space-y-3">
+        {isLoading && (
+          <div className="flex justify-center py-16">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+          </div>
+        )}
 
-      {!isLoading && announcements.length === 0 && (
-        <div className="text-center py-20 text-gray-300">
-          <Megaphone size={40} className="mx-auto mb-3 opacity-40" />
-          <p className="text-sm">{t('whiteboard.noAnnouncements')}</p>
-        </div>
-      )}
+        {!isLoading && announcements.length === 0 && (
+          <div className="text-center py-16 text-gray-300">
+            <Megaphone size={36} className="mx-auto mb-3 opacity-40" />
+            <p className="text-sm">{t('whiteboard.noAnnouncements')}</p>
+          </div>
+        )}
 
-      <div className="space-y-4">
         {announcements.map((a) => (
-          <div key={a._id} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+          <div key={a._id} className="border border-gray-200 rounded-xl p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-sm font-bold flex-shrink-0">
