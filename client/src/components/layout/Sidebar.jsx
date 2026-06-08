@@ -4,7 +4,7 @@ import {
   Users, ShieldCheck, Wrench, Settings, FlaskConical,
   Factory, Crown, Users2,
   ChevronRight, ClipboardList, GraduationCap, FileText,
-  Megaphone, CalendarClock, Wrench as WrenchIcon, BarChart3,
+  CalendarClock, Wrench as WrenchIcon, BarChart3,
   Scale, ShieldAlert,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -217,9 +217,6 @@ const Sidebar = ({ isOpen, onClose }) => {
 
           {/* Static nav — new structured order */}
           <div className="pt-3 space-y-0.5">
-            <div onClick={handleNavClick}>
-              <NavItem to="/announcements" icon={Megaphone} label={t('announcements')} />
-            </div>
             <div onClick={handleNavClick}>
               <NavItem to="/requests" icon={FileText} label={t('requests')} />
             </div>

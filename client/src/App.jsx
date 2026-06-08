@@ -20,7 +20,6 @@ import AnticorruptionTraining from './pages/AnticorruptionTraining.jsx';
 import ProcedureDetail from './pages/ProcedureDetail.jsx';
 import Requests from './pages/Requests.jsx';
 import RequestDetail from './pages/RequestDetail.jsx';
-import Announcements from './pages/Announcements.jsx';
 import Shifts from './pages/Shifts.jsx';
 import Maintenance from './pages/Maintenance.jsx';
 import ProductionReport from './pages/ProductionReport.jsx';
@@ -68,7 +67,6 @@ const App = () => (
             <Route path="/trainings/anticorruption" element={<AnticorruptionTraining />} />
             <Route path="/requests" element={<Requests />} />
             <Route path="/requests/:id" element={<RequestDetail />} />
-            <Route path="/announcements" element={<Announcements />} />
             <Route path="/shifts" element={<Shifts />} />
             <Route path="/maintenance" element={<Maintenance />} />
             <Route path="/production-report" element={<ProductionReport />} />
