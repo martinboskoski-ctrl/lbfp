@@ -23,7 +23,8 @@
     "vraboteni": "Employees",
     "procedures": "Procedures",
     "po": "Purchase Order",
-    "leads": "Leads"
+    "leads": "Leads",
+    "clients": "Clients"
   },
 
   "projectCount_one": "{{count}} project",

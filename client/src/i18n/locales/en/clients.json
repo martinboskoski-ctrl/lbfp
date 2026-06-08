@@ -1,0 +1,74 @@
+{
+  "title": "Clients",
+  "subtitle": "Clients & orders overview",
+  "clientCount_one": "{{count}} client",
+  "clientCount_other": "{{count}} clients",
+  "newClient": "New Client",
+  "addFirstClient": "Add first client",
+  "noClients": "No clients yet",
+  "noFilterMatch": "No results for your search",
+  "searchPlaceholder": "Search clients…",
+  "details": "Details",
+  "allStatuses": "All statuses",
+  "assignedTo": "Owner",
+  "noContact": "No contact",
+
+  "status": {
+    "active": "Active",
+    "prospect": "Prospect",
+    "inactive": "Inactive"
+  },
+
+  "stat": {
+    "total": "Total clients",
+    "active": "Active",
+    "forecast": "Forecast (EUR)",
+    "delivered": "Delivered (EUR)",
+    "items": "Items"
+  },
+
+  "orders": {
+    "title": "Orders",
+    "none": "No orders yet",
+    "add": "Add order",
+    "description": "Description / product",
+    "descriptionPlaceholder": "e.g. packaging, labels…",
+    "forecast": "Forecast (EUR)",
+    "items": "Item count",
+    "date": "Date",
+    "status": "Status",
+    "forecastTotal": "Total forecast",
+    "itemTotal": "Total items"
+  },
+
+  "orderStatus": {
+    "forecast": "Forecast",
+    "confirmed": "Confirmed",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+
+  "activity": {
+    "title": "History / notes",
+    "none": "No activity",
+    "placeholder": "Add a note…",
+    "add": "Add"
+  },
+
+  "modal": {
+    "createTitle": "New Client",
+    "editTitle": "Edit Client",
+    "companyLabel": "Company",
+    "companyPlaceholder": "Company name",
+    "contactNameLabel": "Contact person",
+    "contactNamePlaceholder": "Full name",
+    "emailLabel": "Email",
+    "phoneLabel": "Phone",
+    "statusLabel": "Status",
+    "assignedToLabel": "Owner",
+    "notesLabel": "Notes",
+    "notesPlaceholder": "Additional info…",
+    "submitCreate": "Create",
+    "submitEdit": "Save"
+  }
+}

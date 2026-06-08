@@ -8,6 +8,7 @@ import mkDashboard from './locales/mk/dashboard.json';
 import mkTasks from './locales/mk/tasks.json';
 import mkAgreements from './locales/mk/agreements.json';
 import mkLeads from './locales/mk/leads.json';
+import mkClients from './locales/mk/clients.json';
 import mkPo from './locales/mk/po.json';
 import mkProjects from './locales/mk/projects.json';
 import mkTerkovi from './locales/mk/terkovi.json';
@@ -28,6 +29,7 @@ import enDashboard from './locales/en/dashboard.json';
 import enTasks from './locales/en/tasks.json';
 import enAgreements from './locales/en/agreements.json';
 import enLeads from './locales/en/leads.json';
+import enClients from './locales/en/clients.json';
 import enPo from './locales/en/po.json';
 import enProjects from './locales/en/projects.json';
 import enTerkovi from './locales/en/terkovi.json';
@@ -53,6 +55,7 @@ i18n.use(initReactI18next).init({
       tasks: mkTasks,
       agreements: mkAgreements,
       leads: mkLeads,
+      clients: mkClients,
       po: mkPo,
       projects: mkProjects,
       terkovi: mkTerkovi,
@@ -73,6 +76,7 @@ i18n.use(initReactI18next).init({
       tasks: enTasks,
       agreements: enAgreements,
       leads: enLeads,
+      clients: enClients,
       po: enPo,
       projects: enProjects,
       terkovi: enTerkovi,

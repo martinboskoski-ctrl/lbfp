@@ -98,3 +98,33 @@ Plan file: ~/.claude/plans/validated-marinating-parrot.md
 ## Verification
 - `npm run build --prefix client` ✓; lint — no NEW errors (pre-existing set-state-in-effect untouched); `node --check` + server boot ✓.
 - Not done: live multi-login DnD smoke test (needs Mongo + two accounts).
+
+---
+
+# Sales Clients (CRM-lite) — clients, orders & overview
+
+Plan file: ~/.claude/plans/validated-marinating-parrot.md
+Mirrors the Leads feature end-to-end.
+
+## Decisions (confirmed with user)
+- Client status: active / prospect / inactive (Активен/Потенцијален/Неактивен).
+- Order: description, forecastEUR, itemCount, status (forecast→confirmed→delivered→cancelled), date.
+- Clients separate from Leads for now (lead→client conversion is a later follow-up).
+
+## Done
+- [x] Server `models/Client.js`: embedded orders + activities; virtuals forecastTotal/deliveredTotal/itemTotal/openOrderCount.
+- [x] Server `controllers/client.controller.js`: list/create/update/delete + add/update/delete order + addActivity. Sales+top access; non-managers own-only; managers reassign/delete. Status change auto-logs a status_change activity.
+- [x] `routes/client.routes.js` + mounted `/api/clients` in app.js.
+- [x] Client `api/clients.api.js`, `hooks/useClients.js` (invalidate ['clients']).
+- [x] `components/clients/ClientsPage.jsx` — overview stat cards (total/active/forecast EUR/delivered EUR/items) + search/status filter + client cards.
+- [x] `components/clients/AddClientModal.jsx` (create/edit) and `ClientDetailModal.jsx` (orders table w/ inline add + per-order status/delete, activity log). Esc + backdrop close.
+- [x] i18n `clients.json` (mk+en) registered; `tabs.clients` added to dashboard.json.
+- [x] Dashboard: `Клиенти` nav item (sales/top, before Потенцијални клиенти) + ClientsPage render branch.
+
+## Verification
+- `node --check` all server files ✓; server boots with routes mounted, no errors.
+- `npm run build --prefix client` ✓. Lint clean except one `Icon` no-unused-vars false-positive that mirrors LeadsPage's StatCard (accepted repo pattern).
+- Not done: live DB smoke test (needs Mongo + a sales/top login).
+
+## Future
+- Convert won lead → client; charts/trend in overview; per-rep breakdown; order line-items.

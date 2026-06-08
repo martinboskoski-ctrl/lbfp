@@ -6,6 +6,7 @@ import KanbanBoard from '../components/tasks/KanbanBoard.jsx';
 import HomeDashboard from '../components/home/HomeDashboard.jsx';
 import TerkoviGallery from '../components/terkovi/TerkoviGallery.jsx';
 import LeadsPage from '../components/leads/LeadsPage.jsx';
+import ClientsPage from '../components/clients/ClientsPage.jsx';
 import { useProjects } from '../hooks/useProjects.js';
 import { useDirectory } from '../hooks/useUsers.js';
 import ProjectCard from '../components/project/ProjectCard.jsx';
@@ -20,7 +21,9 @@ const buildNavItems = (dept) => [
   { value: 'tasks',     key: 'tabs.tasks' },
   { value: 'projects',  key: 'tabs.projects' },
   { value: 'terkovi',   key: 'tabs.terkovi' },
-  ...(LEADS_DEPTS.includes(dept) ? [{ value: 'leads', key: 'tabs.leads' }] : []),
+  ...(LEADS_DEPTS.includes(dept)
+    ? [{ value: 'clients', key: 'tabs.clients' }, { value: 'leads', key: 'tabs.leads' }]
+    : []),
   { value: 'vraboteni', key: 'tabs.vraboteni' },
   { value: 'procedures', key: 'tabs.procedures', to: '/procedures' },
 ];
@@ -204,6 +207,10 @@ const Dashboard = () => {
 
               {dept && tab === 'leads' && (
                 <LeadsPage />
+              )}
+
+              {dept && tab === 'clients' && (
+                <ClientsPage />
               )}
 
               {dept && tab === 'vraboteni' && (

@@ -1,0 +1,74 @@
+{
+  "title": "Клиенти",
+  "subtitle": "Преглед на клиенти и нарачки",
+  "clientCount_one": "{{count}} клиент",
+  "clientCount_other": "{{count}} клиенти",
+  "newClient": "Нов клиент",
+  "addFirstClient": "Додај прв клиент",
+  "noClients": "Сè уште нема клиенти",
+  "noFilterMatch": "Нема резултати за пребарувањето",
+  "searchPlaceholder": "Пребарај клиент…",
+  "details": "Детали",
+  "allStatuses": "Сите статуси",
+  "assignedTo": "Одговорен",
+  "noContact": "Без контакт",
+
+  "status": {
+    "active": "Активен",
+    "prospect": "Потенцијален",
+    "inactive": "Неактивен"
+  },
+
+  "stat": {
+    "total": "Вкупно клиенти",
+    "active": "Активни",
+    "forecast": "Прогноза (EUR)",
+    "delivered": "Испорачано (EUR)",
+    "items": "Артикли"
+  },
+
+  "orders": {
+    "title": "Нарачки",
+    "none": "Сè уште нема нарачки",
+    "add": "Додај нарачка",
+    "description": "Опис / производ",
+    "descriptionPlaceholder": "На пр. амбалажа, етикети…",
+    "forecast": "Прогноза (EUR)",
+    "items": "Број артикли",
+    "date": "Датум",
+    "status": "Статус",
+    "forecastTotal": "Вкупна прогноза",
+    "itemTotal": "Вкупно артикли"
+  },
+
+  "orderStatus": {
+    "forecast": "Прогноза",
+    "confirmed": "Потврдена",
+    "delivered": "Испорачана",
+    "cancelled": "Откажана"
+  },
+
+  "activity": {
+    "title": "Историја / белешки",
+    "none": "Нема активности",
+    "placeholder": "Додај белешка…",
+    "add": "Додај"
+  },
+
+  "modal": {
+    "createTitle": "Нов клиент",
+    "editTitle": "Уреди клиент",
+    "companyLabel": "Компанија",
+    "companyPlaceholder": "Име на компанија",
+    "contactNameLabel": "Контакт лице",
+    "contactNamePlaceholder": "Име и презиме",
+    "emailLabel": "Е-пошта",
+    "phoneLabel": "Телефон",
+    "statusLabel": "Статус",
+    "assignedToLabel": "Одговорен",
+    "notesLabel": "Белешки",
+    "notesPlaceholder": "Дополнителни информации…",
+    "submitCreate": "Креирај",
+    "submitEdit": "Зачувај"
+  }
+}

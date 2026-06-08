@@ -23,7 +23,8 @@
     "vraboteni": "Вработени",
     "procedures": "Процедури",
     "po": "Purchase Order",
-    "leads": "Потенцијални клиенти"
+    "leads": "Потенцијални клиенти",
+    "clients": "Клиенти"
   },
 
   "projectCount_one": "{{count}} проект",
