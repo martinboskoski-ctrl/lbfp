@@ -72,3 +72,29 @@ Not done / notes:
 - No DB-backed runtime smoke test (needs Mongo + env); compile-time verification only.
 - Existing contracts keep working — new fields optional/additive; legacy `category` retained in the "Дополнително" section.
 - Dead, unused `AgreementsPage.jsx` left untouched.
+
+---
+
+# Trello-style Task Management + Unified Sector Menu
+
+Plan file: ~/.claude/plans/validated-marinating-parrot.md
+
+## Decisions (confirmed with user)
+- Menu: one unified line bar — Тековни задачи · Проекти · Теркови · Потенцијални клиенти · Вработени · Процедури. Tasks first + default view.
+- Create rights: managers/top-mgmt only. Owner (assignee) drags own card между todo/in_progress/done only.
+
+## Done
+- [x] Server `listTasks`: team-wide visibility — employees now see whole department (assignedTo stays an optional narrowing filter for "Мои задачи").
+- [x] Server `updateStatus`: accepts a direct target `status` (drag&drop) alongside legacy `direction`; manager-only into/out of `approved`; dragging into Одобрено sets approvedBy/At.
+- [x] Installed `@hello-pangea/dnd` (React 19 compatible).
+- [x] `useSetTaskStatus` hook with optimistic cache update (no-flicker drag); `updateStatusApi` now takes a payload object.
+- [x] KanbanBoard: DragDropContext + permission-aware onDragEnd, search + "Само мои" toggle, Нова задача gated to managers, full-height horizontal board.
+- [x] KanbanColumn: Droppable with drag-over highlight; removed show-more paging.
+- [x] TaskCard: Draggable (isDragDisabled when not movable), drag-lift styling, priority left-accent; removed ◀▶ arrows.
+- [x] TaskDetailModal: status pill group via useSetTaskStatus (employees see 3 lanes, managers 4); removed arrow/approve footer.
+- [x] Dashboard: unified nav line bar, default tab = tasks.
+- [x] i18n keys (mk+en): searchPlaceholder, onlyMine, moveNotAllowed, statusLabel, dropHere.
+
+## Verification
+- `npm run build --prefix client` ✓; lint — no NEW errors (pre-existing set-state-in-effect untouched); `node --check` + server boot ✓.
+- Not done: live multi-login DnD smoke test (needs Mongo + two accounts).

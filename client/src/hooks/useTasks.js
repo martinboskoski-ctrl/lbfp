@@ -44,9 +44,32 @@ export const useUpdateTask = () => {
 export const useUpdateTaskStatus = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, direction }) => updateStatusApi(id, direction),
+    mutationFn: ({ id, direction }) => updateStatusApi(id, { direction }),
     onSuccess: () => invalidateAll(qc),
     onError: onErr,
+  });
+};
+
+// Direct status set (drag & drop) with optimistic update for a snappy, no-flicker
+// board. Patches every cached ['tasks', …] variant in place, rolls back on error.
+export const useSetTaskStatus = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }) => updateStatusApi(id, { status }),
+    onMutate: async ({ id, status }) => {
+      await qc.cancelQueries({ queryKey: ['tasks'] });
+      const snapshots = qc.getQueriesData({ queryKey: ['tasks'] });
+      snapshots.forEach(([key, tasks]) => {
+        if (!Array.isArray(tasks)) return;
+        qc.setQueryData(key, tasks.map((t) => (t._id === id ? { ...t, status } : t)));
+      });
+      return { snapshots };
+    },
+    onError: (e, _vars, ctx) => {
+      ctx?.snapshots?.forEach(([key, data]) => qc.setQueryData(key, data));
+      onErr(e);
+    },
+    onSettled: () => invalidateAll(qc),
   });
 };
 

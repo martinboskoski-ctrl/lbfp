@@ -4,6 +4,6 @@ export const listTasksApi   = (dept) => api.get('/tasks', { params: dept ? { dep
 export const listTasksForUserApi = (userId) => api.get('/tasks', { params: { assignedTo: userId } });
 export const createTaskApi  = (data) => api.post('/tasks', data);
 export const updateTaskApi  = (id, data) => api.patch(`/tasks/${id}`, data);
-export const updateStatusApi = (id, direction) => api.patch(`/tasks/${id}/status`, { direction });
+export const updateStatusApi = (id, payload) => api.patch(`/tasks/${id}/status`, payload);
 export const approveTaskApi = (id)   => api.patch(`/tasks/${id}/approve`);
 export const deleteTaskApi  = (id)   => api.delete(`/tasks/${id}`);

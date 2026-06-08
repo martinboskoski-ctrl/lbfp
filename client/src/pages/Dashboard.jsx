@@ -14,20 +14,18 @@ import Topbar from '../components/layout/Topbar.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { canManage } from '../utils/userTier.js';
 
-const DEPT_TABS = [
-  { value: 'terkovi',   key: 'tabs.terkovi' },
-  { value: 'projects',  key: 'tabs.projects' },
+// Unified sector nav — Тековни задачи is the central, default view; the rest are
+// secondary resources. `procedures` jumps to its own page, the others switch tab.
+const buildNavItems = (dept) => [
   { value: 'tasks',     key: 'tabs.tasks' },
-];
-
-// Resource links — shown as a slim bar under the header, above the tools tabs.
-// `vraboteni` stays an in-dashboard tab; `procedures` jumps to its own page.
-const RESOURCE_LINKS = [
-  { value: 'vraboteni', key: 'tabs.vraboteni', to: null },
+  { value: 'projects',  key: 'tabs.projects' },
+  { value: 'terkovi',   key: 'tabs.terkovi' },
+  ...(LEADS_DEPTS.includes(dept) ? [{ value: 'leads', key: 'tabs.leads' }] : []),
+  { value: 'vraboteni', key: 'tabs.vraboteni' },
   { value: 'procedures', key: 'tabs.procedures', to: '/procedures' },
 ];
 
-// Departments that have the Leads (Потенцијални клиенти) tab
+// Departments that have the Leads (Потенцијални клиенти) entry
 const LEADS_DEPTS = ['sales', 'top_management'];
 
 const EmployeeList = ({ dept }) => {
@@ -83,7 +81,7 @@ const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const dept = searchParams.get('dept') || '';
-  const tab  = searchParams.get('tab')  || 'projects';
+  const tab  = searchParams.get('tab')  || 'tasks';
   const { user } = useAuth();
 
   const { data: projects, isLoading, error } = useProjects(dept);
@@ -107,58 +105,33 @@ const Dashboard = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar title={title} onMenuClick={() => setSidebarOpen(true)} />
 
-        {/* Resources bar — sector resources, distinct from the task tools below */}
-        {dept && (
-          <div className="bg-white px-4 pt-2.5">
-            <nav className="flex items-center gap-2.5 text-sm">
-              {RESOURCE_LINKS.map((link, i) => (
-                <span key={link.value} className="flex items-center gap-2.5">
-                  {i > 0 && <span className="text-gray-300 select-none">/</span>}
-                  {link.to ? (
-                    <Link
-                      to={link.to}
-                      className="font-medium text-gray-500 hover:text-blue-700 transition-colors"
-                    >
-                      {t(link.key)}
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() => switchTab(link.value)}
-                      className={`font-medium transition-colors ${
-                        tab === link.value
-                          ? 'text-blue-700'
-                          : 'text-gray-500 hover:text-blue-700'
-                      }`}
-                    >
-                      {t(link.key)}
-                    </button>
-                  )}
-                </span>
-              ))}
-            </nav>
-          </div>
-        )}
-
-        {/* Department sub-tabs — only shown when a specific dept is selected */}
+        {/* Unified sector nav — one clean line bar, tasks first */}
         {dept && (
           <div className="border-b border-gray-200 bg-white px-4">
             <nav className="flex gap-1 overflow-x-auto">
-              {[
-                ...DEPT_TABS,
-                ...(LEADS_DEPTS.includes(dept) ? [{ value: 'leads', key: 'tabs.leads' }] : []),
-              ].map((tabItem) => (
-                <button
-                  key={tabItem.value}
-                  onClick={() => switchTab(tabItem.value)}
-                  className={`flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                    tab === tabItem.value
-                      ? 'border-blue-600 text-blue-700'
-                      : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'
-                  }`}
-                >
-                  {t(tabItem.key)}
-                </button>
-              ))}
+              {buildNavItems(dept).map((item) =>
+                item.to ? (
+                  <Link
+                    key={item.value}
+                    to={item.to}
+                    className="flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300 transition-colors whitespace-nowrap"
+                  >
+                    {t(item.key)}
+                  </Link>
+                ) : (
+                  <button
+                    key={item.value}
+                    onClick={() => switchTab(item.value)}
+                    className={`flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                      tab === item.value
+                        ? 'border-blue-600 text-blue-700'
+                        : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'
+                    }`}
+                  >
+                    {t(item.key)}
+                  </button>
+                )
+              )}
             </nav>
           </div>
         )}

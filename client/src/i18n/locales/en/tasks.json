@@ -22,6 +22,12 @@
   "forwardTooltip": "Forward",
   "approveTooltip": "Approve task",
 
+  "searchPlaceholder": "Search tasks…",
+  "onlyMine": "Only mine",
+  "moveNotAllowed": "You're not allowed to move this task",
+  "statusLabel": "Status",
+  "dropHere": "Drop here",
+
   "modal": {
     "title": "New Task",
     "selfAssign": "The task will be assigned to you",

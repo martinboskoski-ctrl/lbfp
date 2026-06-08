@@ -15,32 +15,23 @@ export const listTasks = async (req, res) => {
   const { dept, assignedTo } = req.query;
   let query = {};
 
+  // Top management can browse any department (or all); everyone else — including
+  // plain employees — sees the whole of their own department (team-wide board).
   if (isTopMgmt(u)) {
-    if (dept)       query.department = dept;
-    if (assignedTo) query.assignedTo = assignedTo;
-  } else if (u.isManager) {
-    query.department = u.department;
-    if (assignedTo) {
-      // Manager can ask for one assignee, but they must be in their dept.
-      // Verify lazily via the existing department lock above + a final assignedTo filter.
-      query.assignedTo = assignedTo;
-    }
+    if (dept) query.department = dept;
   } else {
-    // Plain employee — own tasks only, regardless of any assignedTo passed.
-    query.assignedTo = u._id;
+    query.department = u.department;
   }
+
+  // Optional narrowing by assignee (e.g. the home dashboard "my tasks" view).
+  // Combined with the department lock above, this can never leak cross-dept data.
+  if (assignedTo) query.assignedTo = assignedTo;
 
   const tasks = await Task.find(query)
     .populate(POPULATE_FIELDS)
     .sort({ createdAt: -1 });
 
-  // Manager + assignedTo: enforce that the target belongs to the manager's dept,
-  // by checking the populated task data. Anything outside the dept gets filtered.
-  const filtered = (!isTopMgmt(u) && u.isManager && assignedTo)
-    ? tasks.filter((t) => t.assignedTo?.department === u.department)
-    : tasks;
-
-  res.json({ tasks: filtered });
+  res.json({ tasks });
 };
 
 export const createTask = async (req, res) => {
@@ -131,33 +122,43 @@ export const updateStatus = async (req, res) => {
   const task = await Task.findById(req.params.id);
   if (!task) return res.status(404).json({ message: 'Task not found' });
 
-  const { direction } = req.body; // 'forward' | 'backward'
-  if (!['forward','backward'].includes(direction)) {
-    return res.status(400).json({ message: 'direction must be "forward" or "backward"' });
-  }
-
+  const { direction, status } = req.body; // either a target `status` or a `direction`
   const STATUSES = ['todo','in_progress','done','approved'];
-  const idx = STATUSES.indexOf(task.status);
+
+  // Resolve the target status — direct (drag & drop) or relative (legacy arrows).
+  let newStatus;
+  if (status !== undefined) {
+    if (!STATUSES.includes(status)) {
+      return res.status(400).json({ message: 'invalid status' });
+    }
+    newStatus = status;
+  } else if (['forward','backward'].includes(direction)) {
+    const idx    = STATUSES.indexOf(task.status);
+    const newIdx = direction === 'forward' ? idx + 1 : idx - 1;
+    if (newIdx < 0 || newIdx >= STATUSES.length) {
+      return res.status(400).json({ message: 'Нема следна/претходна позиција' });
+    }
+    newStatus = STATUSES[newIdx];
+  } else {
+    return res.status(400).json({ message: 'status or direction is required' });
+  }
 
   // Employees can only move their own tasks between todo/in_progress/done
   const isAssignee = String(task.assignedTo) === String(u._id);
   const canAct     = isAssignee || isManager(u);
   if (!canAct) return res.status(403).json({ message: 'Немате дозвола' });
 
-  // Employees cannot move to/from 'approved'
-  if (!isManager(u)) {
-    if (task.status === 'approved') return res.status(403).json({ message: 'Немате дозвола' });
-    if (direction === 'forward' && idx >= 2) return res.status(403).json({ message: 'Само менаџер може да одобри задача' });
+  // Only managers can move a task to or away from 'approved'
+  if (!isManager(u) && (task.status === 'approved' || newStatus === 'approved')) {
+    return res.status(403).json({ message: 'Само менаџер може да одобри задача' });
   }
 
-  const newIdx = direction === 'forward' ? idx + 1 : idx - 1;
-  if (newIdx < 0 || newIdx >= STATUSES.length) {
-    return res.status(400).json({ message: 'Нема следна/претходна позиција' });
-  }
-
-  task.status = STATUSES[newIdx];
-  // Clear approval data if moved backwards from approved
-  if (task.status !== 'approved') {
+  task.status = newStatus;
+  if (newStatus === 'approved') {
+    // Dragging straight into Одобрено counts as an approval.
+    task.approvedBy = u._id;
+    task.approvedAt = new Date();
+  } else {
     task.approvedBy = undefined;
     task.approvedAt = undefined;
   }

@@ -22,6 +22,12 @@
   "forwardTooltip": "Напред",
   "approveTooltip": "Одобри задача",
 
+  "searchPlaceholder": "Пребарај задачи…",
+  "onlyMine": "Само мои",
+  "moveNotAllowed": "Немате дозвола да ја преместите оваа задача",
+  "statusLabel": "Статус",
+  "dropHere": "Пуштете тука",
+
   "modal": {
     "title": "Нова задача",
     "selfAssign": "Задачата ќе биде доделена на вас",

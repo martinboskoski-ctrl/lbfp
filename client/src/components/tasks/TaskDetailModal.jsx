@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  X, Loader2, Save, Pencil, Trash2, ChevronLeft, ChevronRight,
+  X, Loader2, Save, Pencil, Trash2,
   CheckCircle2, Calendar, Flag, User as UserIcon, Folder, Clock,
 } from 'lucide-react';
 import {
-  useUpdateTask, useUpdateTaskStatus, useApproveTask, useDeleteTask,
+  useUpdateTask, useSetTaskStatus, useDeleteTask,
 } from '../../hooks/useTasks.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { fmtDateShort } from '../../utils/formatDate.js';
@@ -39,10 +39,9 @@ const TaskDetailModal = ({ task, onClose }) => {
   const { t: tc } = useTranslation('common');
   const { user }  = useAuth();
 
-  const updateTask   = useUpdateTask();
-  const updateStatus = useUpdateTaskStatus();
-  const approveTask  = useApproveTask();
-  const deleteTask   = useDeleteTask();
+  const updateTask = useUpdateTask();
+  const setStatus  = useSetTaskStatus();
+  const deleteTask = useDeleteTask();
 
   // Permissions — mirrors server-side gates.
   const isTopMgmt  = user?.department === 'top_management';
@@ -52,14 +51,10 @@ const TaskDetailModal = ({ task, onClose }) => {
   const isManager  = isDeptMgr || isTopMgmt;
   const canEdit    = isCreator || isManager;
   const canDelete  = isCreator || isTopMgmt;
-  const canMove    = isAssignee || isManager;
 
-  const statusIdx  = STATUSES.indexOf(task.status);
-  const canGoBack    = canMove && statusIdx > 0
-    && !(isAssignee && !isManager && task.status === 'approved');
-  const canGoForward = canMove && statusIdx < STATUSES.length - 1
-    && !(isAssignee && !isManager && statusIdx >= 2);
-  const canApprove   = isManager && task.status === 'done';
+  // Owners may change status (but never into/out of 'approved'); managers set anything.
+  const canSetStatus     = isManager || (isAssignee && task.status !== 'approved');
+  const settableStatuses = isManager ? STATUSES : STATUSES.filter((s) => s !== 'approved');
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
@@ -261,42 +256,33 @@ const TaskDetailModal = ({ task, onClose }) => {
                 )}
               </div>
 
-              {/* Status controls */}
-              <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                <button
-                  onClick={() => updateStatus.mutate({ id: task._id, direction: 'backward' })}
-                  disabled={!canGoBack || updateStatus.isPending}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    canGoBack
-                      ? 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
-                      : 'bg-transparent text-slate-300 cursor-not-allowed'
-                  }`}
-                >
-                  <ChevronLeft size={14} /> {t('backTooltip', { defaultValue: 'Back' })}
-                </button>
-
-                {canApprove && (
-                  <button
-                    onClick={() => approveTask.mutate(task._id)}
-                    disabled={approveTask.isPending}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700"
-                  >
-                    <CheckCircle2 size={13} /> {t('approve')}
-                  </button>
-                )}
-
-                <button
-                  onClick={() => updateStatus.mutate({ id: task._id, direction: 'forward' })}
-                  disabled={!canGoForward || updateStatus.isPending}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    canGoForward
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-transparent text-slate-300 cursor-not-allowed'
-                  }`}
-                >
-                  {t('forwardTooltip', { defaultValue: 'Forward' })} <ChevronRight size={14} />
-                </button>
-              </div>
+              {/* Status controls — direct set via pills */}
+              {canSetStatus && (
+                <div className="pt-3 border-t border-slate-100">
+                  <div className="text-[11px] uppercase tracking-wide text-slate-500 mb-2">
+                    {t('statusLabel')}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {settableStatuses.map((s) => {
+                      const active = task.status === s;
+                      return (
+                        <button
+                          key={s}
+                          onClick={() => !active && setStatus.mutate({ id: task._id, status: s })}
+                          disabled={active || setStatus.isPending}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                            active
+                              ? 'bg-blue-600 text-white border-blue-600 cursor-default'
+                              : 'bg-white text-slate-700 border-slate-200 hover:border-blue-400 hover:text-blue-700'
+                          }`}
+                        >
+                          {t(`column.${s}`)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
