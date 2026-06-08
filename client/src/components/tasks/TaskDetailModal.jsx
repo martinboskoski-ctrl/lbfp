@@ -73,6 +73,13 @@ const TaskDetailModal = ({ task, onClose }) => {
     });
   }, [task._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Close on Escape.
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
   const save = async () => {
     if (!form.title.trim()) return;
     await updateTask.mutateAsync({
@@ -95,8 +102,17 @@ const TaskDetailModal = ({ task, onClose }) => {
     && task.status !== 'approved' && task.status !== 'done';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+      // The modal renders inside the (clickable) task card; stop clicks from
+      // bubbling back to the card's onClick (which would instantly reopen it),
+      // and close when the backdrop itself is clicked.
+      onClick={(e) => { e.stopPropagation(); onClose(); }}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
