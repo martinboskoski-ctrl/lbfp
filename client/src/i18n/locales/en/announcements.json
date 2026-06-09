@@ -2,6 +2,7 @@
   "title": "Announcements",
   "create": "New announcement",
   "created": "Announcement posted",
+  "updated": "Announcement updated",
   "deleted": "Announcement deleted",
   "confirmDelete": "Are you sure you want to delete this announcement?",
   "noAnnouncements": "No announcements",

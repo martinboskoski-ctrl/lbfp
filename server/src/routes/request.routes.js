@@ -11,6 +11,7 @@ router.get('/mine',             ctrl.mine);
 router.get('/pending',          ctrl.pending);
 router.get('/stats/overview',   ctrl.stats);
 router.get('/:id',              ctrl.getOne);
+router.patch('/:id',            ctrl.edit);
 router.patch('/:id/approve',    ctrl.approve);
 router.patch('/:id/reject',     ctrl.reject);
 

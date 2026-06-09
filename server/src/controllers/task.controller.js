@@ -1,10 +1,12 @@
 import Task from '../models/Task.js';
+import { pushEditVersion } from '../models/editVersion.js';
 
 const POPULATE_FIELDS = [
   { path: 'assignedTo', select: 'name department' },
   { path: 'createdBy',  select: 'name department' },
   { path: 'approvedBy', select: 'name' },
   { path: 'project',    select: 'title' },
+  { path: 'editHistory.editedBy', select: 'name' },
 ];
 
 const isTopMgmt  = (u) => u.department === 'top_management';
@@ -95,6 +97,19 @@ export const updateTask = async (req, res) => {
   if (!isCreator && !isDeptMgr && !isTopMgmt(u)) {
     return res.status(403).json({ message: 'Немате дозвола за оваа задача' });
   }
+
+  // Once a task is approved, editing its content no longer makes sense.
+  if (task.status === 'approved') {
+    return res.status(409).json({ message: 'Одобрена задача не може да се измени' });
+  }
+
+  // Snapshot the current content so the change shows up as an edit with history.
+  pushEditVersion(task, {
+    title: task.title,
+    description: task.description,
+    priority: task.priority,
+    deadline: task.deadline,
+  }, u._id);
 
   const { title, description, priority, deadline, project } = req.body;
 

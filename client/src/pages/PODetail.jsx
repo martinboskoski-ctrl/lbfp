@@ -3,14 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft, CheckCircle2, Loader2, Send, Lock, Unlock, Trash2,
-  MessageSquare, ThumbsUp, ThumbsDown, FileText, Copy,
+  MessageSquare, ThumbsUp, ThumbsDown, FileText, Copy, Pencil, Check, X,
 } from 'lucide-react';
 import {
   usePO, useToggleStatus, useAddQuestion, usePostThread, useMarkFinal,
   useSalesReview, useClientApproval, useDigest, useDeletePO,
+  useEditQuestion, useEditThread,
 } from '../hooks/usePO.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { fmtDateShort, fmtDateLong } from '../utils/formatDate.js';
+import EditHistory from '../components/common/EditHistory.jsx';
 import toast from 'react-hot-toast';
 
 const ASCII_RE  = /^[\x20-\x7E]*$/;
@@ -89,6 +91,32 @@ const QuestionCard = ({ question, po, user, isOwner, t }) => {
   const markFinal      = useMarkFinal(po._id);
   const salesReview    = useSalesReview(po._id);
   const clientApproval = useClientApproval(po._id);
+  const editQuestion   = useEditQuestion(po._id);
+  const editThread     = useEditThread(po._id);
+
+  // Author-only edit, allowed only while the post hasn't been engaged with.
+  const meId = String(user?._id);
+  const isQuestionAuthor = String(question.createdBy?._id || question.createdBy) === meId;
+  const questionLocked =
+    (question.thread || []).some((e) => String(e.author?._id || e.author) !== meId) ||
+    !!question.answeredBy || question.status !== 'pending';
+  const threadLocked = (entry, idx) =>
+    (question.thread || []).slice(idx + 1).some((e) => String(e.author?._id || e.author) !== meId) ||
+    po.status === 'closed' || !!question.salesReview?.reviewedBy || !!question.clientApproval?.loggedBy;
+
+  const [editingQ, setEditingQ]   = useState(false);
+  const [qText, setQText]         = useState(question.text);
+  const [editingEntryId, setEEId] = useState(null);
+  const [entryBody, setEntryBody] = useState('');
+
+  const saveQuestion = () => {
+    if (!qText.trim() || !isEnglish(qText)) { setError(t('question.englishOnly')); return; }
+    editQuestion.mutate({ qid: question._id, text: qText.trim() }, { onSuccess: () => setEditingQ(false) });
+  };
+  const saveEntry = (entryId) => {
+    if (!entryBody.trim() || !isEnglish(entryBody)) return;
+    editThread.mutate({ qid: question._id, entryId, body: entryBody.trim() }, { onSuccess: () => setEEId(null) });
+  };
 
   const allFilled = fields.length > 0 && fields.every((f) => f.filled);
 
@@ -136,12 +164,34 @@ const QuestionCard = ({ question, po, user, isOwner, t }) => {
       {/* Header row */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900">{question.text}</p>
+          {editingQ ? (
+            <div className="flex items-start gap-1.5">
+              <textarea
+                className="input resize-none text-sm flex-1"
+                rows={2}
+                value={qText}
+                onChange={(e) => setQText(e.target.value)}
+                autoFocus
+              />
+              <button onClick={saveQuestion} disabled={editQuestion.isPending} className="p-1.5 text-green-600 hover:bg-gray-100 rounded"><Check size={14} /></button>
+              <button onClick={() => { setEditingQ(false); setQText(question.text); }} className="p-1.5 text-gray-400 hover:bg-gray-100 rounded"><X size={14} /></button>
+            </div>
+          ) : (
+            <div className="flex items-start gap-1.5">
+              <p className="text-sm font-medium text-gray-900 flex-1">{question.text}</p>
+              {isQuestionAuthor && !questionLocked && (
+                <button onClick={() => { setEditingQ(true); setQText(question.text); }} className="text-gray-300 hover:text-blue-600 flex-shrink-0 mt-0.5" title={t('common:edit', { defaultValue: 'Edit' })}>
+                  <Pencil size={12} />
+                </button>
+              )}
+            </div>
+          )}
           <div className="flex items-center gap-2 mt-1 flex-wrap text-xs text-gray-400">
             <span>{t('question.askedBy', { name: question.createdBy?.name, date: fmtDateShort(question.createdAt) })}</span>
             <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">
               {t(`phase.${question.phase}`)}
             </span>
+            <EditHistory history={question.editHistory} />
           </div>
         </div>
         <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${STATUS_COLORS[question.status] || 'bg-gray-100'}`}>
@@ -152,22 +202,41 @@ const QuestionCard = ({ question, po, user, isOwner, t }) => {
       {/* Thread */}
       {question.thread?.length > 0 && (
         <div className="mt-3 space-y-2">
-          {question.thread.map((entry) => (
-            <div
-              key={entry._id}
-              className={`pl-3 border-l-2 ${entry.isFinalAnswer ? 'border-green-400 bg-green-50/50' : 'border-blue-200'} py-1.5 px-2 rounded-r`}
-            >
-              <p className="text-sm text-gray-700">{entry.body}</p>
-              <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-                {entry.author?.name} · {fmtDateShort(entry.createdAt)}
-                {entry.isFinalAnswer && (
-                  <span className="ml-1 inline-flex items-center gap-0.5 text-green-700 font-semibold">
-                    <CheckCircle2 size={10} /> {t('question.finalAnswer')}
-                  </span>
+          {question.thread.map((entry, idx) => {
+            const isEntryAuthor = String(entry.author?._id || entry.author) === meId;
+            const canEditEntry  = isEntryAuthor && !entry.isFinalAnswer && !threadLocked(entry, idx);
+            const editingEntry  = editingEntryId === entry._id;
+            return (
+              <div
+                key={entry._id}
+                className={`pl-3 border-l-2 ${entry.isFinalAnswer ? 'border-green-400 bg-green-50/50' : 'border-blue-200'} py-1.5 px-2 rounded-r`}
+              >
+                {editingEntry ? (
+                  <div className="flex items-start gap-1.5">
+                    <textarea className="input resize-none text-sm flex-1" rows={2} value={entryBody} onChange={(e) => setEntryBody(e.target.value)} autoFocus />
+                    <button onClick={() => saveEntry(entry._id)} disabled={editThread.isPending} className="p-1 text-green-600 hover:bg-gray-100 rounded"><Check size={14} /></button>
+                    <button onClick={() => setEEId(null)} className="p-1 text-gray-400 hover:bg-gray-100 rounded"><X size={14} /></button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-700">{entry.body}</p>
                 )}
-              </p>
-            </div>
-          ))}
+                <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1.5">
+                  {entry.author?.name} · {fmtDateShort(entry.createdAt)}
+                  {entry.isFinalAnswer && (
+                    <span className="ml-1 inline-flex items-center gap-0.5 text-green-700 font-semibold">
+                      <CheckCircle2 size={10} /> {t('question.finalAnswer')}
+                    </span>
+                  )}
+                  <EditHistory history={entry.editHistory} />
+                  {canEditEntry && !editingEntry && (
+                    <button onClick={() => { setEEId(entry._id); setEntryBody(entry.body); }} className="text-gray-300 hover:text-blue-600" title={t('common:edit', { defaultValue: 'Edit' })}>
+                      <Pencil size={11} />
+                    </button>
+                  )}
+                </p>
+              </div>
+            );
+          })}
         </div>
       )}
 

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   listClientsApi, createClientApi, updateClientApi, deleteClientApi,
-  addOrderApi, updateOrderApi, deleteOrderApi, addClientActivityApi,
+  addOrderApi, updateOrderApi, deleteOrderApi, addClientActivityApi, editClientActivityApi,
 } from '../api/clients.api.js';
 import toast from 'react-hot-toast';
 
@@ -73,6 +73,15 @@ export const useAddClientActivity = () => {
   return useMutation({
     mutationFn: ({ id, data }) => addClientActivityApi(id, data),
     onSuccess: () => invalidateAll(qc),
+    onError: onErr,
+  });
+};
+
+export const useEditClientActivity = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, activityId, data }) => editClientActivityApi(id, activityId, data),
+    onSuccess: () => { invalidateAll(qc); toast.success('Белешката е изменета'); },
     onError: onErr,
   });
 };

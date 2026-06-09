@@ -152,6 +152,10 @@
   "procedureDepartmentsHint": "Оставете празно за сите вработени",
   "noProcedures": "Нема процедури",
   "createdBy": "Креирано од",
+  "edited": "изменето",
+  "editHistory": "Историја на измени",
+  "original": "оригинал",
+  "editLocked": "Не може повеќе да се измени",
 
   "admin": {
     "allUsers": "Сите корисници"

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   listAnnouncementsApi, createAnnouncementApi, deleteAnnouncementApi,
-  markReadApi, togglePinApi,
+  markReadApi, togglePinApi, editAnnouncementApi,
 } from '../api/announcements.api.js';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,16 @@ export const useCreateAnnouncement = () => {
   return useMutation({
     mutationFn: createAnnouncementApi,
     onSuccess: () => { qc.invalidateQueries({ queryKey: QK }); toast.success(t('created')); },
+    onError: onErr,
+  });
+};
+
+export const useEditAnnouncement = () => {
+  const qc = useQueryClient();
+  const { t } = useTranslation('announcements');
+  return useMutation({
+    mutationFn: ({ id, data }) => editAnnouncementApi(id, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: QK }); toast.success(t('updated', { defaultValue: 'Updated' })); },
     onError: onErr,
   });
 };

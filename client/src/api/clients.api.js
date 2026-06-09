@@ -9,4 +9,5 @@ export const addOrderApi      = (id, data)          => api.post(`/clients/${id}/
 export const updateOrderApi   = (id, orderId, data) => api.put(`/clients/${id}/orders/${orderId}`, data);
 export const deleteOrderApi   = (id, orderId)       => api.delete(`/clients/${id}/orders/${orderId}`);
 
-export const addClientActivityApi = (id, data)      => api.post(`/clients/${id}/activities`, data);
+export const addClientActivityApi  = (id, data)             => api.post(`/clients/${id}/activities`, data);
+export const editClientActivityApi = (id, activityId, data) => api.patch(`/clients/${id}/activities/${activityId}`, data);

@@ -1,6 +1,7 @@
 import Request from '../models/Request.js';
 import { REQUEST_TYPES } from '../config/requestTypes.js';
 import { validateRequestData } from '../services/requestValidation.js';
+import { pushEditVersion } from '../models/editVersion.js';
 import { canActOnStep, getCurrentStepDef, notifyNextApprovers } from '../services/approvalEngine.js';
 import { notify } from '../services/notification.js';
 import LeaveBalance from '../models/LeaveBalance.js';
@@ -34,6 +35,31 @@ export const create = async (req, res) => {
   res.status(201).json({ request });
 };
 
+// PATCH /api/requests/:id — requester edits their own request while still pending
+export const edit = async (req, res) => {
+  const request = await Request.findById(req.params.id);
+  if (!request) return res.status(404).json({ message: 'Барањето не е пронајдено' });
+
+  if (String(request.requester) !== String(req.user._id)) {
+    return res.status(403).json({ message: 'Можете да уредувате само свои барања' });
+  }
+  // Once anyone has acted on it (or it left the pending state), editing is illogical.
+  if (request.status !== 'pending' || (request.stepHistory && request.stepHistory.length > 0)) {
+    return res.status(409).json({ message: 'Барањето веќе не може да се измени' });
+  }
+
+  const { data } = req.body;
+  const validationError = validateRequestData(request.type, data || {});
+  if (validationError) return res.status(400).json({ message: validationError });
+
+  pushEditVersion(request, { data: request.data, type: request.type }, req.user._id);
+  request.data = data || {};
+  await request.save();
+  await request.populate('requester', 'name department');
+  await request.populate('stepHistory.actionBy', 'name');
+  res.json({ request });
+};
+
 // GET /api/requests/mine — requester's own requests
 export const mine = async (req, res) => {
   const requests = await Request.find({ requester: req.user._id })
@@ -65,7 +91,8 @@ export const pending = async (req, res) => {
 export const getOne = async (req, res) => {
   const request = await Request.findById(req.params.id)
     .populate('requester', 'name department')
-    .populate('stepHistory.actionBy', 'name');
+    .populate('stepHistory.actionBy', 'name')
+    .populate('editHistory.editedBy', 'name');
 
   if (!request) return res.status(404).json({ message: 'Request not found' });
 

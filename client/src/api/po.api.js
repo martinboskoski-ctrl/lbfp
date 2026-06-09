@@ -10,7 +10,9 @@ export const answerQuestionApi   = (id, qid, data) => api.patch(`/po/${id}/quest
 export const resolveQuestionApi  = (id, qid)       => api.patch(`/po/${id}/questions/${qid}/resolve`);
 export const deletePOApi         = (id)            => api.delete(`/po/${id}`);
 
+export const editQuestionApi     = (id, qid, data) => api.patch(`/po/${id}/questions/${qid}`, data);
 export const postThreadApi       = (id, qid, data) => api.post(`/po/${id}/questions/${qid}/thread`, data);
+export const editThreadApi       = (id, qid, entryId, data) => api.patch(`/po/${id}/questions/${qid}/thread/${entryId}`, data);
 export const markFinalApi        = (id, qid, data) => api.patch(`/po/${id}/questions/${qid}/final`, data);
 export const salesReviewApi      = (id, qid, data) => api.patch(`/po/${id}/questions/${qid}/review`, data);
 export const clientApprovalApi   = (id, qid, data) => api.patch(`/po/${id}/questions/${qid}/approval`, data);

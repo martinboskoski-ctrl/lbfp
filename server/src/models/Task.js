@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { editVersionSchema } from './editVersion.js';
 
 const DEPARTMENTS = [
   'sales','finance','administration','hr','quality_assurance',
@@ -18,6 +19,7 @@ const taskSchema = new mongoose.Schema(
     status:      { type: String, enum: ['todo','in_progress','done','approved'], default: 'todo' },
     approvedBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     approvedAt:  { type: Date },
+    editHistory: [editVersionSchema],
   },
   { timestamps: true }
 );

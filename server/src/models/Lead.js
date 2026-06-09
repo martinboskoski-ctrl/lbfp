@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { editVersionSchema } from './editVersion.js';
 
 const activitySchema = new mongoose.Schema(
   {
@@ -9,6 +10,7 @@ const activitySchema = new mongoose.Schema(
     },
     text:      { type: String, required: true, trim: true },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    editHistory: [editVersionSchema],
   },
   { timestamps: true }
 );

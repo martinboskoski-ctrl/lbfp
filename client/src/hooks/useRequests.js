@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   createRequestApi, myRequestsApi, pendingRequestsApi,
-  getRequestApi, approveRequestApi, rejectRequestApi, requestStatsApi,
+  getRequestApi, approveRequestApi, rejectRequestApi, requestStatsApi, editRequestApi,
 } from '../api/requests.api.js';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -48,6 +48,19 @@ export const useApproveRequest = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['requests'] });
       toast.success(t('requestApproved'));
+    },
+    onError: onErr,
+  });
+};
+
+export const useEditRequest = () => {
+  const qc = useQueryClient();
+  const { t } = useTranslation('requests');
+  return useMutation({
+    mutationFn: ({ id, data }) => editRequestApi(id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['requests'] });
+      toast.success(t('requestUpdated', { defaultValue: 'Updated' }));
     },
     onError: onErr,
   });

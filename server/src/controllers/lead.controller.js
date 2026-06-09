@@ -1,4 +1,5 @@
 import Lead from '../models/Lead.js';
+import { pushEditVersion } from '../models/editVersion.js';
 
 const isTopMgmt = (u) => u.department === 'top_management';
 const isSales   = (u) => u.department === 'sales';
@@ -9,7 +10,16 @@ const POPULATE = [
   { path: 'assignedTo', select: 'name department' },
   { path: 'createdBy',  select: 'name department' },
   { path: 'activities.createdBy', select: 'name' },
+  { path: 'activities.editHistory.editedBy', select: 'name' },
 ];
+
+// An author may edit their note until a newer activity by someone else exists.
+const noteLockedForEdit = (activities, activity, userId) =>
+  activities.some((a) =>
+    String(a._id) !== String(activity._id) &&
+    new Date(a.createdAt) > new Date(activity.createdAt) &&
+    String(a.createdBy) !== String(userId)
+  );
 
 // GET /api/leads
 export const listLeads = async (req, res) => {
@@ -135,6 +145,37 @@ export const addActivity = async (req, res) => {
     }
 
     lead.activities.push({ type: type || 'note', text: text.trim(), createdBy: u._id });
+    await lead.save();
+    await lead.populate(POPULATE);
+    res.json({ lead: lead.toJSON() });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// PATCH /api/leads/:id/activities/:activityId — author edits their own note
+export const editActivity = async (req, res) => {
+  try {
+    const u = req.user;
+    if (!hasAccess(u)) return res.status(403).json({ message: 'Немате пристап' });
+
+    const lead = await Lead.findById(req.params.id);
+    if (!lead) return res.status(404).json({ message: 'Лидот не е пронајден' });
+
+    const activity = lead.activities.id(req.params.activityId);
+    if (!activity) return res.status(404).json({ message: 'Активноста не е пронајдена' });
+    if (String(activity.createdBy) !== String(u._id)) {
+      return res.status(403).json({ message: 'Можете да уредувате само свои белешки' });
+    }
+    if (noteLockedForEdit(lead.activities, activity, u._id)) {
+      return res.status(409).json({ message: 'Не може повеќе да се измени' });
+    }
+
+    const { text } = req.body;
+    if (!text?.trim()) return res.status(400).json({ message: 'Текстот е задолжителен' });
+
+    pushEditVersion(activity, { text: activity.text }, u._id);
+    activity.text = text.trim();
     await lead.save();
     await lead.populate(POPULATE);
     res.json({ lead: lead.toJSON() });

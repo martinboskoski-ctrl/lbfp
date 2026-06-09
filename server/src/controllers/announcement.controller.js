@@ -1,7 +1,13 @@
 import Announcement from '../models/Announcement.js';
+import { pushEditVersion } from '../models/editVersion.js';
 
 const isTopMgmt = (u) => u.department === 'top_management';
 const isManager = (u) => u.isManager || isTopMgmt(u);
+
+const POPULATE = [
+  { path: 'createdBy', select: 'name department' },
+  { path: 'editHistory.editedBy', select: 'name' },
+];
 
 export const listAnnouncements = async (req, res) => {
   let filter = {};
@@ -15,7 +21,7 @@ export const listAnnouncements = async (req, res) => {
   }
 
   const announcements = await Announcement.find(filter)
-    .populate('createdBy', 'name department')
+    .populate(POPULATE)
     .sort({ pinned: -1, createdAt: -1 });
 
   res.json({ announcements });
@@ -61,7 +67,30 @@ export const togglePin = async (req, res) => {
   if (!announcement) return res.status(404).json({ message: 'Not found' });
   announcement.pinned = !announcement.pinned;
   await announcement.save();
-  await announcement.populate('createdBy', 'name department');
+  await announcement.populate(POPULATE);
+  res.json({ announcement });
+};
+
+// Author-only edit of title/content. Announcements are never locked (reading is not
+// a blocking interaction) — each edit is recorded in editHistory.
+export const editAnnouncement = async (req, res) => {
+  const announcement = await Announcement.findById(req.params.id);
+  if (!announcement) return res.status(404).json({ message: 'Not found' });
+
+  if (String(announcement.createdBy) !== String(req.user._id)) {
+    return res.status(403).json({ message: 'Можете да уредувате само свои соопштенија' });
+  }
+
+  const { title, content } = req.body;
+  if (!title?.trim() || !content?.trim()) {
+    return res.status(400).json({ message: 'Наслов и содржина се задолжителни' });
+  }
+
+  pushEditVersion(announcement, { title: announcement.title, content: announcement.content }, req.user._id);
+  announcement.title = title.trim();
+  announcement.content = content.trim();
+  await announcement.save();
+  await announcement.populate(POPULATE);
   res.json({ announcement });
 };
 

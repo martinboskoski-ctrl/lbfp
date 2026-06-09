@@ -5,6 +5,7 @@ import PurchaseOrder, {
   PO_PHASES,
 } from '../models/PurchaseOrder.js';
 import User from '../models/User.js';
+import { pushEditVersion } from '../models/editVersion.js';
 import { getRequiredFields } from '../config/poRequiredFields.js';
 import { notifyMany, notify } from '../services/notification.js';
 import { logActivity } from '../services/userActivity.js';
@@ -57,6 +58,8 @@ const POPULATE = [
   { path: 'questions.thread.author',            select: 'name' },
   { path: 'questions.salesReview.reviewedBy',   select: 'name' },
   { path: 'questions.clientApproval.loggedBy',  select: 'name' },
+  { path: 'questions.editHistory.editedBy',             select: 'name' },
+  { path: 'questions.thread.editHistory.editedBy',      select: 'name' },
 ];
 
 // ── List ──────────────────────────────────────────────────────────────────────
@@ -238,6 +241,64 @@ export const addQuestion = async (req, res) => {
     ip: reqIp(req),
   });
 
+  res.json({ po });
+};
+
+// ── Edit a question's text (author only, before it's been engaged with) ───────
+export const editQuestion = async (req, res) => {
+  const po = await PurchaseOrder.findById(req.params.id);
+  if (!po) return res.status(404).json({ message: 'Pre-Order Inquiry not found' });
+
+  const question = po.questions.id(req.params.qid);
+  if (!question) return res.status(404).json({ message: 'Question not found' });
+
+  if (String(question.createdBy) !== String(req.user._id)) {
+    return res.status(403).json({ message: 'Only the author can edit this question' });
+  }
+  const repliedByOther = question.thread.some((e) => String(e.author) !== String(req.user._id));
+  if (repliedByOther || question.answeredBy || question.status !== 'pending') {
+    return res.status(409).json({ message: 'This question can no longer be edited' });
+  }
+
+  const { text } = req.body;
+  if (!text?.trim())   return res.status(400).json({ message: 'Question text is required' });
+  if (!isEnglish(text)) return res.status(400).json({ message: 'English only (ASCII)' });
+
+  pushEditVersion(question, { text: question.text }, req.user._id);
+  question.text = text.trim();
+  await po.save();
+  await po.populate(POPULATE);
+  res.json({ po });
+};
+
+// ── Edit a thread message (author only, before it's been superseded) ──────────
+export const editThreadEntry = async (req, res) => {
+  const po = await PurchaseOrder.findById(req.params.id);
+  if (!po) return res.status(404).json({ message: 'Pre-Order Inquiry not found' });
+
+  const question = po.questions.id(req.params.qid);
+  if (!question) return res.status(404).json({ message: 'Question not found' });
+
+  const entry = question.thread.id(req.params.entryId);
+  if (!entry) return res.status(404).json({ message: 'Message not found' });
+
+  if (String(entry.author) !== String(req.user._id)) {
+    return res.status(403).json({ message: 'Only the author can edit this message' });
+  }
+  const idx = question.thread.findIndex((e) => String(e._id) === String(entry._id));
+  const laterByOther = question.thread.slice(idx + 1).some((e) => String(e.author) !== String(req.user._id));
+  if (laterByOther || po.status === 'closed' || question.salesReview?.reviewedBy || question.clientApproval?.loggedBy) {
+    return res.status(409).json({ message: 'This message can no longer be edited' });
+  }
+
+  const { body } = req.body;
+  if (!body?.trim())    return res.status(400).json({ message: 'Body cannot be empty' });
+  if (!isEnglish(body)) return res.status(400).json({ message: 'English only (ASCII)' });
+
+  pushEditVersion(entry, { body: entry.body }, req.user._id);
+  entry.body = body.trim();
+  await po.save();
+  await po.populate(POPULATE);
   res.json({ po });
 };
 

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { REQUEST_TYPE_KEYS } from '../config/requestTypes.js';
+import { editVersionSchema } from './editVersion.js';
 
 const stepHistorySchema = new mongoose.Schema(
   {
@@ -24,6 +25,7 @@ const requestSchema = new mongoose.Schema(
     stepHistory: [stepHistorySchema],
     data:        { type: mongoose.Schema.Types.Mixed, default: {} },
     leaveDays:   { type: Number, default: 0 },
+    editHistory: [editVersionSchema],
   },
   { timestamps: true }
 );

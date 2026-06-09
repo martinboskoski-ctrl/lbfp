@@ -152,6 +152,10 @@
   "procedureDepartmentsHint": "Leave empty for all employees",
   "noProcedures": "No procedures",
   "createdBy": "Created by",
+  "edited": "edited",
+  "editHistory": "Edit history",
+  "original": "original",
+  "editLocked": "Can no longer be edited",
 
   "admin": {
     "allUsers": "All Users"

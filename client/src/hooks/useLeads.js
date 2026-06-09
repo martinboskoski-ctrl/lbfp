@@ -4,6 +4,7 @@ import {
   createLeadApi,
   updateLeadApi,
   addActivityApi,
+  editActivityApi,
   deleteLeadApi,
 } from '../api/leads.api.js';
 import toast from 'react-hot-toast';
@@ -40,6 +41,15 @@ export const useAddActivity = () => {
   return useMutation({
     mutationFn: ({ id, data }) => addActivityApi(id, data),
     onSuccess: () => { invalidateAll(qc); toast.success('Активноста е додадена'); },
+    onError: onErr,
+  });
+};
+
+export const useEditActivity = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, activityId, data }) => editActivityApi(id, activityId, data),
+    onSuccess: () => { invalidateAll(qc); toast.success('Белешката е изменета'); },
     onError: onErr,
   });
 };

@@ -9,6 +9,7 @@ import {
 } from '../../hooks/useTasks.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { fmtDateShort } from '../../utils/formatDate.js';
+import EditHistory from '../common/EditHistory.jsx';
 
 const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
 const STATUSES   = ['todo', 'in_progress', 'done', 'approved'];
@@ -261,6 +262,7 @@ const TaskDetailModal = ({ task, onClose }) => {
                   {t('createdBy', { defaultValue: 'Created by' })} {task.createdBy?.name || '—'}
                   {' · '}
                   {fmtDateShort(task.createdAt)}
+                  <EditHistory history={task.editHistory} className="ml-1" />
                 </div>
                 {task.status === 'approved' && task.approvedBy && (
                   <div className="flex items-center gap-2 text-xs text-emerald-700">

@@ -3,7 +3,7 @@ import {
   listPOsApi, createPOApi, getPOApi, updatePOApi, toggleStatusApi,
   addQuestionApi, answerQuestionApi, resolveQuestionApi, deletePOApi,
   postThreadApi, markFinalApi, salesReviewApi, clientApprovalApi,
-  deptInboxApi, digestApi,
+  deptInboxApi, digestApi, editQuestionApi, editThreadApi,
 } from '../api/po.api.js';
 import toast from 'react-hot-toast';
 
@@ -92,6 +92,24 @@ export const usePostThread = (id) => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ qid, body }) => postThreadApi(id, qid, { body }),
+    onSuccess: () => invalidatePO(qc, id),
+    onError: onErr,
+  });
+};
+
+export const useEditQuestion = (id) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ qid, text }) => editQuestionApi(id, qid, { text }),
+    onSuccess: () => invalidatePO(qc, id),
+    onError: onErr,
+  });
+};
+
+export const useEditThread = (id) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ qid, entryId, body }) => editThreadApi(id, qid, entryId, { body }),
     onSuccess: () => invalidatePO(qc, id),
     onError: onErr,
   });

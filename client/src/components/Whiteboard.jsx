@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Megaphone, Trash2, Pin, Eye, X, Plus } from 'lucide-react';
+import { Megaphone, Trash2, Pin, Eye, X, Plus, Pencil, Save } from 'lucide-react';
 import {
   useAnnouncements, useCreateAnnouncement, useDeleteAnnouncement,
-  useMarkAnnouncementRead, useTogglePin,
+  useMarkAnnouncementRead, useTogglePin, useEditAnnouncement,
 } from '../hooks/useAnnouncements.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { canManage, isTopManagement } from '../utils/userTier.js';
 import { DEPARTMENTS } from './layout/Sidebar.jsx';
 import { fmtDate } from '../utils/formatDate.js';
+import EditHistory from './common/EditHistory.jsx';
 
 const PRIORITY_STYLES = {
   info:      { badge: 'bg-blue-100 text-blue-700',   border: 'border-l-blue-400' },
@@ -31,9 +32,22 @@ const Whiteboard = () => {
   const deleteAnnouncement = useDeleteAnnouncement();
   const markRead = useMarkAnnouncementRead();
   const togglePin = useTogglePin();
+  const editAnnouncement = useEditAnnouncement();
 
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({ title: '', content: '' });
+
+  const startEdit = (a) => { setEditingId(a._id); setEditForm({ title: a.title, content: a.content }); };
+  const cancelEdit = () => { setEditingId(null); setEditForm({ title: '', content: '' }); };
+  const saveEdit = (id) => {
+    if (!editForm.title.trim() || !editForm.content.trim()) return;
+    editAnnouncement.mutate(
+      { id, data: { title: editForm.title.trim(), content: editForm.content.trim() } },
+      { onSuccess: cancelEdit }
+    );
+  };
 
   const closeForm = () => { setShowForm(false); setForm(EMPTY_FORM); };
 
@@ -95,30 +109,67 @@ const Whiteboard = () => {
         {announcements.map((a) => {
           const ps = PRIORITY_STYLES[a.priority] || PRIORITY_STYLES.info;
           const read = isRead(a);
+          const isAuthor = String(a.createdBy?._id || a.createdBy) === String(user?._id);
+          const editing = editingId === a._id;
           return (
             <div key={a._id} className={`border border-gray-200 border-l-4 ${ps.border} rounded-xl p-4 ${read ? 'opacity-70' : ''}`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    {a.pinned && <Pin size={14} className="text-amber-500 shrink-0" />}
-                    <h4 className="font-semibold text-gray-800">{a.title}</h4>
-                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${ps.badge}`}>
-                      {ta(`priority.${a.priority}`)}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{a.content}</p>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-gray-400 flex-wrap">
-                    <span>{a.createdBy?.name}</span>
-                    <span>{fmtDate(a.createdAt)}</span>
-                    {a.departments?.length > 0 && (
-                      <span>{a.departments.map((d) => tc(`dept.${d}`)).join(', ')}</span>
-                    )}
-                    {isTopMgmt && (
-                      <span>{ta('readBy')}: {a.readBy?.length || 0}</span>
-                    )}
-                  </div>
+                  {editing ? (
+                    <div className="space-y-2">
+                      <input
+                        className="input"
+                        value={editForm.title}
+                        onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
+                        placeholder={ta('titlePlaceholder')}
+                      />
+                      <textarea
+                        className="input min-h-[80px]"
+                        value={editForm.content}
+                        onChange={(e) => setEditForm((f) => ({ ...f, content: e.target.value }))}
+                        placeholder={ta('contentPlaceholder')}
+                      />
+                      <div className="flex gap-2">
+                        <button onClick={() => saveEdit(a._id)} disabled={editAnnouncement.isPending} className="btn-primary flex items-center gap-1.5 text-sm py-1.5">
+                          <Save size={14} /> {tc('save')}
+                        </button>
+                        <button onClick={cancelEdit} className="btn-secondary text-sm py-1.5">{tc('cancel')}</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        {a.pinned && <Pin size={14} className="text-amber-500 shrink-0" />}
+                        <h4 className="font-semibold text-gray-800">{a.title}</h4>
+                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${ps.badge}`}>
+                          {ta(`priority.${a.priority}`)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{a.content}</p>
+                      <div className="flex items-center gap-3 mt-2 text-xs text-gray-400 flex-wrap">
+                        <span>{a.createdBy?.name}</span>
+                        <span>{fmtDate(a.createdAt)}</span>
+                        {a.departments?.length > 0 && (
+                          <span>{a.departments.map((d) => tc(`dept.${d}`)).join(', ')}</span>
+                        )}
+                        {isTopMgmt && (
+                          <span>{ta('readBy')}: {a.readBy?.length || 0}</span>
+                        )}
+                        <EditHistory history={a.editHistory} />
+                      </div>
+                    </>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
+                  {!editing && isAuthor && (
+                    <button
+                      onClick={() => startEdit(a)}
+                      className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-blue-600"
+                      title={tc('edit')}
+                    >
+                      <Pencil size={15} />
+                    </button>
+                  )}
                   {!read && (
                     <button
                       onClick={() => markRead.mutate(a._id)}

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { editVersionSchema } from './editVersion.js';
 
 export const PO_DEPARTMENTS = ['sales', 'quality_assurance', 'r_and_d', 'nabavki'];
 export const Q_TARGET_DEPTS = ['quality_assurance', 'r_and_d', 'nabavki', 'packaging'];
@@ -43,6 +44,7 @@ const threadEntrySchema = new mongoose.Schema({
   author:        { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   body:          { type: String, required: true },
   isFinalAnswer: { type: Boolean, default: false },
+  editHistory:   [editVersionSchema],
 }, { timestamps: true });
 
 const salesReviewSchema = new mongoose.Schema({
@@ -86,6 +88,8 @@ const questionSchema = new mongoose.Schema({
   resolved:         { type: Boolean, default: false },
   resolvedBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   resolvedAt:       { type: Date },
+
+  editHistory:      [editVersionSchema],
 }, { timestamps: true });
 
 const purchaseOrderSchema = new mongoose.Schema({

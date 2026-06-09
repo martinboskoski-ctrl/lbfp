@@ -128,3 +128,34 @@ Mirrors the Leads feature end-to-end.
 
 ## Future
 - Convert won lead → client; charts/trend in overview; per-rep breakdown; order line-items.
+
+---
+
+# Edit-your-own-posts + version history + lock rules (app-wide)
+
+Plan: ~/.claude/plans/validated-marinating-parrot.md
+
+## Decisions (confirmed with user)
+- Scope: ALL surfaces. Full version history (every version stored + viewable). Author-only edit. Per-surface locks.
+
+## Shared mechanism
+- Server `models/editVersion.js`: reusable `editVersionSchema` (snapshot/editedBy/editedAt) + `pushEditVersion()`.
+- Client `components/common/EditHistory.jsx` ("изменето" badge → version popover) + `utils/postEdits.js`.
+- common i18n: edited/editHistory/original/editLocked.
+
+## Surfaces (model editHistory + author-only edit endpoint + lock + UI history)
+- [x] Announcements — edit title/content, no lock (Whiteboard inline edit).
+- [x] Lead notes + Client notes — edit text, lock once newer activity by another user.
+- [x] Client orders — author edits content, lock once delivered; status changes stay workflow.
+- [x] Tasks — updateTask snapshots history + lock once approved; "изменето" marker on card + detail.
+- [x] PO Q&A — question text (lock: replied-by-other/answered/not-pending) + thread reply (lock: later entry by other / closed / reviewed/approved).
+- [x] Requests — requester edits `data` while pending (lock once acted); NewRequestModal reused in edit mode.
+
+## Notes
+- Gate comments + File.comments are DORMANT (no schema/route mount) — skipped, as planned.
+- Status changes / reads / pins do NOT create a false "edited" marker (only content edits push history).
+
+## Verification
+- `node --check` all touched server files ✓; server boots with all routes, no errors.
+- `npm run build --prefix client` ✓. Lint: only pre-existing `set-state-in-effect` in TaskDetailModal (baseline) — no new errors. Also removed a pre-existing unused `isTopManagement` import in RequestDetail.
+- Not done: live DB walkthrough with two accounts (lock/permission paths).

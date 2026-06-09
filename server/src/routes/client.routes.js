@@ -9,6 +9,7 @@ import {
   updateOrder,
   deleteOrder,
   addActivity,
+  editActivity,
 } from '../controllers/client.controller.js';
 
 const router = Router();
@@ -24,5 +25,6 @@ router.put('/:id/orders/:orderId',       updateOrder);
 router.delete('/:id/orders/:orderId',    deleteOrder);
 
 router.post('/:id/activities',           addActivity);
+router.patch('/:id/activities/:activityId', editActivity);
 
 export default router;

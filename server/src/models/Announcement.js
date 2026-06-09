@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { DEPARTMENTS } from './User.js';
+import { editVersionSchema } from './editVersion.js';
 
 const announcementSchema = new mongoose.Schema({
   title:       { type: String, required: true, trim: true },
@@ -9,6 +10,7 @@ const announcementSchema = new mongoose.Schema({
   departments: [{ type: String, enum: DEPARTMENTS }],           // empty = all employees
   readBy:      [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   createdBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  editHistory: [editVersionSchema],
 }, { timestamps: true });
 
 export default mongoose.model('Announcement', announcementSchema);

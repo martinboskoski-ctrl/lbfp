@@ -1,9 +1,18 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Phone, Mail, MapPin, Calendar, User, MessageSquare, PhoneCall, Video, MoreHorizontal } from 'lucide-react';
-import { useAddActivity } from '../../hooks/useLeads.js';
+import { X, Phone, Mail, Calendar, User, MessageSquare, PhoneCall, Video, MoreHorizontal, Pencil, Check } from 'lucide-react';
+import { useAddActivity, useEditActivity, useLeads } from '../../hooks/useLeads.js';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { fmtDate, fmtDateTime } from '../../utils/formatDate.js';
 import { STAGE_VALUES, SOURCE_VALUES, PRIORITY_VALUES } from './AddLeadModal.jsx';
+import EditHistory from '../common/EditHistory.jsx';
+
+const activityLocked = (activities, a, userId) =>
+  activities.some((x) =>
+    x._id !== a._id &&
+    new Date(x.createdAt) > new Date(a.createdAt) &&
+    String(x.createdBy?._id || x.createdBy) !== String(userId)
+  );
 
 const STAGE_COLOR = {
   new:         'bg-blue-100 text-blue-700',
@@ -30,12 +39,19 @@ const ACTIVITY_TYPE_ICONS = {
   other: MoreHorizontal,
 };
 
-export default function LeadDetailModal({ lead, onClose }) {
+export default function LeadDetailModal({ lead: leadProp, onClose }) {
   const { t } = useTranslation('leads');
   const { t: tc } = useTranslation('common');
+  const { user } = useAuth();
   const addActivity = useAddActivity();
+  const editActivity = useEditActivity();
+  const { data: leads = [] } = useLeads();
+  const lead = leads.find((l) => l._id === leadProp._id) || leadProp;
+
   const [actType, setActType] = useState('note');
   const [actText, setActText] = useState('');
+  const [editId, setEditId]   = useState(null);
+  const [editText, setEditText] = useState('');
 
   const stageLabel = Object.fromEntries(STAGE_VALUES.map((v) => [v, t(`stage.${v}`)]));
   const sourceLabel = Object.fromEntries(SOURCE_VALUES.map((v) => [v, t(`source.${v}`)]));
@@ -180,18 +196,58 @@ export default function LeadDetailModal({ lead, onClose }) {
               <p className="text-xs text-gray-400 text-center py-4">{t('detail.noActivities')}</p>
             )}
             <div className="space-y-2">
-              {[...(lead.activities || [])].reverse().map((a) => (
-                <div key={a._id} className="card p-3 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 text-xs font-medium">
-                      {activityTypeLabel[a.type] || a.type}
-                    </span>
-                    <span className="text-xs text-gray-400">{fmtDateTime(a.createdAt)}</span>
+              {[...(lead.activities || [])].reverse().map((a) => {
+                const isAuthor = String(a.createdBy?._id || a.createdBy) === String(user?._id);
+                const canEdit  = isAuthor && !activityLocked(lead.activities, a, user?._id);
+                const editing  = editId === a._id;
+                return (
+                  <div key={a._id} className="card p-3 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 text-xs font-medium">
+                        {activityTypeLabel[a.type] || a.type}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <EditHistory history={a.editHistory} />
+                        <span className="text-xs text-gray-400">{fmtDateTime(a.createdAt)}</span>
+                        {canEdit && !editing && (
+                          <button
+                            onClick={() => { setEditId(a._id); setEditText(a.text); }}
+                            className="text-gray-300 hover:text-blue-600"
+                            title={tc('edit')}
+                          >
+                            <Pencil size={12} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {editing ? (
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          className="input text-sm flex-1 py-1"
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => editText.trim() && editActivity.mutate(
+                            { id: lead._id, activityId: a._id, data: { text: editText.trim() } },
+                            { onSuccess: () => setEditId(null) }
+                          )}
+                          className="p-1 text-green-600 hover:bg-gray-100 rounded"
+                        >
+                          <Check size={14} />
+                        </button>
+                        <button onClick={() => setEditId(null)} className="p-1 text-gray-400 hover:bg-gray-100 rounded">
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-700">{a.text}</p>
+                    )}
+                    <p className="text-xs text-gray-400">{a.createdBy?.name || '—'}</p>
                   </div>
-                  <p className="text-sm text-gray-700">{a.text}</p>
-                  <p className="text-xs text-gray-400">{a.createdBy?.name || '—'}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

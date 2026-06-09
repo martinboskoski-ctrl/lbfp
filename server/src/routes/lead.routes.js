@@ -5,6 +5,7 @@ import {
   createLead,
   updateLead,
   addActivity,
+  editActivity,
   deleteLead,
 } from '../controllers/lead.controller.js';
 
@@ -15,6 +16,7 @@ router.get('/',                    listLeads);
 router.post('/',                   createLead);
 router.put('/:id',                 updateLead);
 router.post('/:id/activities',     addActivity);
+router.patch('/:id/activities/:activityId', editActivity);
 router.delete('/:id',              deleteLead);
 
 export default router;

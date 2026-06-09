@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Check, X } from 'lucide-react';
+import { ArrowLeft, Check, X, Pencil } from 'lucide-react';
 import Sidebar from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
 import ApprovalStepper from '../components/requests/ApprovalStepper.jsx';
+import NewRequestModal from '../components/requests/NewRequestModal.jsx';
+import EditHistory from '../components/common/EditHistory.jsx';
 import { useRequest, useApproveRequest, useRejectRequest } from '../hooks/useRequests.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { isTopManagement } from '../utils/userTier.js';
 
 const STATUS_COLORS = {
   pending:     'bg-yellow-100 text-yellow-700',
@@ -31,6 +32,7 @@ const RequestDetail = () => {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [note, setNote] = useState('');
+  const [showEdit, setShowEdit] = useState(false);
 
   const { data: request, isLoading } = useRequest(id);
   const approveMut = useApproveRequest();
@@ -39,6 +41,12 @@ const RequestDetail = () => {
   const canAct = request &&
     !['approved', 'rejected'].includes(request.status) &&
     request.requester?._id !== user?._id;
+
+  // The requester may edit their own request until it's acted on.
+  const canEdit = request &&
+    request.requester?._id === user?._id &&
+    request.status === 'pending' &&
+    !(request.stepHistory?.length > 0);
 
   const handleApprove = () => approveMut.mutate({ id, note });
   const handleReject = () => rejectMut.mutate({ id, note });
@@ -95,10 +103,19 @@ const RequestDetail = () => {
                   <p className="text-sm text-gray-500">
                     {request.requester?.name} · {t(`dept.${request.department}`, request.department)}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    #{request._id.slice(-6)} · {new Date(request.createdAt).toLocaleDateString('mk-MK')}
+                  <p className="text-xs text-gray-400 mt-1 flex items-center gap-2">
+                    <span>#{request._id.slice(-6)} · {new Date(request.createdAt).toLocaleDateString('mk-MK')}</span>
+                    <EditHistory history={request.editHistory} />
                   </p>
                 </div>
+                {canEdit && (
+                  <button
+                    onClick={() => setShowEdit(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100"
+                  >
+                    <Pencil size={14} /> {t('edit', { defaultValue: 'Edit' })}
+                  </button>
+                )}
               </div>
 
               {/* Stepper */}
@@ -181,6 +198,10 @@ const RequestDetail = () => {
           </div>
         </main>
       </div>
+
+      {showEdit && (
+        <NewRequestModal editRequest={request} onClose={() => setShowEdit(false)} />
+      )}
     </div>
   );
 };
