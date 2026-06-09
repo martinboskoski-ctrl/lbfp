@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   listTasksApi, listTasksForUserApi, createTaskApi, updateTaskApi,
   updateStatusApi, approveTaskApi, deleteTaskApi,
+  requestTaskChangeApi, resolveTaskChangeApi,
 } from '../api/tasks.api.js';
 import toast from 'react-hot-toast';
 
@@ -87,6 +88,24 @@ export const useDeleteTask = () => {
   return useMutation({
     mutationFn: (id) => deleteTaskApi(id),
     onSuccess: () => { invalidateAll(qc); toast.success('Задачата е избришана'); },
+    onError: onErr,
+  });
+};
+
+export const useRequestTaskChange = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, message }) => requestTaskChangeApi(id, { message }),
+    onSuccess: () => { invalidateAll(qc); toast.success('Барањето за измена е испратено'); },
+    onError: onErr,
+  });
+};
+
+export const useResolveTaskChange = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, crId }) => resolveTaskChangeApi(id, crId),
+    onSuccess: () => invalidateAll(qc),
     onError: onErr,
   });
 };

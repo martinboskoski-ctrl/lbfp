@@ -6,6 +6,19 @@ const DEPARTMENTS = [
   'facility','machines','r_and_d','production','top_management','carina','nabavki',
 ];
 
+// Assignee-submitted request to change the task (deadline/description/goals…).
+// Only the task-giver (creator/manager) actually edits; this records the ask.
+const changeRequestSchema = new mongoose.Schema(
+  {
+    requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    message:     { type: String, required: true, trim: true },
+    status:      { type: String, enum: ['open', 'resolved'], default: 'open' },
+    resolvedBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    resolvedAt:  { type: Date },
+  },
+  { timestamps: true }
+);
+
 const taskSchema = new mongoose.Schema(
   {
     title:       { type: String, required: true, trim: true },
@@ -20,6 +33,7 @@ const taskSchema = new mongoose.Schema(
     approvedBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     approvedAt:  { type: Date },
     editHistory: [editVersionSchema],
+    changeRequests: [changeRequestSchema],
   },
   { timestamps: true }
 );

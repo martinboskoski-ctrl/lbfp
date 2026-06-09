@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import {
   X, Loader2, Save, Pencil, Trash2,
-  CheckCircle2, Calendar, Flag, User as UserIcon, Folder, Clock,
+  CheckCircle2, Calendar, Flag, User as UserIcon, Folder, Clock, MessageSquarePlus,
 } from 'lucide-react';
 import {
   useUpdateTask, useSetTaskStatus, useDeleteTask,
+  useRequestTaskChange, useResolveTaskChange,
 } from '../../hooks/useTasks.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { fmtDateShort } from '../../utils/formatDate.js';
@@ -43,6 +45,8 @@ const TaskDetailModal = ({ task, onClose }) => {
   const updateTask = useUpdateTask();
   const setStatus  = useSetTaskStatus();
   const deleteTask = useDeleteTask();
+  const requestChange = useRequestTaskChange();
+  const resolveChange = useResolveTaskChange();
 
   // Permissions — mirrors server-side gates.
   const isTopMgmt  = user?.department === 'top_management';
@@ -50,14 +54,19 @@ const TaskDetailModal = ({ task, onClose }) => {
   const isCreator  = String(task.createdBy?._id  || task.createdBy)  === String(user?._id);
   const isDeptMgr  = user?.isManager && user?.department === task.department;
   const isManager  = isDeptMgr || isTopMgmt;
+  // Only the task-giver (creator or a manager) may edit content / delete.
   const canEdit    = isCreator || isManager;
   const canDelete  = isCreator || isTopMgmt;
+  // The assignee can't edit, but may request a change (deadline/description/goals…).
+  const canRequestChange = isAssignee && !canEdit;
 
   // Owners may change status (but never into/out of 'approved'); managers set anything.
   const canSetStatus     = isManager || (isAssignee && task.status !== 'approved');
   const settableStatuses = isManager ? STATUSES : STATUSES.filter((s) => s !== 'approved');
 
   const [editing, setEditing] = useState(false);
+  const [requesting, setRequesting] = useState(false);
+  const [crText, setCrText] = useState('');
   const [form, setForm] = useState({
     title:       task.title || '',
     description: task.description || '',
@@ -99,15 +108,26 @@ const TaskDetailModal = ({ task, onClose }) => {
     onClose();
   };
 
+  const sendChange = () => {
+    if (!crText.trim()) return;
+    requestChange.mutate(
+      { id: task._id, message: crText.trim() },
+      { onSuccess: () => { setCrText(''); setRequesting(false); } }
+    );
+  };
+
+  const changeRequests = task.changeRequests || [];
+
   const isOverdue = task.deadline && new Date(task.deadline) < new Date()
     && task.status !== 'approved' && task.status !== 'done';
 
-  return (
+  // Rendered through a portal to document.body so it is NOT a descendant of the
+  // draggable task card — otherwise the drag handle swallows clicks (e.g. the X).
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-      // The modal renders inside the (clickable) task card; stop clicks from
-      // bubbling back to the card's onClick (which would instantly reopen it),
-      // and close when the backdrop itself is clicked.
+      // Backdrop click closes. stopPropagation prevents the click from bubbling
+      // through the React tree to the parent card's onClick (which would reopen it).
       onClick={(e) => { e.stopPropagation(); onClose(); }}
     >
       <div
@@ -301,11 +321,76 @@ const TaskDetailModal = ({ task, onClose }) => {
                   </div>
                 </div>
               )}
+
+              {/* Change requests — assignee asks the task-giver to change it */}
+              {(changeRequests.length > 0 || canRequestChange) && (
+                <div className="pt-3 border-t border-slate-100">
+                  <div className="text-[11px] uppercase tracking-wide text-slate-500 mb-2">
+                    {t('changeReq.title')}
+                  </div>
+
+                  {changeRequests.length > 0 && (
+                    <ul className="space-y-2 mb-3">
+                      {changeRequests.map((cr) => (
+                        <li key={cr._id} className="flex items-start gap-2 text-sm">
+                          <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${cr.status === 'open' ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-slate-700 whitespace-pre-wrap">{cr.message}</p>
+                            <p className="text-xs text-slate-400">
+                              {cr.requestedBy?.name} · {fmtDateShort(cr.createdAt)} · {t(`changeReq.${cr.status}`)}
+                            </p>
+                          </div>
+                          {canEdit && cr.status === 'open' && (
+                            <button
+                              onClick={() => resolveChange.mutate({ id: task._id, crId: cr._id })}
+                              disabled={resolveChange.isPending}
+                              className="text-xs font-medium text-blue-600 hover:underline flex-shrink-0"
+                            >
+                              {t('changeReq.resolve')}
+                            </button>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {canRequestChange && (
+                    requesting ? (
+                      <div className="space-y-2">
+                        <textarea
+                          className="input resize-none text-sm"
+                          rows={2}
+                          placeholder={t('changeReq.placeholder')}
+                          value={crText}
+                          onChange={(e) => setCrText(e.target.value)}
+                          autoFocus
+                        />
+                        <div className="flex gap-2">
+                          <button onClick={sendChange} disabled={!crText.trim() || requestChange.isPending} className="btn-primary text-sm py-1.5">
+                            {t('changeReq.send')}
+                          </button>
+                          <button onClick={() => { setRequesting(false); setCrText(''); }} className="btn-secondary text-sm py-1.5">
+                            {tc('cancel')}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setRequesting(true)}
+                        className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700"
+                      >
+                        <MessageSquarePlus size={14} /> {t('changeReq.request')}
+                      </button>
+                    )
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

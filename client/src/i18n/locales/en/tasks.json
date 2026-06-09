@@ -27,6 +27,15 @@
   "moveNotAllowed": "You're not allowed to move this task",
   "statusLabel": "Status",
   "dropHere": "Drop here",
+  "changeReq": {
+    "title": "Change requests",
+    "request": "Request a change",
+    "placeholder": "Describe the change you'd like (deadline, description, goals…)",
+    "send": "Send request",
+    "resolve": "Resolve",
+    "open": "Open",
+    "resolved": "Resolved"
+  },
 
   "modal": {
     "title": "New Task",

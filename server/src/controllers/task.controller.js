@@ -7,6 +7,8 @@ const POPULATE_FIELDS = [
   { path: 'approvedBy', select: 'name' },
   { path: 'project',    select: 'title' },
   { path: 'editHistory.editedBy', select: 'name' },
+  { path: 'changeRequests.requestedBy', select: 'name' },
+  { path: 'changeRequests.resolvedBy',  select: 'name' },
 ];
 
 const isTopMgmt  = (u) => u.department === 'top_management';
@@ -212,4 +214,48 @@ export const deleteTask = async (req, res) => {
 
   await task.deleteOne();
   res.json({ message: 'Задачата е избришана' });
+};
+
+// The assignee can't edit the task, but they can request a change (deadline,
+// description, goals…) which the task-giver then applies.
+export const requestChange = async (req, res) => {
+  const u    = req.user;
+  const task = await Task.findById(req.params.id);
+  if (!task) return res.status(404).json({ message: 'Task not found' });
+
+  const isAssignee = String(task.assignedTo) === String(u._id);
+  if (!isAssignee) {
+    return res.status(403).json({ message: 'Само задолженото лице може да побара измена' });
+  }
+
+  const { message } = req.body;
+  if (!message?.trim()) return res.status(400).json({ message: 'Описот на измената е задолжителен' });
+
+  task.changeRequests.push({ requestedBy: u._id, message: message.trim() });
+  await task.save();
+  await task.populate(POPULATE_FIELDS);
+  res.status(201).json({ task });
+};
+
+// The task-giver (creator / dept manager / top management) marks a request resolved.
+export const resolveChangeRequest = async (req, res) => {
+  const u    = req.user;
+  const task = await Task.findById(req.params.id);
+  if (!task) return res.status(404).json({ message: 'Task not found' });
+
+  const isCreator = String(task.createdBy) === String(u._id);
+  const isDeptMgr = u.isManager && task.department === u.department;
+  if (!isCreator && !isDeptMgr && !isTopMgmt(u)) {
+    return res.status(403).json({ message: 'Немате дозвола' });
+  }
+
+  const cr = task.changeRequests.id(req.params.crId);
+  if (!cr) return res.status(404).json({ message: 'Барањето не е пронајдено' });
+
+  cr.status = 'resolved';
+  cr.resolvedBy = u._id;
+  cr.resolvedAt = new Date();
+  await task.save();
+  await task.populate(POPULATE_FIELDS);
+  res.json({ task });
 };
