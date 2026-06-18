@@ -128,8 +128,8 @@
     }
   },
   "export": {
-    "sheetName": "Договори",
     "fileBase": "dogovori",
+    "titleLine": "{{sector}} — {{count}} договори · извезено на {{date}}",
     "col": {
       "sector": "Сектор",
       "seq": "Реден бр.",

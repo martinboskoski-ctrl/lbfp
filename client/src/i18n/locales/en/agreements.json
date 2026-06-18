@@ -128,8 +128,8 @@
     }
   },
   "export": {
-    "sheetName": "Contracts",
     "fileBase": "contracts",
+    "titleLine": "{{sector}} — {{count}} contracts · exported {{date}}",
     "col": {
       "sector": "Sector",
       "seq": "No.",

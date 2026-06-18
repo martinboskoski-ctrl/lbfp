@@ -40,3 +40,14 @@ export simply mirrors what's on screen.
   chunk). Headers/labels localized through i18next; dates written as real Date cells.
 - Button gated on `canManage(user)` (manager OR top management) — employees don't see it.
 - Deferred per user decision: Slides (.pptx) export and direct Google Drive OAuth upload.
+
+## Follow-up — styled, multi-sheet workbook
+- Swapped `xlsx` (SheetJS free build can't style cells) → `exceljs`.
+- One worksheet per sector (sheet name = localized dept); managers get a single sheet,
+  top mgmt "all sectors" gets one tab each.
+- Per sheet: merged title band (sector · count · date), dark header row (frozen,
+  auto-filter), zebra striping, thin borders, date/number/money formats, status &
+  risk cells color-coded, Drive link as a real hyperlink.
+- `exceljs` is dynamically imported → lazy 937kB chunk, main bundle unchanged (1637kB).
+- Build green, util lints clean, mk/en key parity holds (added `export.titleLine`,
+  removed now-unused `export.sheetName`).
