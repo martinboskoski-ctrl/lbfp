@@ -1,42 +1,42 @@
-# Translation pass — Phases 1 & 2
+# Contracts: rename sidebar + Excel export
 
-Goal: wire hardcoded-Macedonian UI to the existing i18next system so the EN
-toggle actually translates these screens. Legal/data content (contract class
-taxonomy, stored enum values) stays as-is.
+Goal: (1) rename the sidebar entry "Систем за управување со договори" → "Договори"
+(EN: "Contracts"); (2) let top management (all sectors) and sector managers (own
+sector) export the contract register to Excel (.xlsx).
 
-## Phase 1 — Agreements / Contract Management
-- [x] Expand `agreements` namespace (mk + en): detail.*, list.*, registerStatus.*,
-      docType.*, duration.*, action.*, toast.*, modal field labels & option labels
-- [x] `pages/AgreementDetail.jsx` → use `agreements` ns
-- [x] `pages/Agreements.jsx` → use `agreements` ns
-- [x] `components/agreements/AddAgreementModal.jsx` → finish remaining hardcoded
-- [x] `hooks/useAgreements.js` → `i18next.t` for toasts
-- [x] `constants/contractRegister.js` → keep CONTRACT_CLASSES MK (legal data);
-      components translate doc-type / status / duration via t()
+Scope decided with user: **Excel only** (slides / Google Drive deferred). Export the
+**current filtered view** (active sector tab, search, status, doc-type, signed-date
+range). All client-side — the list is already permission-scoped server-side, so the
+export simply mirrors what's on screen.
 
-## Phase 2 — Employees (HR dossiers)
-- [x] New `employees` namespace (mk + en) + register in i18n.js
-- [x] `pages/Employees.jsx`
-- [x] `pages/EmployeeDetail.jsx` (UI chrome only; stored enum values left as-is)
+## Plan
+- [x] Install `xlsx` (SheetJS) in client — write-only usage, no parse path
+- [x] Rename sidebar label: `common.json` mk → "Договори", en → "Contracts"
+- [x] New util `client/src/utils/exportAgreements.js` — maps agreement rows to a
+      localized sheet (Sector, №, Type, Class, Name, Counterparty, contact, Category,
+      Signed/Start/End, Days-left, Status, Risk, Value+Currency, Payment, Owner,
+      Archive №, Confidentiality, Drive link) and triggers .xlsx download
+- [x] Add "Export to Excel" button on `Agreements.jsx`, gated on `canManage(user)`,
+      exporting the already-computed `filtered` array; toast when 0 rows
+- [x] i18n: `list.exportExcel`, `list.exportEmpty`, `export.col.*` headers (mk + en)
 
 ## Verify
-- [x] `npm run build --prefix client` — passes (4.6s, no errors)
-- [x] Lint changed files — Phase 2 clean; Phase 1 only pre-existing findings
-      (CATEGORIES react-refresh export, RHF `watch` warning, the `Icon` no-unused-vars
-      false-positive that also exists on HEAD). No new errors introduced.
-- [x] JSON key parity mk vs en — all 20 namespaces match
+- [x] `npm run build --prefix client` passes (xlsx code-split to its own 429kB chunk)
+- [x] Lint changed files — exportAgreements.js clean; only pre-existing `Icon`
+      false-positive on Agreements.jsx:54 (present on HEAD, Icon is actually used)
+- [x] JSON key parity mk vs en for agreements ns — none missing either side
+- [ ] Manual: button visible only to managers/top mgmt; file opens with Cyrillic intact
+      (needs a logged-in browser session — code path verified, build green)
 
 ## Review
-- Phase 1 (Agreements): expanded `agreements` ns (detail/list/modal/registerStatus/
-  docType/duration/action/toast). Wired AgreementDetail, Agreements, AddAgreementModal,
-  useAgreements. `contractRegister.js` CONTRACT_CLASSES kept Macedonian (legal data
-  stored verbatim on `contractClass`); doc-type/status/duration labels now translated
-  in-component via t() keyed on value, with the constant label as fallback.
-- Phase 2 (Employees): new `employees` ns + registered in i18n.js. Wired Employees +
-  EmployeeDetail. Stored enum data values (gender, employmentType, leave/discipline/
-  incident statuses, docType, allowance kind, raw `u.department` pill) left as-is —
-  those are data, not UI chrome.
-- Deferred per user: auto-translating user-entered content (revisit after UI is done).
-- Not in scope this pass: toast strings in other hooks (useLhc/useClients/useTasks/
-  useLeads/useProjects/useProcedures), Trainings.jsx, Dashboard/HomeDashboard/Pagination/
-  Login/EditHistory stray strings, AnticorruptionTraining (authored MK content).
+- Sidebar entry renamed via the existing `common.agreements` key → mk "Договори" /
+  en "Contracts" (no component change needed; Sidebar already uses t('agreements')).
+- Export is fully client-side: reuses the on-screen, already-permission-scoped
+  `filtered` array, so it honours the active sector tab + search + status + doc-type +
+  signed-date filters with zero new server work. Top mgmt exporting "all sectors" gets
+  a Sector column; managers get their own sector only.
+- `xlsx` is dynamically `import()`-ed inside the util so it loads only on first export
+  and stays out of the main bundle (main went 1920kB → 1634kB; xlsx is a 429kB lazy
+  chunk). Headers/labels localized through i18next; dates written as real Date cells.
+- Button gated on `canManage(user)` (manager OR top management) — employees don't see it.
+- Deferred per user decision: Slides (.pptx) export and direct Google Drive OAuth upload.

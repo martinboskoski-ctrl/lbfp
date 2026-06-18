@@ -107,6 +107,8 @@
     "noneToShow": "Нема договори за прикажување.",
     "addFirst": "Додади прв договор",
     "openInDrive": "Отвори папка во Google Drive",
+    "exportExcel": "Извези во Excel",
+    "exportEmpty": "Нема договори за извезување.",
     "col": {
       "type": "Тип",
       "class": "Класа / Предмет",
@@ -123,6 +125,35 @@
       "today": "денес",
       "in": "за {{count}}д",
       "days": "{{count}}д"
+    }
+  },
+  "export": {
+    "sheetName": "Договори",
+    "fileBase": "dogovori",
+    "col": {
+      "sector": "Сектор",
+      "seq": "Реден бр.",
+      "type": "Тип",
+      "class": "Класа / Предмет",
+      "name": "Назив",
+      "counterparty": "Договорна страна",
+      "contact": "Контакт",
+      "email": "Е-пошта",
+      "phone": "Телефон",
+      "category": "Категорија",
+      "signed": "Потпишан",
+      "start": "Стапува во сила",
+      "end": "Истек",
+      "daysLeft": "Денови до истек",
+      "status": "Статус",
+      "risk": "Ризик",
+      "value": "Вредност",
+      "currency": "Валута",
+      "payment": "Услови на плаќање",
+      "owner": "Одговорен",
+      "archiveNo": "Архивски бр.",
+      "confidentiality": "Доверливост",
+      "driveLink": "Линк (Drive)"
     }
   },
 

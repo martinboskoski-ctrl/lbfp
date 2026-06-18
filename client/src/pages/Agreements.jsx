@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   FileText, Plus, Search, XCircle, AlertTriangle,
-  CheckCircle, Clock, Ban, Bell, RefreshCw, ExternalLink, ShieldAlert, X,
+  CheckCircle, Clock, Ban, Bell, RefreshCw, ExternalLink, ShieldAlert, X, Download,
 } from 'lucide-react';
 import Sidebar, { DEPARTMENTS } from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
@@ -13,6 +13,8 @@ import { canManage, isTopManagement } from '../utils/userTier.js';
 import { fmtDate } from '../utils/formatDate.js';
 import AddAgreementModal from '../components/agreements/AddAgreementModal.jsx';
 import { DOCUMENT_TYPES, REGISTER_STATUSES } from '../constants/contractRegister.js';
+import { exportAgreementsToExcel } from '../utils/exportAgreements.js';
+import toast from 'react-hot-toast';
 
 // Tabs are the operating sectors (every department except top management).
 const SECTORS = DEPARTMENTS.filter((d) => d.value !== 'top_management');
@@ -140,6 +142,15 @@ const Agreements = () => {
     dept: isAdmin ? (activeSector || null) : user.department,
   });
 
+  const handleExport = async () => {
+    if (!filtered.length) { toast.error(t('list.exportEmpty')); return; }
+    try {
+      await exportAgreementsToExcel(filtered, activeSector);
+    } catch {
+      toast.error(t('toast.error'));
+    }
+  };
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -160,6 +171,16 @@ const Agreements = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                  {userCanManage && (
+                    <button
+                      onClick={handleExport}
+                      className="btn-secondary flex items-center gap-1.5 text-sm"
+                      title={t('list.exportExcel')}
+                    >
+                      <Download size={14} />
+                      <span className="hidden sm:inline">{t('list.exportExcel')}</span>
+                    </button>
+                  )}
                   {isAdmin && (
                     <button
                       onClick={() => dispatchReminders.mutate()}

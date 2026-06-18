@@ -107,6 +107,8 @@
     "noneToShow": "No agreements to show.",
     "addFirst": "Add the first agreement",
     "openInDrive": "Open folder in Google Drive",
+    "exportExcel": "Export to Excel",
+    "exportEmpty": "No contracts to export.",
     "col": {
       "type": "Type",
       "class": "Class / Subject",
@@ -123,6 +125,35 @@
       "today": "today",
       "in": "in {{count}}d",
       "days": "{{count}}d"
+    }
+  },
+  "export": {
+    "sheetName": "Contracts",
+    "fileBase": "contracts",
+    "col": {
+      "sector": "Sector",
+      "seq": "No.",
+      "type": "Type",
+      "class": "Class / Subject",
+      "name": "Name",
+      "counterparty": "Counterparty",
+      "contact": "Contact",
+      "email": "Email",
+      "phone": "Phone",
+      "category": "Category",
+      "signed": "Signed",
+      "start": "Start",
+      "end": "Expiry",
+      "daysLeft": "Days left",
+      "status": "Status",
+      "risk": "Risk",
+      "value": "Value",
+      "currency": "Currency",
+      "payment": "Payment terms",
+      "owner": "Owner",
+      "archiveNo": "Archive no.",
+      "confidentiality": "Confidentiality",
+      "driveLink": "Drive link"
     }
   },
 
