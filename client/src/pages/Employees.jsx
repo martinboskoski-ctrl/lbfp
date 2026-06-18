@@ -9,31 +9,30 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { isHRAdmin } from '../utils/userTier.js';
 import { DEPARTMENTS } from '../components/layout/Sidebar.jsx';
 
-const StatusBadge = ({ status }) => {
-  const map = {
-    open_ended:    { label: 'Неограничен', cls: 'bg-slate-100 text-slate-600' },
-    active:        { label: 'Активен',     cls: 'bg-slate-100 text-slate-700' },
-    expiring_soon: { label: 'Истекува',    cls: 'bg-amber-50 text-amber-800 border border-amber-200' },
-    expired:       { label: 'Истечен',     cls: 'bg-red-50 text-red-800 border border-red-200' },
-    unknown:       { label: '—',           cls: 'bg-slate-50 text-slate-400' },
+const StatusBadge = ({ status, t }) => {
+  const cls = {
+    open_ended:    'bg-slate-100 text-slate-600',
+    active:        'bg-slate-100 text-slate-700',
+    expiring_soon: 'bg-amber-50 text-amber-800 border border-amber-200',
+    expired:       'bg-red-50 text-red-800 border border-red-200',
+    unknown:       'bg-slate-50 text-slate-400',
   };
-  const v = map[status] || map.unknown;
-  return <span className={`text-xs px-2 py-0.5 rounded ${v.cls}`}>{v.label}</span>;
+  const key = cls[status] ? status : 'unknown';
+  return <span className={`text-xs px-2 py-0.5 rounded ${cls[key]}`}>{t(`contractBadge.${key}`)}</span>;
 };
 
-const SanitaryBadge = ({ status }) => {
-  if (status === 'ok' || status === 'unknown') return null;
-  const map = {
-    overdue:  { label: 'Сан. истечен', cls: 'bg-red-50 text-red-800 border border-red-200' },
-    due_soon: { label: 'Сан. наскоро', cls: 'bg-amber-50 text-amber-800 border border-amber-200' },
+const SanitaryBadge = ({ status, t }) => {
+  if (status !== 'overdue' && status !== 'due_soon') return null;
+  const cls = {
+    overdue:  'bg-red-50 text-red-800 border border-red-200',
+    due_soon: 'bg-amber-50 text-amber-800 border border-amber-200',
   };
-  const v = map[status];
-  if (!v) return null;
-  return <span className={`text-xs px-2 py-0.5 rounded inline-flex items-center gap-1 ${v.cls}`}><AlertTriangle size={12} />{v.label}</span>;
+  return <span className={`text-xs px-2 py-0.5 rounded inline-flex items-center gap-1 ${cls[status]}`}><AlertTriangle size={12} />{t(`sanitaryBadge.${status}`)}</span>;
 };
 
 const Employees = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('employees');
+  const { t: tc } = useTranslation('common');
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [deptFilter, setDeptFilter] = useState('');
@@ -65,16 +64,14 @@ const Employees = () => {
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <Topbar title="HR — Вработени" />
+        <Topbar title={t('list.topbarTitle')} />
         <main className="flex-1 p-4 sm:p-6">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col gap-3 mb-5">
               <div>
-                <h2 className="text-lg sm:text-xl font-semibold text-slate-900">Досиеја на вработени</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-slate-900">{t('list.heading')}</h2>
                 <p className="text-sm text-slate-500 mt-0.5">
-                  {showAll
-                    ? 'Преглед на сите вработени во компанијата.'
-                    : 'Преглед на вработените во вашиот сектор.'}
+                  {showAll ? t('list.subtitleAll') : t('list.subtitleDept')}
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-2">
@@ -83,7 +80,7 @@ const Employees = () => {
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Барај по име, мејл, позиција..."
+                    placeholder={t('list.searchPlaceholder')}
                     className="input pl-9"
                   />
                 </div>
@@ -93,10 +90,10 @@ const Employees = () => {
                     onChange={(e) => setDeptFilter(e.target.value)}
                     className="input sm:w-56"
                   >
-                    <option value="">Сите сектори</option>
+                    <option value="">{t('list.allSectors')}</option>
                     {DEPARTMENTS.map((d) => (
                       <option key={d.value} value={d.value}>
-                        {t(`dept.${d.value}`, { defaultValue: d.value })}
+                        {tc(`dept.${d.value}`, { defaultValue: d.value })}
                       </option>
                     ))}
                   </select>
@@ -112,7 +109,7 @@ const Employees = () => {
 
             {!isLoading && filtered.length === 0 && (
               <div className="card p-10 text-center text-slate-500">
-                Нема вработени за прикажување.
+                {t('list.empty')}
               </div>
             )}
 
@@ -121,7 +118,7 @@ const Employees = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <Building2 size={14} className="text-slate-400" />
                   <h3 className="section-title">
-                    {t(`dept.${dept}`, { defaultValue: dept })}
+                    {tc(`dept.${dept}`, { defaultValue: dept })}
                   </h3>
                   <span className="text-xs text-slate-400">({grouped[dept].length})</span>
                 </div>
@@ -137,24 +134,24 @@ const Employees = () => {
                           <span className="font-medium text-slate-900 truncate">{e.name}</span>
                           {e.isManager && (
                             <span className="text-[11px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded">
-                              Менаџер
+                              {t('list.manager')}
                             </span>
                           )}
                         </div>
                         <div className="text-xs sm:text-sm text-slate-500 mt-0.5 truncate">
-                          {e.position || <span className="italic">без позиција</span>} · <span className="hidden sm:inline">{e.email}</span>
+                          {e.position || <span className="italic">{t('list.noPosition')}</span>} · <span className="hidden sm:inline">{e.email}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {e.leaveTotal != null && (
-                          <span className="hidden sm:inline-flex text-xs text-slate-500 items-center gap-1" title="Преостанато годишен одмор">
+                          <span className="hidden sm:inline-flex text-xs text-slate-500 items-center gap-1" title={t('list.leaveTitle')}>
                             <Calendar size={12} />
                             {e.leaveRemaining}/{e.leaveTotal}
                           </span>
                         )}
-                        <SanitaryBadge status={e.sanitaryCheckStatus} />
+                        <SanitaryBadge status={e.sanitaryCheckStatus} t={t} />
                         <span className="hidden sm:inline">
-                          <StatusBadge status={e.contractStatus} />
+                          <StatusBadge status={e.contractStatus} t={t} />
                         </span>
                       </div>
                     </Link>
@@ -166,8 +163,8 @@ const Employees = () => {
             <div className="mt-8 flex items-start gap-2 text-xs text-slate-500">
               <ShieldAlert size={14} className="flex-shrink-0 mt-0.5" />
               <span>
-                Видливост: {showAll ? 'имате пристап до сите вработени.' : 'имате пристап само до вработените во вашиот сектор.'}{' '}
-                Платата е скриена освен за HR и Топ менаџмент.
+                {t('list.visibilityPrefix')} {showAll ? t('list.visibilityAll') : t('list.visibilityDept')}{' '}
+                {t('list.salaryHidden')}
               </span>
             </div>
           </div>

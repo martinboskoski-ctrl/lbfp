@@ -21,6 +21,7 @@ import mkProduction from './locales/mk/production.json';
 import mkLhc from './locales/mk/lhc.json';
 import mkUserMgmt from './locales/mk/userMgmt.json';
 import mkEmployeeTasks from './locales/mk/employeeTasks.json';
+import mkEmployees from './locales/mk/employees.json';
 
 // EN namespaces
 import enCommon from './locales/en/common.json';
@@ -42,6 +43,7 @@ import enProduction from './locales/en/production.json';
 import enLhc from './locales/en/lhc.json';
 import enUserMgmt from './locales/en/userMgmt.json';
 import enEmployeeTasks from './locales/en/employeeTasks.json';
+import enEmployees from './locales/en/employees.json';
 
 i18n.use(initReactI18next).init({
   lng: localStorage.getItem('packflow_lang') || 'mk',
@@ -68,6 +70,7 @@ i18n.use(initReactI18next).init({
       lhc: mkLhc,
       userMgmt: mkUserMgmt,
       employeeTasks: mkEmployeeTasks,
+      employees: mkEmployees,
     },
     en: {
       common: enCommon,
@@ -89,6 +92,7 @@ i18n.use(initReactI18next).init({
       lhc: enLhc,
       userMgmt: enUserMgmt,
       employeeTasks: enEmployeeTasks,
+      employees: enEmployees,
     },
   },
   defaultNS: 'common',

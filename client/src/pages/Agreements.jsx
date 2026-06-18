@@ -12,7 +12,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { canManage, isTopManagement } from '../utils/userTier.js';
 import { fmtDate } from '../utils/formatDate.js';
 import AddAgreementModal from '../components/agreements/AddAgreementModal.jsx';
-import { STATUS_LABEL, DOC_TYPE_LABEL, REGISTER_STATUSES, DOCUMENT_TYPES } from '../constants/contractRegister.js';
+import { DOCUMENT_TYPES, REGISTER_STATUSES } from '../constants/contractRegister.js';
 
 // Tabs are the operating sectors (every department except top management).
 const SECTORS = DEPARTMENTS.filter((d) => d.value !== 'top_management');
@@ -30,23 +30,23 @@ const STATUS_META = {
   draft:         { cls: 'bg-slate-100 text-slate-500',                              icon: Clock         },
 };
 
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status, t }) => {
   const m = STATUS_META[status] || STATUS_META.draft;
   const Icon = m.icon;
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium whitespace-nowrap ${m.cls}`}>
-      <Icon size={11} /> {STATUS_LABEL[status] || status}
+      <Icon size={11} /> {t(`registerStatus.${status}`, status)}
     </span>
   );
 };
 
-const ExpiryHint = ({ days, status }) => {
+const ExpiryHint = ({ days, status, t }) => {
   if (status === 'terminated' || status === 'renewed' || status === 'archived') return null;
   if (days === null || days === undefined) return <span className="text-xs text-slate-400">∞</span>;
-  if (days < 0)   return <span className="text-xs font-medium text-red-600">пред {Math.abs(days)}д</span>;
-  if (days === 0) return <span className="text-xs font-medium text-red-600">денес</span>;
-  if (days <= 30) return <span className="text-xs font-medium text-amber-600">за {days}д</span>;
-  return <span className="text-xs text-slate-400">{days}д</span>;
+  if (days < 0)   return <span className="text-xs font-medium text-red-600">{t('list.expiry.ago', { count: Math.abs(days) })}</span>;
+  if (days === 0) return <span className="text-xs font-medium text-red-600">{t('list.expiry.today')}</span>;
+  if (days <= 30) return <span className="text-xs font-medium text-amber-600">{t('list.expiry.in', { count: days })}</span>;
+  return <span className="text-xs text-slate-400">{t('list.expiry.days', { count: days })}</span>;
 };
 
 const StatCard = ({ label, count, color, icon: Icon, onClick, active }) => (
@@ -70,6 +70,7 @@ const Td = ({ children, className = '' }) => (
 );
 
 const Agreements = () => {
+  const { t } = useTranslation('agreements');
   const { t: tc } = useTranslation('common');
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -143,7 +144,7 @@ const Agreements = () => {
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <Topbar title="Регистар на договори" />
+        <Topbar title={t('list.topbarTitle')} />
         <main className="flex-1 p-4 sm:p-6">
           <div className="max-w-7xl mx-auto">
 
@@ -151,11 +152,11 @@ const Agreements = () => {
             <div className="flex flex-col gap-3 mb-4">
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div>
-                  <h2 className="text-lg sm:text-xl font-semibold text-slate-900">Регистар на договори</h2>
+                  <h2 className="text-lg sm:text-xl font-semibold text-slate-900">{t('list.heading')}</h2>
                   <p className="text-sm text-slate-500 mt-0.5">
                     {isAdmin
-                      ? 'Единствен извор на вистина за договорите. Преглед на сите сектори.'
-                      : `Договори за вашиот сектор: ${tc(`dept.${user?.department}`, user?.department)}.`}
+                      ? t('list.subtitleAdmin')
+                      : t('list.subtitleDept', { dept: tc(`dept.${user?.department}`, user?.department) })}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -166,12 +167,12 @@ const Agreements = () => {
                       disabled={dispatchReminders.isPending}
                     >
                       <Bell size={14} />
-                      <span className="hidden sm:inline">{dispatchReminders.isPending ? 'Праќа...' : 'Испрати потсетници'}</span>
+                      <span className="hidden sm:inline">{dispatchReminders.isPending ? t('list.sending') : t('list.sendReminders')}</span>
                     </button>
                   )}
                   {canAddHere && (
                     <button onClick={openCreate} className="btn-primary flex items-center gap-1.5">
-                      <Plus size={16} /> Нов договор
+                      <Plus size={16} /> {t('newAgreement')}
                     </button>
                   )}
                 </div>
@@ -180,13 +181,13 @@ const Agreements = () => {
               {/* Sector selector — only top management can switch sectors */}
               {isAdmin && (
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-slate-500 whitespace-nowrap">Сектор:</label>
+                  <label className="text-sm text-slate-500 whitespace-nowrap">{t('list.sector')}</label>
                   <select
                     className="input sm:w-72 text-sm"
                     value={activeSector}
                     onChange={(e) => setActiveSector(e.target.value)}
                   >
-                    <option value="">Сите сектори</option>
+                    <option value="">{t('list.allSectors')}</option>
                     {SECTORS.map((d) => (
                       <option key={d.value} value={d.value}>{tc(`dept.${d.value}`, d.value)}</option>
                     ))}
@@ -197,10 +198,10 @@ const Agreements = () => {
 
             {/* Stats */}
             <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-1 mb-4">
-              <StatCard label="Вкупно"     count={stats.total}         color="bg-slate-100 text-slate-600"    icon={FileText}      onClick={() => setFilterStatus('')}                                                      active={filterStatus === ''} />
-              <StatCard label="Активни"     count={stats.active}        color="bg-emerald-50 text-emerald-700" icon={CheckCircle}   onClick={() => setFilterStatus(filterStatus === 'active' ? '' : 'active')}               active={filterStatus === 'active'} />
-              <StatCard label="Истекуваат"  count={stats.expiring_soon} color="bg-amber-50 text-amber-700"     icon={AlertTriangle} onClick={() => setFilterStatus(filterStatus === 'expiring_soon' ? '' : 'expiring_soon')} active={filterStatus === 'expiring_soon'} />
-              <StatCard label="Истечени"    count={stats.expired}       color="bg-red-50 text-red-700"         icon={XCircle}       onClick={() => setFilterStatus(filterStatus === 'expired' ? '' : 'expired')}             active={filterStatus === 'expired'} />
+              <StatCard label={t('stat.total')}       count={stats.total}         color="bg-slate-100 text-slate-600"    icon={FileText}      onClick={() => setFilterStatus('')}                                                      active={filterStatus === ''} />
+              <StatCard label={t('stat.active')}       count={stats.active}        color="bg-emerald-50 text-emerald-700" icon={CheckCircle}   onClick={() => setFilterStatus(filterStatus === 'active' ? '' : 'active')}               active={filterStatus === 'active'} />
+              <StatCard label={t('stat.expiringSoon')} count={stats.expiring_soon} color="bg-amber-50 text-amber-700"     icon={AlertTriangle} onClick={() => setFilterStatus(filterStatus === 'expiring_soon' ? '' : 'expiring_soon')} active={filterStatus === 'expiring_soon'} />
+              <StatCard label={t('stat.expired')}      count={stats.expired}       color="bg-red-50 text-red-700"         icon={XCircle}       onClick={() => setFilterStatus(filterStatus === 'expired' ? '' : 'expired')}             active={filterStatus === 'expired'} />
             </div>
 
             {/* Filters */}
@@ -210,34 +211,34 @@ const Agreements = () => {
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     className="input pl-8 text-sm"
-                    placeholder="Барај по договорна страна (клиент), наслов, бр. на договор..."
+                    placeholder={t('list.searchFull')}
                     value={searchQ}
                     onChange={(e) => setSearchQ(e.target.value)}
                   />
                 </div>
                 <select className="input sm:w-44 text-sm" value={filterDocType} onChange={(e) => setFilterDocType(e.target.value)}>
-                  <option value="">Сите типови</option>
-                  {DOCUMENT_TYPES.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+                  <option value="">{t('list.allTypes')}</option>
+                  {DOCUMENT_TYPES.map((d) => <option key={d.value} value={d.value}>{t(`docType.${d.value}`, d.label)}</option>)}
                 </select>
                 <select className="input sm:w-48 text-sm" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-                  <option value="">Сите статуси</option>
-                  {REGISTER_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                  <option value="expiring_soon">Истекува наскоро</option>
+                  <option value="">{t('allStatuses')}</option>
+                  {REGISTER_STATUSES.map((s) => <option key={s.value} value={s.value}>{t(`registerStatus.${s.value}`, s.label)}</option>)}
+                  <option value="expiring_soon">{t('list.expiringSoonOption')}</option>
                 </select>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm">
-                <span className="text-slate-500 whitespace-nowrap">Потпишан:</span>
+                <span className="text-slate-500 whitespace-nowrap">{t('list.signed')}</span>
                 <input type="date" className="input text-sm w-auto" value={signedFrom} max={signedTo || undefined}
-                  onChange={(e) => setSignedFrom(e.target.value)} aria-label="Потпишан од" />
+                  onChange={(e) => setSignedFrom(e.target.value)} aria-label={t('list.signedFrom')} />
                 <span className="text-slate-400">–</span>
                 <input type="date" className="input text-sm w-auto" value={signedTo} min={signedFrom || undefined}
-                  onChange={(e) => setSignedTo(e.target.value)} aria-label="Потпишан до" />
+                  onChange={(e) => setSignedTo(e.target.value)} aria-label={t('list.signedTo')} />
                 {(hasExtraFilters || filterStatus || searchQ) && (
                   <button
                     onClick={() => { clearExtraFilters(); setFilterStatus(''); setSearchQ(''); }}
                     className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 px-2 py-1 rounded hover:bg-slate-100"
                   >
-                    <X size={12} /> Исчисти филтри
+                    <X size={12} /> {t('list.clearFilters')}
                   </button>
                 )}
               </div>
@@ -252,9 +253,9 @@ const Agreements = () => {
             {!isLoading && filtered.length === 0 && (
               <div className="text-center py-16 card">
                 <FileText size={36} className="mx-auto text-slate-300 mb-3" />
-                <p className="text-slate-400 text-sm mb-4">Нема договори за прикажување.</p>
+                <p className="text-slate-400 text-sm mb-4">{t('list.noneToShow')}</p>
                 {canAddHere && (
-                  <button onClick={openCreate} className="btn-primary">Додади прв договор</button>
+                  <button onClick={openCreate} className="btn-primary">{t('list.addFirst')}</button>
                 )}
               </div>
             )}
@@ -274,15 +275,15 @@ const Agreements = () => {
                     <thead className="bg-slate-50 border-b border-slate-100 text-xs">
                       <tr>
                         <Th className="w-10">№</Th>
-                        <Th>Тип</Th>
-                        <Th>Класа / Предмет</Th>
-                        <Th>Назив</Th>
-                        <Th>Договорна страна</Th>
-                        <Th>Потпишан</Th>
-                        <Th>Истек</Th>
-                        <Th>Статус</Th>
-                        <Th>Архивски бр.</Th>
-                        <Th>Одговорен</Th>
+                        <Th>{t('list.col.type')}</Th>
+                        <Th>{t('list.col.class')}</Th>
+                        <Th>{t('list.col.name')}</Th>
+                        <Th>{t('list.col.counterparty')}</Th>
+                        <Th>{t('list.col.signed')}</Th>
+                        <Th>{t('list.col.expiry')}</Th>
+                        <Th>{t('list.col.status')}</Th>
+                        <Th>{t('list.col.archiveNo')}</Th>
+                        <Th>{t('list.col.owner')}</Th>
                         <Th className="text-center">Drive</Th>
                       </tr>
                     </thead>
@@ -294,16 +295,16 @@ const Agreements = () => {
                           className="hover:bg-slate-50 cursor-pointer"
                         >
                           <Td className="text-slate-400 font-mono text-xs">{a.sequenceNumber ?? '—'}</Td>
-                          <Td className="whitespace-nowrap text-slate-600 text-xs">{DOC_TYPE_LABEL[a.documentType] || '—'}</Td>
+                          <Td className="whitespace-nowrap text-slate-600 text-xs">{a.documentType ? t(`docType.${a.documentType}`, a.documentType) : '—'}</Td>
                           <Td className="text-slate-700 max-w-[180px] truncate" title={a.contractClass}>{a.contractClass || '—'}</Td>
                           <Td className="font-medium text-slate-900 max-w-[200px] truncate" title={a.title}>{a.title || '—'}</Td>
                           <Td className="text-slate-700 max-w-[180px] truncate" title={a.otherParty}>{a.otherParty}</Td>
                           <Td className="whitespace-nowrap text-slate-500 text-xs">{fmtDate(a.signedDate)}</Td>
                           <Td className="whitespace-nowrap">
                             <div className="text-xs text-slate-600">{a.endDate ? fmtDate(a.endDate) : '∞'}</div>
-                            <ExpiryHint days={a.daysUntilExpiry} status={a.effectiveStatus} />
+                            <ExpiryHint days={a.daysUntilExpiry} status={a.effectiveStatus} t={t} />
                           </Td>
-                          <Td><StatusBadge status={a.effectiveStatus} /></Td>
+                          <Td><StatusBadge status={a.effectiveStatus} t={t} /></Td>
                           <Td className="whitespace-nowrap text-slate-500 text-xs font-mono">{a.archiveNumber || '—'}</Td>
                           <Td className="whitespace-nowrap text-slate-600 text-xs">{a.owner?.name || '—'}</Td>
                           <Td className="text-center">
@@ -314,7 +315,7 @@ const Agreements = () => {
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
                                 className="inline-flex text-slate-400 hover:text-slate-700"
-                                title="Отвори папка во Google Drive"
+                                title={t('list.openInDrive')}
                               >
                                 <ExternalLink size={14} />
                               </a>

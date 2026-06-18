@@ -18,7 +18,6 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { canManage, isTopManagement } from '../utils/userTier.js';
 import { fmtDate } from '../utils/formatDate.js';
 import AddAgreementModal from '../components/agreements/AddAgreementModal.jsx';
-import { STATUS_LABEL, DOC_TYPE_LABEL, DURATION_LABEL } from '../constants/contractRegister.js';
 
 const STATUS_META = {
   active:        { color: 'bg-emerald-50 text-emerald-800 border border-emerald-200', icon: CheckCircle    },
@@ -33,16 +32,17 @@ const STATUS_META = {
   draft:         { color: 'bg-slate-100 text-slate-500',                              icon: Clock          },
 };
 
-const ACTION_META = {
-  created:        { label: 'Создаден',          color: 'bg-slate-100 text-slate-700' },
-  updated:        { label: 'Изменет',           color: 'bg-slate-100 text-slate-600' },
-  note:           { label: 'Белешка',           color: 'bg-amber-50 text-amber-800 border border-amber-200' },
-  renewed:        { label: 'Обновен',           color: 'bg-slate-100 text-slate-700' },
-  terminated:     { label: 'Раскинат',          color: 'bg-red-50 text-red-800 border border-red-200' },
-  reminder_sent:  { label: 'Известување',       color: 'bg-slate-200 text-slate-800' },
-  file_added:     { label: 'Прикачен документ', color: 'bg-emerald-50 text-emerald-800 border border-emerald-200' },
-  file_removed:   { label: 'Избришан документ', color: 'bg-red-50 text-red-700' },
-  status_changed: { label: 'Статус',            color: 'bg-slate-100 text-slate-600' },
+// Activity-log action → badge color. The label is resolved via i18n at render time.
+const ACTION_COLOR = {
+  created:        'bg-slate-100 text-slate-700',
+  updated:        'bg-slate-100 text-slate-600',
+  note:           'bg-amber-50 text-amber-800 border border-amber-200',
+  renewed:        'bg-slate-100 text-slate-700',
+  terminated:     'bg-red-50 text-red-800 border border-red-200',
+  reminder_sent:  'bg-slate-200 text-slate-800',
+  file_added:     'bg-emerald-50 text-emerald-800 border border-emerald-200',
+  file_removed:   'bg-red-50 text-red-700',
+  status_changed: 'bg-slate-100 text-slate-600',
 };
 
 const Field = ({ label, children }) => (
@@ -69,6 +69,7 @@ const AgreementDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation('agreements');
   const { t: tc } = useTranslation('common');
   const tcDept = (d) => tc(`dept.${d}`, d);
   const { data: a, isLoading, error } = useAgreement(id);
@@ -98,12 +99,12 @@ const AgreementDetail = () => {
       <div className="flex min-h-screen">
         <Sidebar />
         <div className="flex-1 flex flex-col">
-          <Topbar title="Грешка" />
+          <Topbar title={t('detail.errorTitle')} />
           <main className="flex-1 p-6">
             <div className="card p-6 max-w-xl mx-auto text-center">
-              <p className="text-red-600 mb-3">Договорот не е пронајден или немате пристап.</p>
+              <p className="text-red-600 mb-3">{t('detail.notFound')}</p>
               <Link to="/agreements" className="btn-secondary inline-flex items-center gap-1">
-                <ArrowLeft size={14} /> Назад до сите договори
+                <ArrowLeft size={14} /> {t('detail.backToAll')}
               </Link>
             </div>
           </main>
@@ -129,11 +130,11 @@ const AgreementDetail = () => {
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <Topbar title="Договор" />
+        <Topbar title={t('detail.topbarTitle')} />
         <main className="flex-1 p-4 sm:p-6">
           <div className="max-w-4xl mx-auto">
             <Link to="/agreements" className="text-sm text-slate-500 hover:text-slate-800 inline-flex items-center gap-1 mb-3">
-              <ArrowLeft size={14} /> Сите договори
+              <ArrowLeft size={14} /> {t('detail.allAgreements')}
             </Link>
 
             {/* Header */}
@@ -150,21 +151,21 @@ const AgreementDetail = () => {
                     <h1 className="text-lg sm:text-xl font-semibold text-slate-900">{a.title}</h1>
                   </div>
                   <p className="text-sm text-slate-600 mt-1">
-                    Со <span className="font-medium">{a.otherParty}</span>
-                    {a.owner?.name && <span className="text-slate-500"> · одговорен: {a.owner.name}</span>}
+                    {t('detail.with')} <span className="font-medium">{a.otherParty}</span>
+                    {a.owner?.name && <span className="text-slate-500"> · {t('detail.responsible')}: {a.owner.name}</span>}
                   </p>
                   <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium ${sMeta.color}`}>
-                      <StatusIcon size={11} /> {STATUS_LABEL[status] || status}
+                      <StatusIcon size={11} /> {t(`registerStatus.${status}`, status)}
                     </span>
                     {a.confidentiality === 'confidential' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-slate-200 text-slate-800">
-                        <ShieldAlert size={11} /> Доверливо
+                        <ShieldAlert size={11} /> {t('detail.confidential')}
                       </span>
                     )}
                     {a.riskLevel && a.riskLevel !== 'low' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-red-50 text-red-800 border border-red-200">
-                        Ризик: {a.riskLevel}
+                        {t('detail.risk')}: {t(`modal.risk.${a.riskLevel}`, a.riskLevel)}
                       </span>
                     )}
                     {a.tags?.map((tag, i) => (
@@ -178,20 +179,20 @@ const AgreementDetail = () => {
               {userCanManage && (
                 <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
                   <button onClick={() => setModal({ mode: 'edit', initial: a })} className="btn-secondary inline-flex items-center gap-1 text-sm">
-                    <Edit2 size={13} /> Уреди
+                    <Edit2 size={13} /> {t('actions.edit')}
                   </button>
                   {isTerminatable && (
                     <button onClick={() => setModal({ mode: 'renew', initial: a })} className="btn-secondary inline-flex items-center gap-1 text-sm">
-                      <RefreshCw size={13} /> Обнови
+                      <RefreshCw size={13} /> {t('actions.renew')}
                     </button>
                   )}
                   {isTerminatable && (
                     <button onClick={() => setConfirmTerminate(true)} className="btn-secondary inline-flex items-center gap-1 text-sm">
-                      <Ban size={13} /> Раскини
+                      <Ban size={13} /> {t('actions.terminate')}
                     </button>
                   )}
                   <button onClick={() => setConfirmDelete(true)} className="btn-secondary inline-flex items-center gap-1 text-sm text-red-700 sm:ml-auto">
-                    <Trash2 size={13} /> Избриши
+                    <Trash2 size={13} /> {t('actions.delete')}
                   </button>
                 </div>
               )}
@@ -199,15 +200,15 @@ const AgreementDetail = () => {
               {/* Termination prompt */}
               {confirmTerminate && (
                 <div className="mt-4 p-3 rounded bg-amber-50 border border-amber-200 space-y-2">
-                  <p className="text-sm text-amber-800">Внеси причина за раскинување (опционално):</p>
-                  <input className="input text-sm" value={termReason} onChange={(e) => setTermReason(e.target.value)} placeholder="Причина..." />
+                  <p className="text-sm text-amber-800">{t('detail.terminatePrompt')}</p>
+                  <input className="input text-sm" value={termReason} onChange={(e) => setTermReason(e.target.value)} placeholder={t('detail.reasonPlaceholder')} />
                   <div className="flex gap-2 justify-end">
-                    <button onClick={() => setConfirmTerminate(false)} className="btn-secondary text-sm">Откажи</button>
+                    <button onClick={() => setConfirmTerminate(false)} className="btn-secondary text-sm">{tc('cancel')}</button>
                     <button
                       onClick={() => { terminate.mutate({ id: a._id, reason: termReason }); setConfirmTerminate(false); }}
                       className="btn-danger text-sm"
                     >
-                      Потврди раскинување
+                      {t('actions.confirmTerminate')}
                     </button>
                   </div>
                 </div>
@@ -216,14 +217,14 @@ const AgreementDetail = () => {
               {/* Delete prompt */}
               {confirmDelete && (
                 <div className="mt-4 p-3 rounded bg-red-50 border border-red-200 space-y-2">
-                  <p className="text-sm text-red-800">Сигурно сакате да го избришете овој договор? Ова е неповратно.</p>
+                  <p className="text-sm text-red-800">{t('detail.deletePrompt')}</p>
                   <div className="flex gap-2 justify-end">
-                    <button onClick={() => setConfirmDelete(false)} className="btn-secondary text-sm">Откажи</button>
+                    <button onClick={() => setConfirmDelete(false)} className="btn-secondary text-sm">{tc('cancel')}</button>
                     <button
                       onClick={() => remove.mutate(a._id, { onSuccess: () => navigate('/agreements') })}
                       className="btn-danger text-sm"
                     >
-                      Избриши
+                      {t('actions.delete')}
                     </button>
                   </div>
                 </div>
@@ -231,70 +232,70 @@ const AgreementDetail = () => {
             </div>
 
             {/* Basic info */}
-            <Section title="Основни податоци" icon={FileText}>
+            <Section title={t('detail.sectionBasic')} icon={FileText}>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6">
-                <Field label="Сектор">{tcDept(a.department)}</Field>
-                <Field label="Реден број">{a.sequenceNumber ?? '—'}</Field>
-                <Field label="Тип на документ">{DOC_TYPE_LABEL[a.documentType] || '—'}</Field>
-                <Field label="Класа / Предмет">{a.contractClass || '—'}</Field>
-                <Field label="Број на договор">{a.contractNumber}</Field>
-                <Field label="Архивски број / печат">{a.archiveNumber || '—'}</Field>
-                <Field label="Датум на потпишување">{fmtDate(a.signedDate)}</Field>
-                <Field label="Стапување во сила">{fmtDate(a.startDate)}</Field>
-                <Field label="Датум на истек">{a.endDate ? fmtDate(a.endDate) : 'неопределено'}</Field>
-                <Field label="Времетраење">{DURATION_LABEL[a.durationType] || (a.endDate ? 'Определено' : 'Неопределено')}</Field>
-                <Field label="Датум за преглед">{fmtDate(a.reviewDate)}</Field>
-                <Field label="Откажен рок">{a.terminationNoticeDays} денови</Field>
-                <Field label="Авто-обновување">{a.autoRenew ? `Да (${a.autoRenewMonths || 12} месеци)` : 'Не'}</Field>
-                <Field label="Праг на потсетник">{a.reminderDays} денови</Field>
-                <Field label="Линк до Drive">
+                <Field label={t('detail.fSector')}>{tcDept(a.department)}</Field>
+                <Field label={t('detail.fSeq')}>{a.sequenceNumber ?? '—'}</Field>
+                <Field label={t('detail.fDocType')}>{a.documentType ? t(`docType.${a.documentType}`, a.documentType) : '—'}</Field>
+                <Field label={t('detail.fClass')}>{a.contractClass || '—'}</Field>
+                <Field label={t('detail.fContractNo')}>{a.contractNumber}</Field>
+                <Field label={t('detail.fArchiveNo')}>{a.archiveNumber || '—'}</Field>
+                <Field label={t('detail.fSignedDate')}>{fmtDate(a.signedDate)}</Field>
+                <Field label={t('detail.fStartDate')}>{fmtDate(a.startDate)}</Field>
+                <Field label={t('detail.fEndDate')}>{a.endDate ? fmtDate(a.endDate) : t('detail.undetermined')}</Field>
+                <Field label={t('detail.fDuration')}>{a.durationType ? t(`duration.${a.durationType}`, a.durationType) : (a.endDate ? t('detail.fixedShort') : t('detail.indefiniteShort'))}</Field>
+                <Field label={t('detail.fReviewDate')}>{fmtDate(a.reviewDate)}</Field>
+                <Field label={t('detail.fTerminationNotice')}>{a.terminationNoticeDays} {t('detail.daysSuffix')}</Field>
+                <Field label={t('detail.fAutoRenew')}>{a.autoRenew ? t('detail.autoRenewYes', { months: a.autoRenewMonths || 12 }) : t('detail.no')}</Field>
+                <Field label={t('detail.fReminderThreshold')}>{a.reminderDays} {t('detail.daysSuffix')}</Field>
+                <Field label={t('detail.fDriveLink')}>
                   {a.driveLink
-                    ? <a href={a.driveLink} target="_blank" rel="noopener noreferrer" className="text-sky-700 hover:underline inline-flex items-center gap-1">Отвори папка</a>
+                    ? <a href={a.driveLink} target="_blank" rel="noopener noreferrer" className="text-sky-700 hover:underline inline-flex items-center gap-1">{t('detail.openFolder')}</a>
                     : '—'}
                 </Field>
               </div>
               {a.reviewComment && (
                 <div className="mt-4 pt-3 border-t border-slate-100">
-                  <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Преглед — коментар</div>
+                  <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('detail.reviewComment')}</div>
                   <p className="text-sm text-slate-800 whitespace-pre-wrap">{a.reviewComment}</p>
                 </div>
               )}
               {a.description && (
                 <div className="mt-4 pt-3 border-t border-slate-100">
-                  <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Опис</div>
+                  <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('detail.description')}</div>
                   <p className="text-sm text-slate-800 whitespace-pre-wrap">{a.description}</p>
                 </div>
               )}
             </Section>
 
             {/* Counterparty */}
-            <Section title="Друга страна / контакт" icon={UserIcon}>
+            <Section title={t('detail.sectionCounterparty')} icon={UserIcon}>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6">
-                <Field label="Правно лице">{a.otherParty}</Field>
-                <Field label="Контакт лице">{a.counterpartyContact?.name}</Field>
-                <Field label="Даночен бр.">{a.counterpartyContact?.taxNo}</Field>
-                <Field label={<span className="inline-flex items-center gap-1"><Mail size={11} /> Мејл</span>}>{a.counterpartyContact?.email}</Field>
-                <Field label={<span className="inline-flex items-center gap-1"><Phone size={11} /> Телефон</span>}>{a.counterpartyContact?.phone}</Field>
-                <Field label={<span className="inline-flex items-center gap-1"><MapPin size={11} /> Адреса</span>}>{a.counterpartyContact?.address}</Field>
+                <Field label={t('detail.fLegalEntity')}>{a.otherParty}</Field>
+                <Field label={t('detail.fContactPerson')}>{a.counterpartyContact?.name}</Field>
+                <Field label={t('detail.fTaxNo')}>{a.counterpartyContact?.taxNo}</Field>
+                <Field label={<span className="inline-flex items-center gap-1"><Mail size={11} /> {t('detail.fEmail')}</span>}>{a.counterpartyContact?.email}</Field>
+                <Field label={<span className="inline-flex items-center gap-1"><Phone size={11} /> {t('detail.fPhone')}</span>}>{a.counterpartyContact?.phone}</Field>
+                <Field label={<span className="inline-flex items-center gap-1"><MapPin size={11} /> {t('detail.fAddress')}</span>}>{a.counterpartyContact?.address}</Field>
               </div>
             </Section>
 
             {/* Value & payment */}
-            <Section title="Вредност и плаќање">
+            <Section title={t('detail.sectionValue')}>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6">
-                <Field label="Вредност">
+                <Field label={t('detail.fValue')}>
                   {a.value ? `${Number(a.value).toLocaleString('mk-MK')} ${a.currency}` : '—'}
                 </Field>
-                <Field label="Услови">{a.paymentTerms}</Field>
-                <Field label="Износ по циклус">
+                <Field label={t('detail.fPaymentTerms')}>{a.paymentTerms ? t(`modal.pay.${a.paymentTerms}`, a.paymentTerms) : '—'}</Field>
+                <Field label={t('detail.fAmountPerCycle')}>
                   {a.paymentAmount ? `${Number(a.paymentAmount).toLocaleString('mk-MK')} ${a.currency}` : '—'}
                 </Field>
-                <Field label="Валута">{a.currency}</Field>
+                <Field label={t('detail.fCurrency')}>{a.currency}</Field>
               </div>
             </Section>
 
             {/* Files */}
-            <Section title={`Документи (${a.files?.length || 0})`}>
+            <Section title={t('detail.sectionFiles', { count: a.files?.length || 0 })}>
               {a.files?.length ? (
                 <ul className="divide-y divide-slate-100 -my-2">
                   {a.files.map((f) => (
@@ -307,57 +308,57 @@ const AgreementDetail = () => {
                   ))}
                 </ul>
               ) : (
-                <div className="text-sm text-slate-500">Нема прикачени документи.</div>
+                <div className="text-sm text-slate-500">{t('detail.noFiles')}</div>
               )}
               {userCanManage && (
-                <p className="text-xs text-slate-400 mt-3">Прикачувањето на документи бара активна S3 конфигурација.</p>
+                <p className="text-xs text-slate-400 mt-3">{t('detail.s3Hint')}</p>
               )}
             </Section>
 
             {/* Reminder bookkeeping */}
             {(a.lastReminderSentAt || a.lastReminderDayOffset) && (
-              <Section title="Известувања" icon={Bell}>
+              <Section title={t('detail.sectionReminders')} icon={Bell}>
                 <div className="text-sm text-slate-700">
-                  Последен потсетник: <strong>{fmtDate(a.lastReminderSentAt)}</strong>
-                  {a.lastReminderDayOffset && <span> (праг {a.lastReminderDayOffset} денови)</span>}
+                  {t('detail.lastReminder')} <strong>{fmtDate(a.lastReminderSentAt)}</strong>
+                  {a.lastReminderDayOffset && <span> {t('detail.thresholdDays', { count: a.lastReminderDayOffset })}</span>}
                 </div>
               </Section>
             )}
 
             {/* Notes */}
             {a.notes && (
-              <Section title="Забелешки">
+              <Section title={t('detail.sectionNotes')}>
                 <p className="text-sm text-slate-800 whitespace-pre-wrap">{a.notes}</p>
               </Section>
             )}
 
             {/* Activity log + add note */}
-            <Section title={`Активност (${a.activityLog?.length || 0})`}>
+            <Section title={t('detail.sectionActivity', { count: a.activityLog?.length || 0 })}>
               <form onSubmit={submitNote} className="flex gap-2 mb-4">
                 <input
                   className="input text-sm flex-1"
-                  placeholder="Додади белешка во дневникот..."
+                  placeholder={t('detail.notePlaceholder')}
                   value={noteText}
                   onChange={(e) => setNoteText(e.target.value)}
                 />
                 <button type="submit" className="btn-primary text-sm inline-flex items-center gap-1" disabled={addNote.isPending || !noteText.trim()}>
-                  <Send size={13} /> Додади
+                  <Send size={13} /> {t('detail.addNote')}
                 </button>
               </form>
               {a.activityLog?.length ? (
                 <ul className="space-y-3">
                   {[...a.activityLog].reverse().map((entry) => {
-                    const meta = ACTION_META[entry.action] || { label: entry.action, color: 'bg-slate-100 text-slate-600' };
+                    const color = ACTION_COLOR[entry.action] || 'bg-slate-100 text-slate-600';
                     return (
                       <li key={entry._id} className="flex gap-3">
                         <div className="flex-shrink-0 w-1.5 mt-2 self-stretch bg-slate-100 rounded-full" />
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${meta.color}`}>
-                              {meta.label}
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${color}`}>
+                              {t(`action.${entry.action}`, entry.action)}
                             </span>
                             <span className="text-xs text-slate-500">
-                              {entry.user?.name || 'Систем'} · {fmtDate(entry.at)}
+                              {entry.user?.name || t('detail.system')} · {fmtDate(entry.at)}
                             </span>
                           </div>
                           {entry.text && (
@@ -365,7 +366,7 @@ const AgreementDetail = () => {
                           )}
                           {entry.meta?.fields?.length > 0 && (
                             <p className="text-xs text-slate-500 mt-0.5">
-                              Изменети полиња: {entry.meta.fields.join(', ')}
+                              {t('detail.changedFields')} {entry.meta.fields.join(', ')}
                             </p>
                           )}
                         </div>
@@ -374,7 +375,7 @@ const AgreementDetail = () => {
                   })}
                 </ul>
               ) : (
-                <div className="text-sm text-slate-500">Нема активност.</div>
+                <div className="text-sm text-slate-500">{t('detail.noActivity')}</div>
               )}
             </Section>
           </div>

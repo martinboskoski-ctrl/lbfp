@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft, User as UserIcon, Briefcase, DollarSign, Calendar, GraduationCap,
   ShieldAlert, Heart, Package, FileText, Lock, CheckCircle2, AlertTriangle,
@@ -47,22 +48,24 @@ const Section = ({ title, icon: Icon, children, action }) => (
   </div>
 );
 
+// Tab descriptors — labels are resolved via i18n (`detail.tab.<key>`) at render time.
 const TABS = [
-  { key: 'overview',     label: 'Преглед',           icon: UserIcon },
-  { key: 'tasks',        label: 'Задачи',            icon: ListChecks,    needs: 'tasks' },
-  { key: 'employment',   label: 'Вработување',       icon: Briefcase },
-  { key: 'compensation', label: 'Плата',             icon: DollarSign,    needs: 'salary' },
-  { key: 'leave',        label: 'Одмор',             icon: Calendar },
-  { key: 'training',     label: 'Обуки и сертификати', icon: GraduationCap },
-  { key: 'discipline',   label: 'Дисциплина',        icon: ShieldAlert },
-  { key: 'health',       label: 'Здравје и БЗР',     icon: Heart },
-  { key: 'assets',       label: 'Опрема',            icon: Package },
-  { key: 'documents',    label: 'Документи',         icon: FileText },
-  { key: 'notes',        label: 'HR белешки',        icon: Lock,          needs: 'confidential' },
+  { key: 'overview',     icon: UserIcon },
+  { key: 'tasks',        icon: ListChecks,    needs: 'tasks' },
+  { key: 'employment',   icon: Briefcase },
+  { key: 'compensation', icon: DollarSign,    needs: 'salary' },
+  { key: 'leave',        icon: Calendar },
+  { key: 'training',     icon: GraduationCap },
+  { key: 'discipline',   icon: ShieldAlert },
+  { key: 'health',       icon: Heart },
+  { key: 'assets',       icon: Package },
+  { key: 'documents',    icon: FileText },
+  { key: 'notes',        icon: Lock,          needs: 'confidential' },
 ];
 
 const EmployeeDetail = () => {
   const { id } = useParams();
+  const { t } = useTranslation('employees');
   const { user: viewer } = useAuth();
   const { data, isLoading, error } = useEmployeeFile(id);
   const [tab, setTab] = useState('overview');
@@ -83,12 +86,12 @@ const EmployeeDetail = () => {
       <div className="flex min-h-screen">
         <Sidebar />
         <div className="flex-1 flex flex-col">
-          <Topbar title="Грешка" />
+          <Topbar title={t('detail.errorTitle')} />
           <main className="flex-1 p-6">
             <div className="card p-6 max-w-xl mx-auto text-center">
-              <p className="text-red-600 mb-3">Немате пристап до ова досие или досието не постои.</p>
+              <p className="text-red-600 mb-3">{t('detail.noAccess')}</p>
               <Link to="/employees" className="btn-secondary inline-flex items-center gap-1">
-                <ArrowLeft size={14} /> Назад до сите вработени
+                <ArrowLeft size={14} /> {t('detail.backToAll')}
               </Link>
             </div>
           </main>
@@ -108,10 +111,10 @@ const EmployeeDetail = () => {
   const canViewTasks = isTopMgmt || isSameDeptManager || perms.isSelf;
   const canAddTasks  = isTopMgmt || isSameDeptManager;
 
-  const visibleTabs = TABS.filter((t) => {
-    if (t.needs === 'salary' && !perms.canViewSalary) return false;
-    if (t.needs === 'confidential' && !perms.canViewConfidential) return false;
-    if (t.needs === 'tasks' && !canViewTasks) return false;
+  const visibleTabs = TABS.filter((tb) => {
+    if (tb.needs === 'salary' && !perms.canViewSalary) return false;
+    if (tb.needs === 'confidential' && !perms.canViewConfidential) return false;
+    if (tb.needs === 'tasks' && !canViewTasks) return false;
     return true;
   });
 
@@ -119,11 +122,11 @@ const EmployeeDetail = () => {
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <Topbar title="HR — Досие на вработен" />
+        <Topbar title={t('detail.topbarTitle')} />
         <main className="flex-1 p-4 sm:p-6">
           <div className="max-w-5xl mx-auto">
             <Link to="/employees" className="text-sm text-slate-500 hover:text-slate-800 inline-flex items-center gap-1 mb-3">
-              <ArrowLeft size={14} /> Сите вработени
+              <ArrowLeft size={14} /> {t('detail.allEmployees')}
             </Link>
 
             {/* Header card */}
@@ -136,28 +139,28 @@ const EmployeeDetail = () => {
                   <div className="min-w-0">
                     <h1 className="text-lg sm:text-xl font-semibold text-slate-900 truncate">{u.name}</h1>
                     <div className="text-sm text-slate-600 mt-0.5 truncate">
-                      {p.position || <span className="italic text-slate-400">без позиција</span>} · {u.email}
+                      {p.position || <span className="italic text-slate-400">{t('detail.noPosition')}</span>} · {u.email}
                     </div>
                     <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                       <Pill tone="gray">{u.department}</Pill>
-                      {u.isManager && <Pill tone="purple">Менаџер</Pill>}
-                      {p.contractStatus === 'expiring_soon' && <Pill tone="amber">Договор истекува</Pill>}
-                      {p.contractStatus === 'expired' && <Pill tone="red">Договор истечен</Pill>}
-                      {p.sanitaryCheckStatus === 'overdue' && <Pill tone="red">Сан. истечен</Pill>}
-                      {p.sanitaryCheckStatus === 'due_soon' && <Pill tone="amber">Сан. наскоро</Pill>}
-                      {perms.isSelf && <Pill tone="gray">Ова сте Вие</Pill>}
+                      {u.isManager && <Pill tone="purple">{t('detail.pillManager')}</Pill>}
+                      {p.contractStatus === 'expiring_soon' && <Pill tone="amber">{t('detail.pillContractExpiring')}</Pill>}
+                      {p.contractStatus === 'expired' && <Pill tone="red">{t('detail.pillContractExpired')}</Pill>}
+                      {p.sanitaryCheckStatus === 'overdue' && <Pill tone="red">{t('detail.pillSanitaryOverdue')}</Pill>}
+                      {p.sanitaryCheckStatus === 'due_soon' && <Pill tone="amber">{t('detail.pillSanitaryDueSoon')}</Pill>}
+                      {perms.isSelf && <Pill tone="gray">{t('detail.pillThisIsYou')}</Pill>}
                     </div>
                   </div>
                 </div>
                 <div className="text-sm sm:text-right w-full sm:w-auto">
                   {f.manager && (
                     <div className="text-slate-500">
-                      Менаџер: <span className="text-slate-800 font-medium">{f.manager.name}</span>
+                      {t('detail.managerLabel')} <span className="text-slate-800 font-medium">{f.manager.name}</span>
                     </div>
                   )}
                   {p.seniorityYears != null && (
                     <div className="text-slate-500">
-                      Стаж: <span className="text-slate-800 font-medium">{p.seniorityYears} год.</span>
+                      {t('detail.seniorityLabel')} <span className="text-slate-800 font-medium">{p.seniorityYears} {t('detail.yearsShort')}</span>
                     </div>
                   )}
                 </div>
@@ -166,13 +169,13 @@ const EmployeeDetail = () => {
 
             {/* Tabs */}
             <div className="border-b border-slate-200 mb-4 flex gap-1 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-              {visibleTabs.map((t) => {
-                const I = t.icon;
-                const active = tab === t.key;
+              {visibleTabs.map((tb) => {
+                const I = tb.icon;
+                const active = tab === tb.key;
                 return (
                   <button
-                    key={t.key}
-                    onClick={() => setTab(t.key)}
+                    key={tb.key}
+                    onClick={() => setTab(tb.key)}
                     className={`px-3 py-2 text-sm flex items-center gap-1.5 border-b-2 transition-colors whitespace-nowrap ${
                       active
                         ? 'border-slate-800 text-slate-900 font-medium'
@@ -180,7 +183,7 @@ const EmployeeDetail = () => {
                     }`}
                   >
                     <I size={14} />
-                    {t.label}
+                    {t(`detail.tab.${tb.key}`)}
                   </button>
                 );
               })}
@@ -189,37 +192,37 @@ const EmployeeDetail = () => {
             {/* Tab content */}
             {tab === 'overview' && (
               <>
-                <Section title="Идентитет" icon={UserIcon}>
+                <Section title={t('detail.identity')} icon={UserIcon}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6">
-                    <Field label="Име">{p.legalName || u.name}</Field>
-                    <Field label="ЕМБГ">{p.embg}</Field>
-                    <Field label="ID број">{p.idNumber}</Field>
-                    <Field label="Дата на раѓање">{fmtDate(p.birthDate)}</Field>
-                    <Field label="Пол">{p.gender}</Field>
-                    <Field label="Брачен статус">{p.maritalStatus}</Field>
-                    <Field label="Деца / зависни">{p.dependents}</Field>
-                    <Field label="Националност">{p.nationality}</Field>
-                    <Field label="Крвна група">{p.bloodType}</Field>
+                    <Field label={t('detail.fName')}>{p.legalName || u.name}</Field>
+                    <Field label={t('detail.fEmbg')}>{p.embg}</Field>
+                    <Field label={t('detail.fIdNumber')}>{p.idNumber}</Field>
+                    <Field label={t('detail.fBirthDate')}>{fmtDate(p.birthDate)}</Field>
+                    <Field label={t('detail.fGender')}>{p.gender}</Field>
+                    <Field label={t('detail.fMaritalStatus')}>{p.maritalStatus}</Field>
+                    <Field label={t('detail.fDependents')}>{p.dependents}</Field>
+                    <Field label={t('detail.fNationality')}>{p.nationality}</Field>
+                    <Field label={t('detail.fBloodType')}>{p.bloodType}</Field>
                   </div>
                 </Section>
-                <Section title="Контакт и адреса">
+                <Section title={t('detail.contactSection')}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6">
-                    <Field label="Личен телефон">{p.personalPhone}</Field>
-                    <Field label="Личен мејл">{p.personalEmail}</Field>
-                    <Field label="Град">{p.address?.city}</Field>
-                    <Field label="Адреса">{p.address?.street}</Field>
-                    <Field label="Поштенски">{p.address?.postal}</Field>
-                    <Field label="Држава">{p.address?.country}</Field>
+                    <Field label={t('detail.fPersonalPhone')}>{p.personalPhone}</Field>
+                    <Field label={t('detail.fPersonalEmail')}>{p.personalEmail}</Field>
+                    <Field label={t('detail.fCity')}>{p.address?.city}</Field>
+                    <Field label={t('detail.fAddress')}>{p.address?.street}</Field>
+                    <Field label={t('detail.fPostal')}>{p.address?.postal}</Field>
+                    <Field label={t('detail.fCountry')}>{p.address?.country}</Field>
                   </div>
                   <div className="mt-3 pt-3 border-t border-slate-100">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Контакт во итен случај</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('detail.emergencyContact')}</div>
                     <div className="text-sm">
                       {p.emergencyContact?.name || '—'}{p.emergencyContact?.relation ? ` (${p.emergencyContact.relation})` : ''} · {p.emergencyContact?.phone || ''}
                     </div>
                   </div>
                 </Section>
                 {f.directReports?.length > 0 && (
-                  <Section title="Директни подредени" icon={UsersIcon}>
+                  <Section title={t('detail.directReports')} icon={UsersIcon}>
                     <ul className="space-y-1">
                       {f.directReports.map((r) => (
                         <li key={r._id} className="text-sm">
@@ -238,24 +241,24 @@ const EmployeeDetail = () => {
             )}
 
             {tab === 'employment' && (
-              <Section title="Вработување и договор" icon={Briefcase}>
+              <Section title={t('detail.employmentSection')} icon={Briefcase}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6">
-                  <Field label="Позиција">{p.position}</Field>
-                  <Field label="Под-тим">{p.subTeam}</Field>
-                  <Field label="Тип на вработување">{p.employmentType}</Field>
-                  <Field label="Тип на договор">{p.contractType}</Field>
-                  <Field label="Почеток на договор">{fmtDate(p.contractStart)}</Field>
-                  <Field label="Крај на договор">{fmtDate(p.contractEnd)}</Field>
-                  <Field label="Крај на пробен период">{fmtDate(p.probationEnd)}</Field>
-                  <Field label="Отказен рок (денови)">{p.noticePeriodDays}</Field>
-                  <Field label="Локација">{p.workLocation}</Field>
-                  <Field label="FTE %">{p.ftePercent}</Field>
-                  <Field label="Дата на вработување">{fmtDate(p.hireDate)}</Field>
-                  <Field label="Стаж (години)">{p.seniorityYears}</Field>
+                  <Field label={t('detail.fPosition')}>{p.position}</Field>
+                  <Field label={t('detail.fSubTeam')}>{p.subTeam}</Field>
+                  <Field label={t('detail.fEmploymentType')}>{p.employmentType}</Field>
+                  <Field label={t('detail.fContractType')}>{p.contractType}</Field>
+                  <Field label={t('detail.fContractStart')}>{fmtDate(p.contractStart)}</Field>
+                  <Field label={t('detail.fContractEnd')}>{fmtDate(p.contractEnd)}</Field>
+                  <Field label={t('detail.fProbationEnd')}>{fmtDate(p.probationEnd)}</Field>
+                  <Field label={t('detail.fNoticePeriod')}>{p.noticePeriodDays}</Field>
+                  <Field label={t('detail.fWorkLocation')}>{p.workLocation}</Field>
+                  <Field label={t('detail.fFte')}>{p.ftePercent}</Field>
+                  <Field label={t('detail.fHireDate')}>{fmtDate(p.hireDate)}</Field>
+                  <Field label={t('detail.fSeniorityYears')}>{p.seniorityYears}</Field>
                 </div>
                 {p.jobDescription && (
                   <div className="mt-4 pt-3 border-t border-slate-100">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Опис на работно место</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('detail.jobDescription')}</div>
                     <p className="text-sm text-slate-800 whitespace-pre-wrap">{p.jobDescription}</p>
                   </div>
                 )}
@@ -264,18 +267,18 @@ const EmployeeDetail = () => {
 
             {tab === 'compensation' && perms.canViewSalary && (
               <>
-                <Section title="Тековна плата" icon={DollarSign}>
+                <Section title={t('detail.currentSalary')} icon={DollarSign}>
                   {f.compensation ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6">
-                      <Field label="Бруто">{fmtMoney(f.compensation.grossAmount, f.compensation.currency)}</Field>
-                      <Field label="Нето">{fmtMoney(f.compensation.netAmount, f.compensation.currency)}</Field>
-                      <Field label="Фреквенција">{f.compensation.payFrequency}</Field>
-                      <Field label="Од">{fmtDate(f.compensation.effectiveDate)}</Field>
+                      <Field label={t('detail.fGross')}>{fmtMoney(f.compensation.grossAmount, f.compensation.currency)}</Field>
+                      <Field label={t('detail.fNet')}>{fmtMoney(f.compensation.netAmount, f.compensation.currency)}</Field>
+                      <Field label={t('detail.fPayFrequency')}>{f.compensation.payFrequency}</Field>
+                      <Field label={t('detail.fEffectiveFrom')}>{fmtDate(f.compensation.effectiveDate)}</Field>
                     </div>
-                  ) : <div className="text-sm text-slate-500">Нема податоци.</div>}
+                  ) : <div className="text-sm text-slate-500">{t('detail.noData')}</div>}
                   {f.compensation?.allowances?.length > 0 && (
                     <div className="mt-4 pt-3 border-t border-slate-100">
-                      <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">Додатоци</div>
+                      <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">{t('detail.allowances')}</div>
                       <ul className="text-sm space-y-1">
                         {f.compensation.allowances.map((a, i) => (
                           <li key={i} className="flex justify-between max-w-xs">
@@ -287,17 +290,17 @@ const EmployeeDetail = () => {
                     </div>
                   )}
                 </Section>
-                <Section title="Историја на плата">
+                <Section title={t('detail.salaryHistory')}>
                   {f.salaryHistory?.length > 0 ? (
                     <div className="overflow-x-auto -mx-2">
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="text-xs text-slate-500 uppercase tracking-wide">
-                            <th className="text-left px-2 py-2">Дата</th>
-                            <th className="text-left px-2 py-2">Бруто</th>
-                            <th className="text-left px-2 py-2">Нето</th>
-                            <th className="text-left px-2 py-2">Причина</th>
-                            <th className="text-left px-2 py-2">Забелешка</th>
+                            <th className="text-left px-2 py-2">{t('detail.colDate')}</th>
+                            <th className="text-left px-2 py-2">{t('detail.fGross')}</th>
+                            <th className="text-left px-2 py-2">{t('detail.fNet')}</th>
+                            <th className="text-left px-2 py-2">{t('detail.colReason')}</th>
+                            <th className="text-left px-2 py-2">{t('detail.colNote')}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -313,28 +316,28 @@ const EmployeeDetail = () => {
                         </tbody>
                       </table>
                     </div>
-                  ) : <div className="text-sm text-slate-500">Нема историја.</div>}
+                  ) : <div className="text-sm text-slate-500">{t('detail.noHistory')}</div>}
                 </Section>
               </>
             )}
 
             {tab === 'compensation' && !perms.canViewSalary && (
-              <Section title="Плата" icon={Lock}>
-                <p className="text-sm text-slate-500">Платата е скриена. Само HR и Топ менаџмент имаат пристап.</p>
+              <Section title={t('detail.salaryLockedTitle')} icon={Lock}>
+                <p className="text-sm text-slate-500">{t('detail.salaryLocked')}</p>
               </Section>
             )}
 
             {tab === 'leave' && (
               <>
-                <Section title="Биланс на одмор" icon={Calendar}>
+                <Section title={t('detail.leaveBalance')} icon={Calendar}>
                   {f.leaveBalances?.length > 0 ? (
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="text-xs text-slate-500 uppercase tracking-wide">
-                          <th className="text-left px-2 py-2">Година</th>
-                          <th className="text-left px-2 py-2">Вкупно</th>
-                          <th className="text-left px-2 py-2">Искористени</th>
-                          <th className="text-left px-2 py-2">Преостанато</th>
+                          <th className="text-left px-2 py-2">{t('detail.colYear')}</th>
+                          <th className="text-left px-2 py-2">{t('detail.colTotal')}</th>
+                          <th className="text-left px-2 py-2">{t('detail.colUsed')}</th>
+                          <th className="text-left px-2 py-2">{t('detail.colRemaining')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -348,16 +351,16 @@ const EmployeeDetail = () => {
                         ))}
                       </tbody>
                     </table>
-                  ) : <div className="text-sm text-slate-500">Нема податоци.</div>}
+                  ) : <div className="text-sm text-slate-500">{t('detail.noData')}</div>}
                 </Section>
-                <Section title="Барања за одмор и слично">
+                <Section title={t('detail.leaveRequests')}>
                   {f.leaveRequests?.length > 0 ? (
                     <ul className="divide-y divide-slate-100 -my-2">
                       {f.leaveRequests.slice(0, 20).map((r) => (
                         <li key={r._id} className="py-2 flex justify-between items-center">
                           <div>
                             <div className="text-sm font-medium text-slate-900">{r.type}</div>
-                            <div className="text-xs text-slate-500">{fmtDate(r.createdAt)} · {r.leaveDays || 0} денови</div>
+                            <div className="text-xs text-slate-500">{fmtDate(r.createdAt)} · {r.leaveDays || 0} {t('detail.daysSuffix')}</div>
                           </div>
                           <Pill
                             tone={
@@ -371,17 +374,17 @@ const EmployeeDetail = () => {
                         </li>
                       ))}
                     </ul>
-                  ) : <div className="text-sm text-slate-500">Нема барања.</div>}
+                  ) : <div className="text-sm text-slate-500">{t('detail.noRequests')}</div>}
                 </Section>
               </>
             )}
 
             {tab === 'training' && (
-              <Section title="Образование, јазици и вештини" icon={GraduationCap}>
-                <Field label="Највисоко образование">{p.highestEducation}</Field>
+              <Section title={t('detail.trainingSection')} icon={GraduationCap}>
+                <Field label={t('detail.fHighestEducation')}>{p.highestEducation}</Field>
                 {p.schools?.length > 0 && (
                   <div className="mt-3">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Школи</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('detail.schools')}</div>
                     <ul className="text-sm space-y-1">
                       {p.schools.map((s, i) => (
                         <li key={i}>{s.degree} · {s.field} — <span className="text-slate-500">{s.institution} ({fmtDate(s.from)} — {fmtDate(s.to)})</span></li>
@@ -391,7 +394,7 @@ const EmployeeDetail = () => {
                 )}
                 {p.languages?.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-slate-100">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Јазици</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('detail.languages')}</div>
                     <div className="flex flex-wrap gap-2">
                       {p.languages.map((l, i) => (
                         <Pill key={i} tone="gray">{l.language} · {l.proficiency}</Pill>
@@ -401,20 +404,20 @@ const EmployeeDetail = () => {
                 )}
                 {p.skills?.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-slate-100">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Вештини</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('detail.skills')}</div>
                     <div className="flex flex-wrap gap-2">
                       {p.skills.map((s, i) => <Pill key={i} tone="blue">{s}</Pill>)}
                     </div>
                   </div>
                 )}
                 <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500">
-                  Сертификатите со рок ќе се прикажат тука кога ќе се поврзат со модулот за обуки.
+                  {t('detail.certHint')}
                 </div>
               </Section>
             )}
 
             {tab === 'discipline' && (
-              <Section title="Дисциплински мерки" icon={ShieldAlert}>
+              <Section title={t('detail.disciplineSection')} icon={ShieldAlert}>
                 {f.discipline?.length > 0 ? (
                   <ul className="divide-y divide-slate-100 -my-2">
                     {f.discipline.map((d) => (
@@ -425,7 +428,7 @@ const EmployeeDetail = () => {
                               {d.type.replace('_', ' ')} — {d.category}
                             </div>
                             <div className="text-xs text-slate-500">
-                              Издадено: {fmtDate(d.issuedDate)} · Сериозност: {d.severity}/5
+                              {t('detail.issued')} {fmtDate(d.issuedDate)} · {t('detail.severity')} {d.severity}/5
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -438,29 +441,29 @@ const EmployeeDetail = () => {
                             }>
                               {d.status}
                             </Pill>
-                            {d.isActive && <Pill tone="red">Активна</Pill>}
+                            {d.isActive && <Pill tone="red">{t('detail.active')}</Pill>}
                           </div>
                         </div>
                         <p className="text-sm text-slate-800 mt-1">{d.reason}</p>
                         {d.description && <p className="text-xs text-slate-500 mt-1">{d.description}</p>}
                         {d.expiryDate && (
                           <div className="text-xs text-slate-500 mt-1">
-                            Важи до: {fmtDate(d.expiryDate)}
+                            {t('detail.validUntil')} {fmtDate(d.expiryDate)}
                           </div>
                         )}
                       </li>
                     ))}
                   </ul>
-                ) : <div className="text-sm text-slate-500">Нема дисциплински мерки.</div>}
+                ) : <div className="text-sm text-slate-500">{t('detail.noDiscipline')}</div>}
               </Section>
             )}
 
             {tab === 'health' && (
               <>
-                <Section title="Здравје и БЗР" icon={Heart}>
+                <Section title={t('detail.healthSection')} icon={Heart}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6">
-                    <Field label="Последен сан. преглед">{fmtDate(p.sanitaryCheckLast)}</Field>
-                    <Field label="Следен сан. преглед">
+                    <Field label={t('detail.fSanitaryLast')}>{fmtDate(p.sanitaryCheckLast)}</Field>
+                    <Field label={t('detail.fSanitaryNext')}>
                       <span className="inline-flex items-center gap-1">
                         {fmtDate(p.sanitaryCheckNext)}
                         {p.sanitaryCheckStatus === 'overdue' && <AlertTriangle size={12} className="text-red-600" />}
@@ -468,20 +471,20 @@ const EmployeeDetail = () => {
                         {p.sanitaryCheckStatus === 'ok' && <CheckCircle2 size={12} className="text-green-600" />}
                       </span>
                     </Field>
-                    <Field label="Последен фитнес">{fmtDate(p.fitnessExamLast)}</Field>
-                    <Field label="Следен фитнес">{fmtDate(p.fitnessExamNext)}</Field>
-                    <Field label="Алергии">{p.allergies}</Field>
-                    <Field label="Крвна група">{p.bloodType}</Field>
+                    <Field label={t('detail.fFitnessLast')}>{fmtDate(p.fitnessExamLast)}</Field>
+                    <Field label={t('detail.fFitnessNext')}>{fmtDate(p.fitnessExamNext)}</Field>
+                    <Field label={t('detail.fAllergies')}>{p.allergies}</Field>
+                    <Field label={t('detail.fBloodType')}>{p.bloodType}</Field>
                   </div>
                 </Section>
-                <Section title="Инциденти" icon={Activity}>
+                <Section title={t('detail.incidents')} icon={Activity}>
                   {f.incidents?.length > 0 ? (
                     <ul className="divide-y divide-slate-100 -my-2">
                       {f.incidents.map((i) => (
                         <li key={i._id} className="py-3">
                           <div className="flex items-start justify-between gap-2 flex-wrap">
                             <div>
-                              <div className="text-sm font-medium text-slate-900">{i.injuryType || 'Инцидент'}</div>
+                              <div className="text-sm font-medium text-slate-900">{i.injuryType || t('detail.incident')}</div>
                               <div className="text-xs text-slate-500">{fmtDate(i.occurredAt)} · {i.location}</div>
                             </div>
                             <Pill tone={
@@ -491,18 +494,18 @@ const EmployeeDetail = () => {
                           </div>
                           <p className="text-sm text-slate-800 mt-1">{i.description}</p>
                           {i.correctiveAction && (
-                            <p className="text-xs text-slate-600 mt-1"><strong>Мерка:</strong> {i.correctiveAction}</p>
+                            <p className="text-xs text-slate-600 mt-1"><strong>{t('detail.correctiveAction')}</strong> {i.correctiveAction}</p>
                           )}
                         </li>
                       ))}
                     </ul>
-                  ) : <div className="text-sm text-slate-500">Нема пријавени инциденти.</div>}
+                  ) : <div className="text-sm text-slate-500">{t('detail.noIncidents')}</div>}
                 </Section>
               </>
             )}
 
             {tab === 'assets' && (
-              <Section title="Доделена опрема" icon={Package}>
+              <Section title={t('detail.assetsSection')} icon={Package}>
                 {f.assets?.length > 0 ? (
                   <ul className="divide-y divide-slate-100 -my-2">
                     {f.assets.map((a) => (
@@ -510,22 +513,22 @@ const EmployeeDetail = () => {
                         <div>
                           <div className="text-sm font-medium text-slate-900">{a.label}</div>
                           <div className="text-xs text-slate-500">
-                            {a.assetType}{a.serialNumber ? ` · ${a.serialNumber}` : ''}{a.size ? ` · големина ${a.size}` : ''}
+                            {a.assetType}{a.serialNumber ? ` · ${a.serialNumber}` : ''}{a.size ? ` · ${t('detail.size')} ${a.size}` : ''}
                           </div>
-                          <div className="text-xs text-slate-500 mt-0.5">Издадено: {fmtDate(a.issuedDate)}</div>
+                          <div className="text-xs text-slate-500 mt-0.5">{t('detail.issued')} {fmtDate(a.issuedDate)}</div>
                         </div>
                         <Pill tone={a.isReturned ? 'gray' : 'green'}>
-                          {a.isReturned ? `Вратено ${fmtDate(a.returnedDate)}` : 'Активно'}
+                          {a.isReturned ? t('detail.returned', { date: fmtDate(a.returnedDate) }) : t('detail.assetActive')}
                         </Pill>
                       </li>
                     ))}
                   </ul>
-                ) : <div className="text-sm text-slate-500">Нема доделена опрема.</div>}
+                ) : <div className="text-sm text-slate-500">{t('detail.noAssets')}</div>}
               </Section>
             )}
 
             {tab === 'documents' && (
-              <Section title="Документи" icon={FileText}>
+              <Section title={t('detail.documentsSection')} icon={FileText}>
                 {f.documents?.length > 0 ? (
                   <ul className="divide-y divide-slate-100 -my-2">
                     {f.documents.map((d) => (
@@ -534,28 +537,28 @@ const EmployeeDetail = () => {
                           <div className="text-sm font-medium text-slate-900">{d.title}</div>
                           <div className="text-xs text-slate-500">{d.docType} · {fmtDate(d.issueDate)}</div>
                           {d.expiryDate && (
-                            <div className="text-xs text-slate-500 mt-0.5">Важи до: {fmtDate(d.expiryDate)}</div>
+                            <div className="text-xs text-slate-500 mt-0.5">{t('detail.validUntil')} {fmtDate(d.expiryDate)}</div>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          {d.confidential && <Pill tone="red">Доверливо</Pill>}
-                          {d.expiryStatus === 'expired' && <Pill tone="red">Истечено</Pill>}
-                          {d.expiryStatus === 'expiring_soon' && <Pill tone="amber">Истекува</Pill>}
-                          {d.expiryStatus === 'valid' && <Pill tone="green">Важечко</Pill>}
+                          {d.confidential && <Pill tone="red">{t('detail.docConfidential')}</Pill>}
+                          {d.expiryStatus === 'expired' && <Pill tone="red">{t('detail.docExpired')}</Pill>}
+                          {d.expiryStatus === 'expiring_soon' && <Pill tone="amber">{t('detail.docExpiring')}</Pill>}
+                          {d.expiryStatus === 'valid' && <Pill tone="green">{t('detail.docValid')}</Pill>}
                         </div>
                       </li>
                     ))}
                   </ul>
-                ) : <div className="text-sm text-slate-500">Нема прикачени документи.</div>}
+                ) : <div className="text-sm text-slate-500">{t('detail.noDocuments')}</div>}
               </Section>
             )}
 
             {tab === 'notes' && perms.canViewConfidential && (
-              <Section title="HR белешки (само за HR и Топ менаџмент)" icon={Lock}>
+              <Section title={t('detail.notesSection')} icon={Lock}>
                 {f.hrNotes ? (
                   <p className="text-sm text-slate-800 whitespace-pre-wrap">{f.hrNotes}</p>
                 ) : (
-                  <div className="text-sm text-slate-500">Нема белешки.</div>
+                  <div className="text-sm text-slate-500">{t('detail.noNotes')}</div>
                 )}
               </Section>
             )}
