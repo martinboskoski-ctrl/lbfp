@@ -10,7 +10,7 @@ const activitySchema = new mongoose.Schema(
     user:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     action:  {
       type: String,
-      enum: ['created', 'updated', 'note', 'renewed', 'terminated', 'reminder_sent', 'file_added', 'file_removed', 'status_changed'],
+      enum: ['created', 'updated', 'note', 'renewed', 'terminated', 'reminder_sent', 'file_added', 'file_removed', 'status_changed', 'moved'],
       required: true,
     },
     text:    { type: String, default: '' },

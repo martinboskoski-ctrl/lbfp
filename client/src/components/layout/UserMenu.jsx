@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, KeyRound, Users, LogOut } from 'lucide-react';
+import { ChevronDown, KeyRound, Users, LogOut, Database, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { isTopManagement } from '../../utils/userTier.js';
+import { downloadBackupApi } from '../../api/backup.api.js';
 import ChangePasswordModal from './ChangePasswordModal.jsx';
 
 const initials = (name) =>
@@ -14,7 +16,34 @@ const UserMenu = () => {
   const { t } = useTranslation('common');
   const [open, setOpen] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [backingUp, setBackingUp] = useState(false);
   const ref = useRef(null);
+
+  const handleBackup = async () => {
+    if (backingUp) return;
+    setBackingUp(true);
+    const toastId = toast.loading(t('backup.inProgress'));
+    try {
+      const res = await downloadBackupApi();
+      const cd = res.headers['content-disposition'] || '';
+      const match = cd.match(/filename="?([^"]+)"?/);
+      const filename = match ? match[1] : `backup-${new Date().toISOString().slice(0, 10)}.zip`;
+
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/zip' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success(t('backup.done'), { id: toastId });
+    } catch {
+      toast.error(t('backup.error'), { id: toastId });
+    } finally {
+      setBackingUp(false);
+    }
+  };
 
   useEffect(() => {
     const onClick = (e) => {
@@ -72,6 +101,20 @@ const UserMenu = () => {
                   <Users size={14} className="text-slate-400" />
                   {t('userManagement')}
                 </Link>
+              )}
+
+              {isTopManagement(user) && (
+                <button
+                  onClick={handleBackup}
+                  disabled={backingUp}
+                  title={t('backup.tooltip')}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-60 disabled:cursor-wait"
+                >
+                  {backingUp
+                    ? <Loader2 size={14} className="text-slate-400 animate-spin" />
+                    : <Database size={14} className="text-slate-400" />}
+                  {t('backup.label')}
+                </button>
               )}
             </div>
 

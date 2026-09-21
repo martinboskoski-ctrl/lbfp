@@ -4,6 +4,7 @@ import {
   getAgreementApi,
   createAgreementApi,
   updateAgreementApi,
+  moveAgreementApi,
   renewAgreementApi,
   terminateAgreementApi,
   deleteAgreementApi,
@@ -49,6 +50,15 @@ export const useUpdateAgreement = () => {
   return useMutation({
     mutationFn: ({ id, data }) => updateAgreementApi(id, data),
     onSuccess: () => { invalidateAll(qc); toast.success(t('toast.saved')); },
+    onError: onErr,
+  });
+};
+
+export const useMoveAgreement = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, department }) => moveAgreementApi(id, department),
+    onSuccess: () => { invalidateAll(qc); toast.success(t('toast.moved')); },
     onError: onErr,
   });
 };

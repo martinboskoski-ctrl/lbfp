@@ -4,15 +4,16 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, FileText, Edit2, RefreshCw, Ban, Trash2, Bell,
   CheckCircle, AlertTriangle, XCircle, Clock, ShieldAlert,
-  Send, Mail, Phone, MapPin, User as UserIcon, Tag,
+  Send, Mail, Phone, MapPin, User as UserIcon, Tag, ArrowLeftRight,
 } from 'lucide-react';
-import Sidebar from '../components/layout/Sidebar.jsx';
+import Sidebar, { DEPARTMENTS } from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
 import {
   useAgreement,
   useAddAgreementNote,
   useTerminateAgreement,
   useDeleteAgreement,
+  useMoveAgreement,
 } from '../hooks/useAgreements.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { canManage, isTopManagement } from '../utils/userTier.js';
@@ -76,6 +77,7 @@ const AgreementDetail = () => {
   const addNote = useAddAgreementNote();
   const terminate = useTerminateAgreement();
   const remove = useDeleteAgreement();
+  const move = useMoveAgreement();
 
   const [modal, setModal] = useState(null);
   const [noteText, setNoteText] = useState('');
@@ -178,9 +180,11 @@ const AgreementDetail = () => {
               </div>
               {userCanManage && (
                 <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
-                  <button onClick={() => setModal({ mode: 'edit', initial: a })} className="btn-secondary inline-flex items-center gap-1 text-sm">
-                    <Edit2 size={13} /> {t('actions.edit')}
-                  </button>
+                  {isTopManagement(user) && (
+                    <button onClick={() => setModal({ mode: 'edit', initial: a })} className="btn-secondary inline-flex items-center gap-1 text-sm">
+                      <Edit2 size={13} /> {t('actions.edit')}
+                    </button>
+                  )}
                   {isTerminatable && (
                     <button onClick={() => setModal({ mode: 'renew', initial: a })} className="btn-secondary inline-flex items-center gap-1 text-sm">
                       <RefreshCw size={13} /> {t('actions.renew')}
@@ -191,7 +195,26 @@ const AgreementDetail = () => {
                       <Ban size={13} /> {t('actions.terminate')}
                     </button>
                   )}
-                  <button onClick={() => setConfirmDelete(true)} className="btn-secondary inline-flex items-center gap-1 text-sm text-red-700 sm:ml-auto">
+                  {isTopManagement(user) && (
+                    <div className="inline-flex items-center gap-1.5 sm:ml-auto">
+                      <ArrowLeftRight size={13} className="text-slate-400" />
+                      <select
+                        className="input text-sm py-1.5 w-auto"
+                        value=""
+                        disabled={move.isPending}
+                        onChange={(e) => {
+                          const dept = e.target.value;
+                          if (dept) move.mutate({ id: a._id, department: dept });
+                        }}
+                      >
+                        <option value="">{t('actions.moveToSector')}</option>
+                        {DEPARTMENTS.filter((d) => d.value !== a.department).map((d) => (
+                          <option key={d.value} value={d.value}>{tcDept(d.value)}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  <button onClick={() => setConfirmDelete(true)} className={`btn-secondary inline-flex items-center gap-1 text-sm text-red-700 ${isTopManagement(user) ? '' : 'sm:ml-auto'}`}>
                     <Trash2 size={13} /> {t('actions.delete')}
                   </button>
                 </div>

@@ -29,7 +29,12 @@ export const DEPARTMENTS = [
   { value: 'safety',            icon: ShieldAlert },
 ];
 
-const NavItem = ({ to, icon, label, end, badge }) => {
+// Small red "demo" tag used to flag features that are still in demo mode.
+const DemoTag = () => (
+  <span className="text-[9px] font-bold uppercase tracking-wide text-red-500 flex-shrink-0">demo</span>
+);
+
+const NavItem = ({ to, icon, label, end, badge, demo }) => {
   const IconCmp = icon;
   return (
     <NavLink
@@ -45,6 +50,7 @@ const NavItem = ({ to, icon, label, end, badge }) => {
     >
       <IconCmp size={15} className="flex-shrink-0" />
       <span className="truncate flex-1">{label}</span>
+      {demo && <DemoTag />}
       {badge > 0 && (
         <span className="text-[10px] font-semibold min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-slate-700 text-white">
           {badge > 99 ? '99+' : badge}
@@ -58,7 +64,7 @@ const NavItem = ({ to, icon, label, end, badge }) => {
 //   default → icon + label + chevron, indented like a NavItem.
 //   header  → uppercase tracking-wider text, top hairline border, no icon — used for
 //             the Departments rail header. Same hover-flyout behavior.
-const NavGroup = ({ icon, label, items, onItemClick, variant = 'default' }) => {
+const NavGroup = ({ icon, label, items, onItemClick, variant = 'default', demo }) => {
   const IconCmp = icon;
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
@@ -83,6 +89,7 @@ const NavGroup = ({ icon, label, items, onItemClick, variant = 'default' }) => {
       <button type="button" onClick={() => setOpen((v) => !v)} className={triggerCls}>
         {!isHeader && IconCmp && <IconCmp size={15} className="flex-shrink-0" />}
         <span className={`truncate text-left ${isHeader ? '' : 'flex-1'}`}>{label}</span>
+        {demo && <DemoTag />}
         {!isHeader && totalBadge > 0 && (
           <span className="text-[10px] font-semibold min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-slate-700 text-white">
             {totalBadge > 99 ? '99+' : totalBadge}
@@ -218,7 +225,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           {/* Static nav — new structured order */}
           <div className="pt-3 space-y-0.5">
             <div onClick={handleNavClick}>
-              <NavItem to="/requests" icon={FileText} label={t('requests')} />
+              <NavItem to="/requests" icon={FileText} label={t('requests')} demo />
             </div>
             <div onClick={handleNavClick}>
               <NavItem to="/trainings" icon={GraduationCap} label={t('trainings')} />
@@ -238,6 +245,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               label={t('navGroup.production')}
               items={productionItems}
               onItemClick={handleNavClick}
+              demo
             />
 
             <NavGroup
@@ -269,7 +277,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   className="rounded-md bg-gradient-to-br from-slate-50 to-blue-50/40 p-0.5"
                   onClick={handleNavClick}
                 >
-                  <NavItem to="/inquiries" icon={ClipboardList} label={t('inquiriesNav')} />
+                  <NavItem to="/inquiries" icon={ClipboardList} label={t('inquiriesNav')} demo />
                 </div>
               </div>
             </div>

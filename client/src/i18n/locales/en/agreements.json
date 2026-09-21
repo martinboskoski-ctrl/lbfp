@@ -231,7 +231,8 @@
     "reminder_sent": "Reminder",
     "file_added": "Document added",
     "file_removed": "Document removed",
-    "status_changed": "Status changed"
+    "status_changed": "Status changed",
+    "moved": "Moved"
   },
 
   "actions": {
@@ -240,7 +241,8 @@
     "terminate": "Terminate",
     "delete": "Delete",
     "confirmTerminate": "Confirm termination",
-    "terminateReasonPlaceholder": "Reason for termination (optional)…"
+    "terminateReasonPlaceholder": "Reason for termination (optional)…",
+    "moveToSector": "Move to sector…"
   },
 
   "modal": {
@@ -345,6 +347,7 @@
     "renewed": "Agreement renewed",
     "terminated": "Agreement terminated",
     "deleted": "Agreement deleted",
+    "moved": "Agreement moved to another sector",
     "remindersSent": "{{count}} reminders sent"
   }
 }

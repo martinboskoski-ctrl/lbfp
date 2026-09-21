@@ -144,8 +144,8 @@ export const createAgreement = async (req, res) => {
 export const updateAgreement = async (req, res) => {
   try {
     const u = req.user;
-    if (!isManager(u)) {
-      return res.status(403).json({ message: 'Само менаџери можат да уредуваат договори' });
+    if (!isTopMgmt(u)) {
+      return res.status(403).json({ message: 'Само топ менаџментот може да уредува договори' });
     }
 
     const a = await Agreement.findById(req.params.id);
@@ -272,6 +272,50 @@ export const deleteAgreement = async (req, res) => {
 
     await a.deleteOne();
     res.json({ message: 'Договорот е избришан' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const DEPARTMENTS = [
+  'sales','finance','administration','hr','quality_assurance',
+  'facility','machines','r_and_d','production','top_management','carina','nabavki','safety',
+];
+
+// PATCH /api/agreements/:id/department  { department }
+// Move an agreement from one sector to another. Top management only.
+export const moveAgreement = async (req, res) => {
+  try {
+    const u = req.user;
+    if (!isTopMgmt(u)) {
+      return res.status(403).json({ message: 'Само топ менаџментот може да префрла договори меѓу сектори' });
+    }
+
+    const target = req.body.department;
+    if (!target || !DEPARTMENTS.includes(target)) {
+      return res.status(400).json({ message: 'Невалиден сектор' });
+    }
+
+    const a = await Agreement.findById(req.params.id);
+    if (!a) return res.status(404).json({ message: 'Договорот не е пронајден' });
+    if (a.department === target) {
+      return res.status(400).json({ message: 'Договорот е веќе во тој сектор' });
+    }
+
+    const from = a.department;
+    a.department = target;
+
+    // Реден број — assign the next sequence number within the target sector.
+    const last = await Agreement.findOne({ department: target })
+      .sort({ sequenceNumber: -1 })
+      .select('sequenceNumber')
+      .lean();
+    a.sequenceNumber = (last?.sequenceNumber || 0) + 1;
+
+    a.activityLog.push({ user: u._id, action: 'moved', text: '', meta: { from, to: target } });
+    await a.save();
+    await a.populate(POPULATE);
+    res.json({ agreement: a.toJSON() });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

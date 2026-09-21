@@ -44,6 +44,13 @@
   "agreements": "Contracts",
   "compliance": "Compliance",
   "employeesNav": "Employees",
+  "backup": {
+    "label": "Backup",
+    "tooltip": "Download all collections as JSON (MongoDB-ready)",
+    "inProgress": "Preparing backup…",
+    "done": "Backup downloaded",
+    "error": "Backup failed"
+  },
   "procedures": "Procedures & regulations",
   "trainings": "Trainings",
   "requests": "Requests",

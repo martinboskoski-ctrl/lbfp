@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useAgreements, useTerminateAgreement, useDeleteAgreement } from '../../hooks/useAgreements.js';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { canManage } from '../../utils/userTier.js';
+import { canManage, isTopManagement } from '../../utils/userTier.js';
 import { fmtDate } from '../../utils/formatDate.js';
 import AddAgreementModal, { CATEGORIES } from './AddAgreementModal.jsx';
 
@@ -49,7 +49,7 @@ const StatCard = ({ label, count, color, icon: Icon, onClick, active }) => (
 
 // ─── Agreement Card ───────────────────────────────────────────────────────────
 
-const AgreementCard = ({ agreement, canAct, onEdit, onRenew, onTerminate, onDelete, t, tc }) => {
+const AgreementCard = ({ agreement, canAct, canEdit, onEdit, onRenew, onTerminate, onDelete, t, tc }) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmTerminate, setConfirmTerminate] = useState(false);
   const [termReason, setTermReason] = useState('');
@@ -138,10 +138,12 @@ const AgreementCard = ({ agreement, canAct, onEdit, onRenew, onTerminate, onDele
             </div>
           ) : (
             <div className="flex gap-1.5 flex-wrap">
-              <button onClick={() => onEdit(agreement)}
-                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                <Edit2 size={11} /> {t('actions.edit')}
-              </button>
+              {canEdit && (
+                <button onClick={() => onEdit(agreement)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                  <Edit2 size={11} /> {t('actions.edit')}
+                </button>
+              )}
               {isTerminatable && (
                 <button onClick={() => onRenew(agreement)}
                   className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
@@ -304,6 +306,7 @@ export default function AgreementsPage({ dept }) {
             key={a._id}
             agreement={a}
             canAct={userCanManage}
+            canEdit={isTopManagement(user)}
             onEdit={(ag)      => setModal({ mode: 'edit',      initial: ag })}
             onRenew={(ag)     => setModal({ mode: 'renew',     initial: ag })}
             onTerminate={(id, reason) => terminate.mutate({ id, reason })}

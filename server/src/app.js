@@ -25,6 +25,7 @@ import maintenanceRoutes from './routes/maintenance.routes.js';
 import productionReportRoutes from './routes/productionReport.routes.js';
 import employeeRoutes from './routes/employee.routes.js';
 import lhcRoutes from './routes/lhc.routes.js';
+import backupRoutes from './routes/backup.routes.js';
 import { dispatchReminders } from './controllers/agreement.controller.js';
 import { autoCloseCampaigns } from './controllers/lhc.controller.js';
 
@@ -63,6 +64,7 @@ app.use('/api/maintenance',     maintenanceRoutes);
 app.use('/api/production-reports', productionReportRoutes);
 app.use('/api/employees',       employeeRoutes);
 app.use('/api/lhc',             lhcRoutes);
+app.use('/api/backup',          backupRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 

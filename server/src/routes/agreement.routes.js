@@ -5,6 +5,7 @@ import {
   getAgreement,
   createAgreement,
   updateAgreement,
+  moveAgreement,
   renewAgreement,
   terminateAgreement,
   deleteAgreement,
@@ -25,6 +26,7 @@ router.post('/dispatch-reminders',         triggerReminders);
 
 router.get('/:id',                         getAgreement);
 router.put('/:id',                         updateAgreement);
+router.patch('/:id/department',            moveAgreement);
 router.delete('/:id',                      deleteAgreement);
 
 router.post('/:id/renew',                  renewAgreement);

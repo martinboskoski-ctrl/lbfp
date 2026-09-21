@@ -231,7 +231,8 @@
     "reminder_sent": "Известување",
     "file_added": "Прикачен документ",
     "file_removed": "Избришан документ",
-    "status_changed": "Статус"
+    "status_changed": "Статус",
+    "moved": "Преместен"
   },
 
   "actions": {
@@ -240,7 +241,8 @@
     "terminate": "Раскини",
     "delete": "Избриши",
     "confirmTerminate": "Потврди раскинување",
-    "terminateReasonPlaceholder": "Причина за раскинување (опционално)…"
+    "terminateReasonPlaceholder": "Причина за раскинување (опционално)…",
+    "moveToSector": "Премести во сектор…"
   },
 
   "modal": {
@@ -345,6 +347,7 @@
     "renewed": "Договорот е обновен",
     "terminated": "Договорот е раскинат",
     "deleted": "Договорот е избришан",
+    "moved": "Договорот е преместен во друг сектор",
     "remindersSent": "Испратени {{count}} известувања"
   }
 }

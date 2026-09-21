@@ -4,6 +4,7 @@ export const listAgreementsApi    = (params = {}) => api.get('/agreements', { pa
 export const getAgreementApi      = (id) => api.get(`/agreements/${id}`);
 export const createAgreementApi   = (data) => api.post('/agreements', data);
 export const updateAgreementApi   = (id, data) => api.put(`/agreements/${id}`, data);
+export const moveAgreementApi     = (id, department) => api.patch(`/agreements/${id}/department`, { department });
 export const renewAgreementApi    = (id, data) => api.post(`/agreements/${id}/renew`, data);
 export const terminateAgreementApi = (id, reason) => api.post(`/agreements/${id}/terminate`, { reason });
 export const deleteAgreementApi   = (id) => api.delete(`/agreements/${id}`);
