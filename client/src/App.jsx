@@ -13,6 +13,10 @@ import Projects from './pages/Projects.jsx';
 import Terkovi from './pages/Terkovi.jsx';
 import Clients from './pages/Clients.jsx';
 import Leads from './pages/Leads.jsx';
+import PackagingChecks from './pages/PackagingChecks.jsx';
+import PackagingCheckNew from './pages/PackagingCheckNew.jsx';
+import PackagingCheckDetail from './pages/PackagingCheckDetail.jsx';
+import PackagingRules from './pages/PackagingRules.jsx';
 import AdminUsers from './pages/AdminUsers.jsx';
 import UserManagement from './pages/UserManagement.jsx';
 import UserDetail from './pages/UserDetail.jsx';
@@ -56,6 +60,10 @@ const App = () => (
             <Route path="/terkovi" element={<Terkovi />} />
             <Route path="/clients" element={<Clients />} />
             <Route path="/leads" element={<Leads />} />
+            <Route path="/tools/packaging" element={<PackagingChecks />} />
+            <Route path="/tools/packaging/new" element={<PackagingCheckNew />} />
+            <Route path="/tools/packaging/rules" element={<PackagingRules />} />
+            <Route path="/tools/packaging/:id" element={<PackagingCheckDetail />} />
             <Route path="/admin/user-management"     element={<UserManagement />} />
             <Route path="/admin/user-management/:id" element={<UserDetail />} />
             <Route path="/register" element={<Register />} />

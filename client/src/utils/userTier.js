@@ -4,6 +4,12 @@ export const canManage = (user) => user?.isManager === true || isTopManagement(u
 // Clients + leads (CRM) — mirrors hasAccess in the lead/client controllers.
 export const hasSalesAccess = (user) => user?.department === 'sales' || isTopManagement(user);
 
+// Packaging artwork check — mirrors packaging.controller.js.
+export const PACKAGING_SECTORS = ['sales', 'r_and_d', 'nabavki', 'quality_assurance'];
+export const canUsePackagingTool = (user) => isTopManagement(user) || PACKAGING_SECTORS.includes(user?.department);
+export const isPackagingLead = (user) => isTopManagement(user) || user?.department === 'sales';
+export const canEditPackagingRules = (user) => isTopManagement(user) || user?.department === 'quality_assurance';
+
 export const isHR = (user) => user?.department === 'hr';
 export const isHRManager = (user) => isHR(user) && user?.isManager === true;
 

@@ -5,12 +5,12 @@ import {
   Factory, Crown, Users2,
   ChevronRight, ClipboardList, GraduationCap, FileText,
   Scale, ShieldAlert, FolderKanban, FileSignature,
-  Handshake, Target, Library,
+  Handshake, Target, Library, Wrench as ToolsIcon, ScanSearch,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { canManage, hasSalesAccess, isTopManagement } from '../../utils/userTier.js';
+import { canManage, hasSalesAccess, isTopManagement, canUsePackagingTool } from '../../utils/userTier.js';
 import { useLhcOverview } from '../../hooks/useLhc.js';
 
 export const DEPARTMENTS = [
@@ -118,6 +118,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const { t } = useTranslation('common');
   const { t: td } = useTranslation('dashboard');
+  const { t: tp } = useTranslation('packaging');
 
   const { data: lhcOverview } = useLhcOverview();
   const lhcBadge = (lhcOverview?.myAssignments || []).filter(
@@ -188,6 +189,14 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div onClick={handleNavClick}>
               <NavItem to="/procedures" icon={ClipboardList} label={t('procedures')} />
             </div>
+            {canUsePackagingTool(user) && (
+              <NavGroup
+                icon={ToolsIcon}
+                label={tp('toolsGroup')}
+                items={[{ to: '/tools/packaging', icon: ScanSearch, label: tp('title') }]}
+                onItemClick={handleNavClick}
+              />
+            )}
             <div onClick={handleNavClick}>
               <NavItem to="/trainings" icon={GraduationCap} label={t('trainings')} />
             </div>

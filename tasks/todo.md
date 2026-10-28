@@ -1,44 +1,65 @@
-# Feature: Амбалажа (Packaging compliance)
+> **Working plan:** `tasks/packaging-check-plan.md` — progress and decisions are
+> tracked there; this section is the short summary.
 
-Under "Барања од клиенти". Visible to: top_management, sales, quality_assurance,
-nabavki, r_and_d (== existing `showInquiries` set).
+# Feature: Проверка на амбалажа (Packaging artwork check)
 
-## Decisions (confirmed)
-- AI provider: **user-supplied custom endpoint** (need API details).
-- Regulation source: **full regulation texts** loaded as AI context.
-- Image storage: **do not persist** — transient to AI; store only extraction + report.
-- Timing: **synchronous** (user waits for the report).
+Sidebar: **Алатки → Проверка на амбалажа**. Supersedes the earlier solo
+"Амбалажа" plan (`tasks/packaging-feature-plan.md`), which hung off the removed
+"Барања од клиенти" feature.
+
+## Problem
+Client label/packaging artwork must be checked against the product's ingredient
+list and our labelling rules (mandatory content, language, font size, order of
+nutrition facts). Today Sales chases R&D / Набавки / Quality ad hoc — no single
+view of what was checked, by whom, what is still open.
+
+## Roles
+| Who | Can |
+|---|---|
+| Sales (lead) | create checks, upload rounds, add remarks, close a round (Одобрено / Потребни корекции) |
+| R&D, Набавки, Quality | see all checks, confirm/dispute remarks for their sector, add remarks |
+| Quality + top mgmt | maintain the checklist rules |
+| Top management | everything, incl. closing with open remarks |
+Visible only to: sales, r_and_d, nabavki, quality_assurance, top_management.
+
+## Decisions (confirmed 2026-10-28)
+- Files (artwork, ingredient-list file) stored in **MongoDB GridFS**, max 15 MB.
+- Checklist rules maintained by **Quality + top management**, each tagged with
+  the responsible sector → AI remarks route automatically.
+- **Rounds**: one check per client+product; corrected artwork = new round,
+  history kept.
+- AI provider not available yet → single adapter (`services/packagingAi.js`);
+  until configured the UI says "AI не е поврзан" and remarks are added manually.
 
 ## Flow
-Upload image (drag & drop) → backend receives in-memory → AI vision extracts
-structured content → AI compliance step checks extraction against EU regulation
-texts → structured report returned & saved (report only, no image).
+1. Sales: client, product, drag & drop artwork (+ ingredient list as text and/or file).
+2. AI (when configured) checks artwork vs ingredients vs active rules → remarks
+   {text, severity, sector, rule}.
+3. Each sector notified; per remark: Потврдено (needs correction) or
+   Не е проблем (comment required).
+4. Sales sees per-sector progress; when nothing is pending, closes the round
+   with an outcome + summary for the client.
+5. Corrected artwork → new round → re-check.
 
 ## Backend
-- [ ] `models/PackagingAssessment.js` — createdBy, department, title, status,
-      extraction{}, compliance{ overall, items[], summary }, model, tokensUsed, timestamps
-- [ ] `services/ai.js` — wrapper for the user's custom provider (endpoint, key, model, format)
-- [ ] `services/packagingCompliance.js` — vision-extract prompt + compliance prompt,
-      injects regulation text from `server/src/data/regulations/`
-- [ ] `data/regulations/` — the regulation texts the user provides
-- [ ] `controllers/packaging.controller.js` — POST / (multipart, multer memoryStorage),
-      GET /, GET /:id, POST /:id/reanalyze, DELETE /:id; dept-scoped like agreements
-- [ ] `routes/packaging.routes.js` + mount `/api/packaging` in `app.js`
+- [ ] `models/PackagingCheck.js` — code, client, product, status, rounds[{ number,
+      artwork, ingredientsText, ingredientsFile, ai{status,error,summary,model,ranAt},
+      remarks[{text, severity, sector, rule, ruleText, source, createdBy, status,
+      response{comment,by,at}}], outcome{decision,summary,by,at} }]
+- [ ] `models/PackagingRule.js` — text, sector, category, active, order
+- [ ] `services/packagingFiles.js` — GridFS put/stream/delete
+- [ ] `services/packagingAi.js` — prompt builder + response parser + provider adapter (stub)
+- [ ] `controllers/packaging.controller.js` + `routes/packaging.routes.js`, mount `/api/packaging`
+- [ ] Notifications via `services/notification.js`
 
 ## Frontend
-- [ ] `pages/Packaging.jsx` + `components/packaging/*` (native HTML5 dropzone, preview, progress)
-- [ ] Results UI: extraction summary + compliance cards (pass / warning / fail + fix)
-- [ ] `api/packaging.api.js`, `hooks/usePackaging.js` (TanStack Query, mirror useAgreements)
-- [ ] Sidebar: `Амбалажа` nav item under inquiries block, `showInquiries` gating
-- [ ] Route `/packaging` in App.jsx (+ dept guard)
-- [ ] i18n `mk`/`en` `packaging.json`
+- [ ] Sidebar group "Алатки" (gated) → `/tools/packaging`
+- [ ] Pages: list, new check, check detail (artwork + remarks by sector + progress), rules
+- [ ] `api/packaging.api.js`, `hooks/usePackaging.js`, i18n `packaging.json` mk/en
 
-## Blocked on user (see handoff list)
-- AI endpoint details (URL, key, model, request/response format, vision support)
-- Regulation texts (files) + which regs + language
-- Packaging/product scope
-- Report language (MK/EN)
-- Allowed image types + max size
-
-## Review
-(to be filled after implementation)
+## Review (2026-10-28)
+- Backend + frontend built; details and progress in `tasks/packaging-check-plan.md`.
+- Verified: server integration tests on a throwaway DB (29/29 workflow, 7/7 AI path
+  with a fake provider); client build + lint clean for all new files.
+- Not yet verified: visual click-through in the browser.
+- Remaining: connect the AI provider (plan §7); seed the first checklist with Quality.

@@ -1,3 +1,6 @@
+> **SUPERSEDED (2026-10-28):** replaced by the multi-sector "Проверка на амбалажа"
+> tool — see `tasks/todo.md`. Kept for history only.
+
 # Амбалажа (Packaging Compliance) — Feature Plan & Resume Doc
 
 > **Purpose of this file:** self-contained handoff. When re-opened in a new
