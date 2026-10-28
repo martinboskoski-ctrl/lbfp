@@ -1,10 +1,11 @@
 import PizZip from 'pizzip';
 import { PACKAGING_SECTORS } from '../models/PackagingCheck.js';
+import { openaiAdapter } from './aiProviders/openai.js';
 
 // AI review of packaging artwork against the product's ingredient list and the
 // checklist rules. Everything except the provider call lives here; to connect a
 // provider, register an adapter with registerAiProvider() and set in server/.env:
-//   PACKAGING_AI_PROVIDER=<key in PROVIDERS>
+//   PACKAGING_AI_PROVIDER=<key in PROVIDERS>   (built in: openai)
 //   PACKAGING_AI_API_KEY=...
 //   PACKAGING_AI_MODEL=...            (must accept images)
 //
@@ -13,6 +14,8 @@ import { PACKAGING_SECTORS } from '../models/PackagingCheck.js';
 const PROVIDERS = {};
 
 export const registerAiProvider = (name, adapter) => { PROVIDERS[name] = adapter; };
+
+registerAiProvider('openai', openaiAdapter);
 
 export class AiNotConfiguredError extends Error {
   constructor() {

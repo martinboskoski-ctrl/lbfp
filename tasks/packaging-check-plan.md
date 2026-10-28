@@ -86,21 +86,25 @@ Sidebar: **Алатки → Проверка на амбалажа**.
 | POST | `/:id/remarks/:remarkId/respond` | responsible sector, top |
 | GET / POST / PATCH / DELETE | `/rules…` | read: tool users · write: quality, top |
 
-## 7. Connecting the AI (the missing piece)
+## 7. Connecting the AI — OpenAI
 
-Everything except the provider call is in `server/src/services/packagingAi.js`:
-prompt built from the active checklist + ingredient list, artwork (and an image/PDF
-ingredient file) attached as base64, reply parsed as JSON, remarks routed by rule
-→ sector, invalid values normalised. To connect:
+Provider chosen: **OpenAI** (Responses API). Adapter: `server/src/services/aiProviders/openai.js`,
+registered as `openai` in `services/packagingAi.js`.
+- Artwork / ingredient images → `input_image` (base64 data URL, `detail: high`);
+  PDFs → `input_file` (no conversion needed; vision model required, 50 MB per request).
+- Reply forced into the remark schema with Structured Outputs (`json_schema`, strict).
+- API errors, refusals and incomplete replies are recorded on the round as
+  "AI проверката не успеа: …" — remarks are never lost.
 
-1. Write an adapter: `registerAiProvider('<name>', async ({ apiKey, model, system, prompt, attachments }) => rawText)`
-   — `attachments` = `[{ mimeType, base64, label }]`. Must be a **vision** model;
-   check the provider accepts PDF, or convert PDF pages to images.
-2. Set in `server/.env`: `PACKAGING_AI_PROVIDER`, `PACKAGING_AI_API_KEY`, `PACKAGING_AI_MODEL`.
-3. Restart the server — the "AI не е поврзан" notice disappears and new checks/rounds
-   are reviewed automatically; "Пушти AI проверка" re-runs on the open round.
-
-Need from you: provider + model name + API key.
+**To switch it on** — `server/.env` already has:
+```
+PACKAGING_AI_PROVIDER=openai
+PACKAGING_AI_MODEL=gpt-4.1
+PACKAGING_AI_API_KEY=            ← paste the key here
+```
+then restart the server. Any vision-capable model on your account works; change
+`PACKAGING_AI_MODEL` to use another. For production, set the same three variables
+on the server host. Never commit the key (`.env` is gitignored).
 
 ## 8. Progress
 
@@ -125,14 +129,16 @@ Need from you: provider + model name + API key.
       (build + lint pass; not yet viewed — browser automation was unavailable)
 
 ### Later / ideas
-- [ ] Connect the AI provider (section 7)
-- [ ] Seed a starter checklist with Quality (food-labelling basics: name, ingredients
+- [x] OpenAI adapter written and tested against a mocked API (10/10)
+- [ ] Paste the API key + first real check with a real label
+- [x] Starter checklist seeded (20 rules, EU 1169/2011 + 1924/2006) — **Quality to review**
+- [ ] ~~Seed a starter checklist with Quality~~ (food-labelling basics: name, ingredients
       in descending order, allergens emphasised, net quantity, best-before, storage,
       producer, nutrition table order, min. font size, Macedonian language)
 - [ ] Export a round's remarks as PDF for the client
 - [ ] Annotate remarks on the artwork (pin a remark to a spot on the image)
 
 ## 9. Open questions
-- Which AI provider/model? (blocks section 7)
+- ~~Which AI provider/model?~~ → OpenAI (model configurable)
 - Who writes the first version of the checklist, and from which regulation/standard?
 - Should the client-facing summary be in Macedonian, English, or both?
