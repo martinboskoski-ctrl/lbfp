@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Sidebar from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
-import { useProcedure, useDeleteProcedure } from '../hooks/useProcedures.js';
+import { Download } from 'lucide-react';
+import { useProcedure, useDeleteProcedure, useDownloadProcedurePdf } from '../hooks/useProcedures.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { isTopManagement } from '../utils/userTier.js';
 import { DeptBadges } from './Procedures.jsx';
@@ -15,6 +16,7 @@ const ProcedureDetail = () => {
   const { user } = useAuth();
   const { data: procedure, isLoading } = useProcedure(id);
   const deleteMut = useDeleteProcedure();
+  const download = useDownloadProcedurePdf();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleDelete = () => {
@@ -72,6 +74,14 @@ const ProcedureDetail = () => {
                         </span>
                       </div>
                     </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => download.mutate({ id: procedure._id, title: procedure.title })}
+                      disabled={download.isPending}
+                      className="btn-secondary text-sm flex items-center gap-1.5"
+                    >
+                      <Download size={15} /> {t('downloadPdf')}
+                    </button>
                     {isTopManagement(user) && (
                       <button
                         onClick={handleDelete}
@@ -81,6 +91,7 @@ const ProcedureDetail = () => {
                         {t('delete')}
                       </button>
                     )}
+                    </div>
                   </div>
                 </div>
 

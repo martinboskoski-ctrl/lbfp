@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  listProceduresApi, createProcedureApi, getProcedureApi, deleteProcedureApi,
+  listProceduresApi, createProcedureApi, getProcedureApi, deleteProcedureApi, procedurePdfApi,
 } from '../api/procedures.api.js';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -39,3 +39,20 @@ export const useDeleteProcedure = () => {
     onError: onErr,
   });
 };
+
+// Downloads the server-rendered PDF, saved under the procedure's title.
+export const useDownloadProcedurePdf = () =>
+  useMutation({
+    mutationFn: async ({ id, title }) => {
+      const res = await procedurePdfApi(id);
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${title.replace(/[\\/:*?"<>|]+/g, ' ').trim()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    },
+    onError: onErr,
+  });
