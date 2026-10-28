@@ -307,7 +307,7 @@ const EmployeeTasksTab = ({ employee, canAddTasks }) => {
               <TaskRow key={task._id} task={task} tc={tc} tt={tt} onOpen={setActiveTask} />
             ))}
             <Link
-              to={`/dashboard?dept=${employee.department}&tab=tasks`}
+              to={`/dashboard?dept=${employee.department}`}
               className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 mt-2"
             >
               {t('viewAllOnKanban')} <ExternalLink size={11} />

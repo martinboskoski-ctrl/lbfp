@@ -353,29 +353,6 @@ const EmployeeDetail = () => {
                     </table>
                   ) : <div className="text-sm text-slate-500">{t('detail.noData')}</div>}
                 </Section>
-                <Section title={t('detail.leaveRequests')}>
-                  {f.leaveRequests?.length > 0 ? (
-                    <ul className="divide-y divide-slate-100 -my-2">
-                      {f.leaveRequests.slice(0, 20).map((r) => (
-                        <li key={r._id} className="py-2 flex justify-between items-center">
-                          <div>
-                            <div className="text-sm font-medium text-slate-900">{r.type}</div>
-                            <div className="text-xs text-slate-500">{fmtDate(r.createdAt)} · {r.leaveDays || 0} {t('detail.daysSuffix')}</div>
-                          </div>
-                          <Pill
-                            tone={
-                              r.status === 'approved' ? 'green' :
-                              r.status === 'rejected' ? 'red' :
-                              r.status === 'in_progress' ? 'amber' : 'gray'
-                            }
-                          >
-                            {r.status}
-                          </Pill>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : <div className="text-sm text-slate-500">{t('detail.noRequests')}</div>}
-                </Section>
               </>
             )}
 

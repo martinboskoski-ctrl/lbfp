@@ -4,13 +4,13 @@ import {
   Users, ShieldCheck, Wrench, Settings, FlaskConical,
   Factory, Crown, Users2,
   ChevronRight, ClipboardList, GraduationCap, FileText,
-  CalendarClock, Wrench as WrenchIcon, BarChart3,
-  Scale, ShieldAlert,
+  Scale, ShieldAlert, FolderKanban, FileSignature,
+  Handshake, Target, Library,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { canManage, isTopManagement } from '../../utils/userTier.js';
+import { canManage, hasSalesAccess, isTopManagement } from '../../utils/userTier.js';
 import { useLhcOverview } from '../../hooks/useLhc.js';
 
 export const DEPARTMENTS = [
@@ -29,12 +29,7 @@ export const DEPARTMENTS = [
   { value: 'safety',            icon: ShieldAlert },
 ];
 
-// Small red "demo" tag used to flag features that are still in demo mode.
-const DemoTag = () => (
-  <span className="text-[9px] font-bold uppercase tracking-wide text-red-500 flex-shrink-0">demo</span>
-);
-
-const NavItem = ({ to, icon, label, end, badge, demo }) => {
+const NavItem = ({ to, icon, label, end, badge }) => {
   const IconCmp = icon;
   return (
     <NavLink
@@ -50,7 +45,6 @@ const NavItem = ({ to, icon, label, end, badge, demo }) => {
     >
       <IconCmp size={15} className="flex-shrink-0" />
       <span className="truncate flex-1">{label}</span>
-      {demo && <DemoTag />}
       {badge > 0 && (
         <span className="text-[10px] font-semibold min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-slate-700 text-white">
           {badge > 99 ? '99+' : badge}
@@ -60,11 +54,8 @@ const NavItem = ({ to, icon, label, end, badge, demo }) => {
   );
 };
 
-// `variant` = 'default' | 'header'
-//   default → icon + label + chevron, indented like a NavItem.
-//   header  → uppercase tracking-wider text, top hairline border, no icon — used for
-//             the Departments rail header. Same hover-flyout behavior.
-const NavGroup = ({ icon, label, items, onItemClick, variant = 'default', demo }) => {
+// Collapsible group: inline submenu on mobile, hover flyout on desktop.
+const NavGroup = ({ icon, label, items, onItemClick }) => {
   const IconCmp = icon;
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
@@ -73,12 +64,7 @@ const NavGroup = ({ icon, label, items, onItemClick, variant = 'default', demo }
     (it) => pathname === it.to || pathname.startsWith(it.to + '/')
   );
 
-  const isHeader = variant === 'header';
-  const triggerCls = isHeader
-    ? `flex items-center justify-between w-full px-3 pt-3 pb-2 mt-1 border-t border-slate-200 cursor-pointer text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors ${
-        anyActive ? 'text-slate-900' : 'text-slate-600 hover:text-slate-900'
-      }`
-    : `relative flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors cursor-pointer w-full ${
+  const triggerCls = `relative flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors cursor-pointer w-full ${
         anyActive
           ? 'bg-slate-100 text-slate-900 font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-r-full before:bg-slate-700'
           : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -87,23 +73,22 @@ const NavGroup = ({ icon, label, items, onItemClick, variant = 'default', demo }
   return (
     <div className="group relative">
       <button type="button" onClick={() => setOpen((v) => !v)} className={triggerCls}>
-        {!isHeader && IconCmp && <IconCmp size={15} className="flex-shrink-0" />}
-        <span className={`truncate text-left ${isHeader ? '' : 'flex-1'}`}>{label}</span>
-        {demo && <DemoTag />}
-        {!isHeader && totalBadge > 0 && (
+        {IconCmp && <IconCmp size={15} className="flex-shrink-0" />}
+        <span className="truncate text-left flex-1">{label}</span>
+        {totalBadge > 0 && (
           <span className="text-[10px] font-semibold min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-slate-700 text-white">
             {totalBadge > 99 ? '99+' : totalBadge}
           </span>
         )}
         <ChevronRight
-          size={isHeader ? 13 : 14}
+          size={14}
           className={`text-slate-400 transition-transform md:group-hover:rotate-90 ${open ? 'rotate-90 md:rotate-0' : ''}`}
         />
       </button>
 
       {/* Mobile inline submenu */}
       {open && (
-        <div className={`md:hidden mt-0.5 space-y-0.5 ${isHeader ? 'pl-2' : 'pl-7'}`}>
+        <div className="md:hidden mt-0.5 space-y-0.5 pl-7">
           {items.map((item) => (
             <div key={item.to} onClick={onItemClick}>
               <NavItem to={item.to} icon={item.icon} label={item.label} badge={item.badge} />
@@ -132,6 +117,7 @@ const NavGroup = ({ icon, label, items, onItemClick, variant = 'default', demo }
 const Sidebar = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const { t } = useTranslation('common');
+  const { t: td } = useTranslation('dashboard');
 
   const { data: lhcOverview } = useLhcOverview();
   const lhcBadge = (lhcOverview?.myAssignments || []).filter(
@@ -142,31 +128,19 @@ const Sidebar = ({ isOpen, onClose }) => {
     if (onClose) onClose();
   };
 
-  const showProductionReports = isTopManagement(user) || user?.department === 'production';
   const showEmployeesItem = canManage(user) || user?.department === 'hr';
-  // Top mgmt + sales + the contributor depts that answer inquiry questions.
-  const showInquiries = isTopManagement(user) ||
-    ['sales', 'quality_assurance', 'r_and_d', 'nabavki'].includes(user?.department);
 
   // ── Submenus ───────────────────────────────────────────────────
-  const legalItems = [
-    { to: '/procedures', icon: ClipboardList,  label: t('procedures') },
-    { to: '/lhc',        icon: Scale,          label: t('compliance'), badge: lhcBadge },
-  ];
-
-  const productionItems = [
-    { to: '/maintenance', icon: WrenchIcon,    label: t('maintenance') },
-    { to: '/shifts',      icon: CalendarClock, label: t('shifts') },
-    ...(showProductionReports
-      ? [{ to: '/production-report', icon: BarChart3, label: t('productionReport') }]
+  const resourceItems = [
+    { to: '/projects',   icon: FolderKanban,  label: td('tabs.projects') },
+    { to: '/terkovi',    icon: FileSignature, label: td('tabs.terkovi') },
+    ...(hasSalesAccess(user)
+      ? [
+          { to: '/clients', icon: Handshake, label: td('tabs.clients') },
+          { to: '/leads',   icon: Target,    label: td('tabs.leads') },
+        ]
       : []),
   ];
-
-  const departmentItems = DEPARTMENTS.map((d) => ({
-    to:    `/dashboard?dept=${d.value}`,
-    icon:  d.icon,
-    label: t(`dept.${d.value}`),
-  }));
 
   return (
     <>
@@ -184,14 +158,14 @@ const Sidebar = ({ isOpen, onClose }) => {
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         md:relative md:translate-x-0 md:w-56 md:z-auto md:transition-none
       `}>
+        {/* Brand — doubles as the home link */}
         <NavLink
-          to="/"
+          to="/dashboard"
           onClick={handleNavClick}
           className="block px-4 py-4 border-b border-slate-200 hover:bg-slate-50 transition-colors"
         >
           <div className="text-sm font-semibold text-slate-800 leading-tight tracking-tight">
-            ЛБФП ДОО
-            <span className="block text-slate-500 font-normal">{t('appCity')}</span>
+            {t('appName')}
           </div>
           <div className="mt-1 text-[11px] italic text-slate-400 leading-tight">
             {t('appTagline')}
@@ -199,39 +173,23 @@ const Sidebar = ({ isOpen, onClose }) => {
         </NavLink>
 
         <nav className="flex-1 flex flex-col p-2 overflow-y-auto md:overflow-y-visible space-y-0.5">
-          {/* Departments — top mgmt sees a hover-flyout to the right;
-              other users see only their own dept inline. */}
-          {isTopManagement(user) ? (
+          {/* Main nav — the brand link above leads to the task board */}
+          <div className="pt-1 space-y-0.5">
             <NavGroup
-              variant="header"
-              label={t('departments')}
-              items={departmentItems}
+              icon={Library}
+              label={t('navGroup.resources')}
+              items={resourceItems}
               onItemClick={handleNavClick}
             />
-          ) : (
-            <div className="space-y-0.5 pt-1">
-              {DEPARTMENTS.filter((d) => d.value === user?.department).map((dept) => (
-                <div key={dept.value} onClick={handleNavClick}>
-                  <NavItem
-                    to={`/dashboard?dept=${dept.value}`}
-                    icon={dept.icon}
-                    label={t(`dept.${dept.value}`)}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Static nav — new structured order */}
-          <div className="pt-3 space-y-0.5">
+            <div className="mx-3 my-2 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" aria-hidden="true" />
             <div onClick={handleNavClick}>
-              <NavItem to="/requests" icon={FileText} label={t('requests')} demo />
+              <NavItem to="/agreements" icon={FileText} label={t('agreements')} />
+            </div>
+            <div onClick={handleNavClick}>
+              <NavItem to="/procedures" icon={ClipboardList} label={t('procedures')} />
             </div>
             <div onClick={handleNavClick}>
               <NavItem to="/trainings" icon={GraduationCap} label={t('trainings')} />
-            </div>
-            <div onClick={handleNavClick}>
-              <NavItem to="/agreements" icon={FileText} label={t('agreements')} />
             </div>
 
             {showEmployeesItem && (
@@ -240,20 +198,11 @@ const Sidebar = ({ isOpen, onClose }) => {
               </div>
             )}
 
-            <NavGroup
-              icon={Factory}
-              label={t('navGroup.production')}
-              items={productionItems}
-              onItemClick={handleNavClick}
-              demo
-            />
-
-            <NavGroup
-              icon={Scale}
-              label={t('navGroup.legal')}
-              items={legalItems}
-              onItemClick={handleNavClick}
-            />
+            {isTopManagement(user) && (
+              <div onClick={handleNavClick}>
+                <NavItem to="/lhc" icon={Scale} label={t('compliance')} badge={lhcBadge} />
+              </div>
+            )}
           </div>
 
           {user?.role === 'admin' && (
@@ -269,19 +218,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             </>
           )}
 
-          {/* Pre-Order Inquiries — pinned to the bottom with a faint accent backdrop */}
-          {showInquiries && (
-            <div className="mt-auto pt-3">
-              <div className="border-t border-slate-100 pt-2">
-                <div
-                  className="rounded-md bg-gradient-to-br from-slate-50 to-blue-50/40 p-0.5"
-                  onClick={handleNavClick}
-                >
-                  <NavItem to="/inquiries" icon={ClipboardList} label={t('inquiriesNav')} demo />
-                </div>
-              </div>
-            </div>
-          )}
         </nav>
       </aside>
     </>

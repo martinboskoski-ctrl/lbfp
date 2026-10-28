@@ -2,26 +2,17 @@
   "bulletin": "Огласна табла",
 
   "home": {
-    "greeting": "Здраво, {{name}}",
-    "subtitle": "Брз преглед на твоите задачи и барања",
-    "myTasks": "Мои задачи",
-    "myTasksEmpty": "Немаш активни задачи",
-    "myRequests": "Мои барања",
-    "myRequestsEmpty": "Немаш активни барања",
     "deadlines": "Претстојни рокови",
+    "noDeadlines": "Нема претстојни рокови",
     "overdue": "Изминат рок",
-    "dueToday": "Денес",
-    "viewAll": "Сите"
+    "dueToday": "Денес"
   },
 
   "tabs": {
     "terkovi": "Теркови",
     "projects": "Проекти",
-    "tasks": "Тековни задачи",
     "nabavki": "Набавки",
     "dogovori": "Договори",
-    "vraboteni": "Вработени",
-    "procedures": "Процедури",
     "po": "Purchase Order",
     "leads": "Потенцијални клиенти",
     "clients": "Клиенти"
@@ -37,11 +28,7 @@
 
   "nabavkiComingSoon": "Набавки — наскоро",
 
-  "employees": "Вработени",
-  "noEmployees": "Нема регистрирани вработени во ова одделение.",
-
   "whiteboard": {
-    "subtitle": "Соопштенија од раководството",
     "placeholder": "Напишете соопштение за сите вработени…",
     "post": "Објави",
     "noAnnouncements": "Сè уште нема соопштенија",

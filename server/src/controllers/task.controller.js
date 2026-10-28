@@ -48,16 +48,15 @@ export const createTask = async (req, res) => {
 
   // Employees can only create tasks for themselves
   if (!isManager(u)) {
-    const selfId     = String(u._id);
-    const targetId   = String(assignedTo || u._id);
-    const targetDept = department || u.department;
+    const selfId   = String(u._id);
+    const targetId = String(assignedTo || u._id);
     if (targetId !== selfId) {
       return res.status(403).json({ message: 'Вработените можат да додаваат задачи само за себе' });
     }
     const task = await Task.create({
       title, description,
       assignedTo: u._id,
-      department: targetDept,
+      department: u.department,
       createdBy:  u._id,
       project:    project || undefined,
       priority:   priority || 'medium',

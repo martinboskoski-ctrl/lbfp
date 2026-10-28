@@ -9,12 +9,12 @@ const COLUMN_CFG = {
   approved:    { key: 'column.approved',    headerCls: 'bg-green-50 text-green-700',   dotCls: 'bg-green-500'  },
 };
 
-const KanbanColumn = ({ status, tasks, currentUser, isManager }) => {
+const KanbanColumn = ({ status, tasks, currentUser, isManager, showDept }) => {
   const { t } = useTranslation('tasks');
   const cfg   = COLUMN_CFG[status];
 
   return (
-    <div className="flex flex-col min-w-[270px] flex-1 bg-gray-50 rounded-xl border border-gray-100">
+    <div className="flex flex-col min-w-[240px] flex-1 bg-gray-50 rounded-xl border border-gray-100">
       {/* Column header */}
       <div className={`flex items-center gap-2 px-3 py-2.5 rounded-t-xl ${cfg.headerCls}`}>
         <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dotCls}`} />
@@ -39,6 +39,7 @@ const KanbanColumn = ({ status, tasks, currentUser, isManager }) => {
                 index={index}
                 currentUser={currentUser}
                 isManager={isManager}
+                showDept={showDept}
               />
             ))}
             {provided.placeholder}

@@ -22,7 +22,7 @@ export const USER_STATUSES = ['active', 'suspended', 'deleted'];
 const activityEntrySchema = new mongoose.Schema({
   action:     { type: String, required: true },
   at:         { type: Date, default: Date.now },
-  target:     { type: String, default: '' },     // e.g. "User:<id>" or "PurchaseOrder:<id>"
+  target:     { type: String, default: '' },     // e.g. "User:<id>"
   targetType: { type: String, default: '' },
   metadata:   { type: mongoose.Schema.Types.Mixed, default: {} },
   ip:         { type: String, default: '' },

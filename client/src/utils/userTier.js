@@ -1,6 +1,9 @@
 export const isTopManagement = (user) => user?.department === 'top_management';
 export const canManage = (user) => user?.isManager === true || isTopManagement(user);
 
+// Clients + leads (CRM) — mirrors hasAccess in the lead/client controllers.
+export const hasSalesAccess = (user) => user?.department === 'sales' || isTopManagement(user);
+
 export const isHR = (user) => user?.department === 'hr';
 export const isHRManager = (user) => isHR(user) && user?.isManager === true;
 

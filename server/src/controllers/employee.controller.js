@@ -6,7 +6,6 @@ import EmployeeAsset from '../models/EmployeeAsset.js';
 import EmployeeDocument from '../models/EmployeeDocument.js';
 import IncidentReport from '../models/IncidentReport.js';
 import LeaveBalance from '../models/LeaveBalance.js';
-import Request from '../models/Request.js';
 import {
   isHRAdmin,
   canViewHRFile,
@@ -104,7 +103,7 @@ export const getEmployeeFile = async (req, res) => {
 
   const targetId = target._id;
 
-  const [profile, salary, discipline, assets, documents, incidents, balances, leaveRequests, manager] =
+  const [profile, salary, discipline, assets, documents, incidents, balances, manager] =
     await Promise.all([
       EmployeeProfile.findOne({ user: targetId }).lean(),
       SalaryHistory.find({ user: targetId }).sort({ effectiveDate: -1 }).lean(),
@@ -113,7 +112,6 @@ export const getEmployeeFile = async (req, res) => {
       EmployeeDocument.find({ user: targetId }).sort({ createdAt: -1 }).lean(),
       IncidentReport.find({ user: targetId }).sort({ occurredAt: -1 }).lean(),
       LeaveBalance.find({ user: targetId }).sort({ year: -1 }).lean(),
-      Request.find({ requester: targetId }).sort({ createdAt: -1 }).limit(50).lean(),
       target.manager ? User.findById(target.manager).select('name department').lean() : null,
     ]);
 
@@ -169,7 +167,6 @@ export const getEmployeeFile = async (req, res) => {
     documents,
     incidents,
     leaveBalances: balances,
-    leaveRequests,
   };
 
   // Include hrNotes only for HR admins.

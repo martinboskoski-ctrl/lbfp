@@ -9,20 +9,17 @@ import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import ProjectCreate from './pages/ProjectCreate.jsx';
 import ProjectDetail from './pages/ProjectDetail.jsx';
+import Projects from './pages/Projects.jsx';
+import Terkovi from './pages/Terkovi.jsx';
+import Clients from './pages/Clients.jsx';
+import Leads from './pages/Leads.jsx';
 import AdminUsers from './pages/AdminUsers.jsx';
-import PODetail from './pages/PODetail.jsx';
-import Inquiries from './pages/Inquiries.jsx';
 import UserManagement from './pages/UserManagement.jsx';
 import UserDetail from './pages/UserDetail.jsx';
 import Procedures from './pages/Procedures.jsx';
 import Trainings from './pages/Trainings.jsx';
 import AnticorruptionTraining from './pages/AnticorruptionTraining.jsx';
 import ProcedureDetail from './pages/ProcedureDetail.jsx';
-import Requests from './pages/Requests.jsx';
-import RequestDetail from './pages/RequestDetail.jsx';
-import Shifts from './pages/Shifts.jsx';
-import Maintenance from './pages/Maintenance.jsx';
-import ProductionReport from './pages/ProductionReport.jsx';
 import Employees from './pages/Employees.jsx';
 import EmployeeDetail from './pages/EmployeeDetail.jsx';
 import Agreements from './pages/Agreements.jsx';
@@ -54,10 +51,11 @@ const App = () => (
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:id" element={<ProjectDetail />} />
-            <Route path="/po/:id"       element={<PODetail />} />
-            <Route path="/inquiries"       element={<Inquiries />} />
-            <Route path="/inquiries/inbox" element={<Navigate to="/inquiries" replace />} />
+            <Route path="/terkovi" element={<Terkovi />} />
+            <Route path="/clients" element={<Clients />} />
+            <Route path="/leads" element={<Leads />} />
             <Route path="/admin/user-management"     element={<UserManagement />} />
             <Route path="/admin/user-management/:id" element={<UserDetail />} />
             <Route path="/register" element={<Register />} />
@@ -65,11 +63,6 @@ const App = () => (
             <Route path="/procedures/:id" element={<ProcedureDetail />} />
             <Route path="/trainings" element={<Trainings />} />
             <Route path="/trainings/anticorruption" element={<AnticorruptionTraining />} />
-            <Route path="/requests" element={<Requests />} />
-            <Route path="/requests/:id" element={<RequestDetail />} />
-            <Route path="/shifts" element={<Shifts />} />
-            <Route path="/maintenance" element={<Maintenance />} />
-            <Route path="/production-report" element={<ProductionReport />} />
             <Route path="/employees" element={<Employees />} />
             <Route path="/employees/:id" element={<EmployeeDetail />} />
             <Route path="/agreements" element={<Agreements />} />

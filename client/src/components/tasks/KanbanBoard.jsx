@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Plus, Search, User as UserIcon } from 'lucide-react';
@@ -6,25 +7,41 @@ import toast from 'react-hot-toast';
 import { useTasks, useSetTaskStatus } from '../../hooks/useTasks.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { canManage, isTopManagement } from '../../utils/userTier.js';
+import { DEPARTMENTS } from '../layout/Sidebar.jsx';
 import KanbanColumn from './KanbanColumn.jsx';
 import AddTaskModal from './AddTaskModal.jsx';
 
 const STATUSES = ['todo', 'in_progress', 'done', 'approved'];
 
+const ALL_DEPTS = 'all';
+
 const ownerId = (task) => String(task.assignedTo?._id || task.assignedTo);
 
-const KanbanBoard = ({ dept }) => {
+const KanbanBoard = () => {
   const { t }     = useTranslation('tasks');
+  const { t: tc } = useTranslation('common');
   const { user }  = useAuth();
   const isManager = canManage(user);
   const isTopMgmt = isTopManagement(user);
 
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch]       = useState('');
-  const [onlyMine, setOnlyMine]   = useState(false);
+  // Everyone starts on their own cards; the toggle reveals the whole team board.
+  const [onlyMine, setOnlyMine]   = useState(true);
 
-  const fetchDept = isTopMgmt ? dept : undefined;
-  const { data: tasks = [], isLoading, error } = useTasks(fetchDept);
+  // Top management picks a department via ?dept= (default: their own board;
+  // ALL_DEPTS shows every department). Everyone else is locked to their own
+  // department server-side.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const dept = isTopMgmt ? searchParams.get('dept') || 'top_management' : '';
+  const allDepts = dept === ALL_DEPTS;
+  const setDept = (value) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('dept', value);
+    setSearchParams(next, { replace: true });
+  };
+
+  const { data: tasks = [], isLoading, error } = useTasks(dept && !allDepts ? dept : undefined);
   const setStatus = useSetTaskStatus();
 
   if (isLoading) {
@@ -67,15 +84,23 @@ const KanbanBoard = ({ dept }) => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)]">
+    <div className="flex flex-col h-full min-h-0">
       {/* Board toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4 shrink-0">
         <div>
           <h2 className="text-lg font-bold text-gray-900">{t('title')}</h2>
-          <p className="text-xs text-gray-400 mt-0.5">{t('totalCount', { count: tasks.length })}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{t('totalCount', { count: filtered.length })}</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {isTopMgmt && (
+            <select className="input py-1.5 w-44" value={dept} onChange={(e) => setDept(e.target.value)}>
+              <option value={ALL_DEPTS}>{tc('allDepartments')}</option>
+              {DEPARTMENTS.map((d) => (
+                <option key={d.value} value={d.value}>{tc(`dept.${d.value}`)}</option>
+              ))}
+            </select>
+          )}
           <div className="relative">
             <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
@@ -95,11 +120,9 @@ const KanbanBoard = ({ dept }) => {
           >
             <UserIcon size={14} /> {t('onlyMine')}
           </button>
-          {isManager && (
-            <button onClick={() => setShowModal(true)} className="btn-primary flex items-center gap-2">
-              <Plus size={15} /> {t('newTask')}
-            </button>
-          )}
+          <button onClick={() => setShowModal(true)} className="btn-primary flex items-center gap-2">
+            <Plus size={15} /> {t('newTask')}
+          </button>
         </div>
       </div>
 
@@ -113,6 +136,7 @@ const KanbanBoard = ({ dept }) => {
               tasks={byStatus(status)}
               currentUser={user}
               isManager={isManager}
+              showDept={allDepts}
             />
           ))}
         </div>
@@ -122,7 +146,7 @@ const KanbanBoard = ({ dept }) => {
       {showModal && (
         <AddTaskModal
           onClose={() => setShowModal(false)}
-          defaultDept={dept || user?.department}
+          defaultDept={dept && !allDepts ? dept : user?.department}
           isTopMgmt={isTopMgmt}
           isManager={isManager}
           currentUser={user}

@@ -1,5 +1,5 @@
 {
-  "appCity": "Bitola",
+  "appName": "LBP Bitola",
   "appTagline": "One source of truth",
   "save": "Save",
   "cancel": "Cancel",
@@ -38,8 +38,7 @@
   "registerUser": "Register user",
   "changePassword": "Change password",
   "navGroup": {
-    "legal": "Legal",
-    "production": "Production"
+    "resources": "Resources"
   },
   "agreements": "Contracts",
   "compliance": "Compliance",
@@ -51,15 +50,10 @@
     "done": "Backup downloaded",
     "error": "Backup failed"
   },
-  "procedures": "Procedures & regulations",
+  "procedures": "Procedure Book",
+  "home": "Home",
   "trainings": "Trainings",
-  "requests": "Requests",
-  "inquiriesInbox": "Inquiry Inbox",
-  "inquiriesNav": "Client Inquiries",
   "announcements": "Announcements",
-  "shifts": "Shift Schedule",
-  "maintenance": "Maintenance",
-  "productionReport": "Reports",
   "language": "Language",
 
   "dept": {
@@ -158,6 +152,12 @@
   "procedureDepartments": "Departments",
   "procedureDepartmentsHint": "Leave empty for all employees",
   "noProcedures": "No procedures",
+  "downloadPdf": "Download PDF",
+  "generalProcedures": "General",
+  "generalProceduresSection": "General procedures",
+  "sectorProceduresSection": "Sector procedures",
+  "searchProcedures": "Search procedures…",
+  "noProceduresMatch": "No procedures match this filter",
   "createdBy": "Created by",
   "edited": "edited",
   "editHistory": "Edit history",

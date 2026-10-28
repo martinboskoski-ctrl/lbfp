@@ -21,7 +21,7 @@ const PRIORITY_ACCENT = {
   urgent: 'border-l-red-500',
 };
 
-const TaskCard = ({ task, index, currentUser, isManager }) => {
+const TaskCard = ({ task, index, currentUser, isManager, showDept }) => {
   const { t }  = useTranslation('tasks');
   const { t: tc } = useTranslation('common');
   const [showDetail, setShowDetail] = useState(false);
@@ -68,6 +68,12 @@ const TaskCard = ({ task, index, currentUser, isManager }) => {
               </button>
             )}
           </div>
+
+          {showDept && task.department && (
+            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400 mt-1 truncate">
+              {tc(`dept.${task.department}`)}
+            </p>
+          )}
 
           {/* Compact meta — priority + deadline on the left, edited marker + assignee on the right */}
           <div className="flex items-center gap-1.5 mt-2">

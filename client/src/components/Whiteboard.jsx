@@ -38,6 +38,7 @@ const Whiteboard = () => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ title: '', content: '' });
+  const [expandedId, setExpandedId] = useState(null);
 
   const startEdit = (a) => { setEditingId(a._id); setEditForm({ title: a.title, content: a.content }); };
   const cancelEdit = () => { setEditingId(null); setEditForm({ title: '', content: '' }); };
@@ -68,41 +69,37 @@ const Whiteboard = () => {
   const isRead = (a) => a.readBy?.includes(user?._id);
 
   return (
-    <div className="card p-4 h-full flex flex-col min-h-0">
+    <div className="card p-3 h-full flex flex-col min-h-0">
 
       {/* Header */}
-      <div className="flex items-center justify-between gap-2.5 mb-3 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
-            <Megaphone size={16} className="text-white" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-gray-800">{t('bulletin')}</h3>
-            <p className="text-xs text-gray-400">{t('whiteboard.subtitle')}</p>
-          </div>
+      <div className="flex items-center justify-between gap-2 mb-2 shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <Megaphone size={15} className="text-blue-600 flex-shrink-0" />
+          <h3 className="text-sm font-semibold text-gray-800 truncate">{t('bulletin')}</h3>
         </div>
         {canPost && (
           <button
             onClick={() => setShowForm(true)}
-            className="btn-primary flex items-center gap-1.5 shrink-0"
+            className="p-1 rounded-md text-gray-400 hover:bg-blue-50 hover:text-blue-600 shrink-0"
+            title={ta('create')}
           >
-            <Plus size={15} /> {ta('create')}
+            <Plus size={16} />
           </button>
         )}
       </div>
 
-      {/* Announcements list — scrolls within the panel */}
-      <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1 space-y-3">
+      {/* Announcements — compact previews; click to expand. Scrolls within the panel. */}
+      <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1 space-y-2">
         {isLoading && (
-          <div className="flex justify-center py-16">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
           </div>
         )}
 
         {!isLoading && announcements.length === 0 && (
-          <div className="text-center py-16 text-gray-300">
-            <Megaphone size={36} className="mx-auto mb-3 opacity-40" />
-            <p className="text-sm">{t('whiteboard.noAnnouncements')}</p>
+          <div className="text-center py-8 text-gray-300">
+            <Megaphone size={24} className="mx-auto mb-2 opacity-40" />
+            <p className="text-xs">{t('whiteboard.noAnnouncements')}</p>
           </div>
         )}
 
@@ -111,95 +108,97 @@ const Whiteboard = () => {
           const read = isRead(a);
           const isAuthor = String(a.createdBy?._id || a.createdBy) === String(user?._id);
           const editing = editingId === a._id;
+          const expanded = expandedId === a._id;
           return (
-            <div key={a._id} className={`border border-gray-200 border-l-4 ${ps.border} rounded-xl p-4 ${read ? 'opacity-70' : ''}`}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  {editing ? (
-                    <div className="space-y-2">
-                      <input
-                        className="input"
-                        value={editForm.title}
-                        onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-                        placeholder={ta('titlePlaceholder')}
-                      />
-                      <textarea
-                        className="input min-h-[80px]"
-                        value={editForm.content}
-                        onChange={(e) => setEditForm((f) => ({ ...f, content: e.target.value }))}
-                        placeholder={ta('contentPlaceholder')}
-                      />
-                      <div className="flex gap-2">
-                        <button onClick={() => saveEdit(a._id)} disabled={editAnnouncement.isPending} className="btn-primary flex items-center gap-1.5 text-sm py-1.5">
-                          <Save size={14} /> {tc('save')}
-                        </button>
-                        <button onClick={cancelEdit} className="btn-secondary text-sm py-1.5">{tc('cancel')}</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        {a.pinned && <Pin size={14} className="text-amber-500 shrink-0" />}
-                        <h4 className="font-semibold text-gray-800">{a.title}</h4>
-                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${ps.badge}`}>
+            <div key={a._id} className={`border border-gray-200 border-l-4 ${ps.border} rounded-lg p-2.5 ${read ? 'opacity-70' : ''}`}>
+              {editing ? (
+                <div className="space-y-2">
+                  <input
+                    className="input text-sm"
+                    value={editForm.title}
+                    onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
+                    placeholder={ta('titlePlaceholder')}
+                  />
+                  <textarea
+                    className="input text-sm min-h-[80px]"
+                    value={editForm.content}
+                    onChange={(e) => setEditForm((f) => ({ ...f, content: e.target.value }))}
+                    placeholder={ta('contentPlaceholder')}
+                  />
+                  <div className="flex gap-2">
+                    <button onClick={() => saveEdit(a._id)} disabled={editAnnouncement.isPending} className="btn-primary flex items-center gap-1.5 text-xs py-1">
+                      <Save size={13} /> {tc('save')}
+                    </button>
+                    <button onClick={cancelEdit} className="btn-secondary text-xs py-1">{tc('cancel')}</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setExpandedId(expanded ? null : a._id)}
+                    className="w-full text-left"
+                  >
+                    <div className="flex items-start gap-1.5">
+                      {a.pinned && <Pin size={12} className="text-amber-500 shrink-0 mt-0.5" />}
+                      <h4 className="text-sm font-semibold text-gray-800 leading-snug flex-1 min-w-0">{a.title}</h4>
+                      {a.priority !== 'info' && (
+                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full shrink-0 ${ps.badge}`}>
                           {ta(`priority.${a.priority}`)}
                         </span>
-                      </div>
-                      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{a.content}</p>
-                      <div className="flex items-center gap-3 mt-2 text-xs text-gray-400 flex-wrap">
-                        <span>{a.createdBy?.name}</span>
-                        <span>{fmtDate(a.createdAt)}</span>
-                        {a.departments?.length > 0 && (
-                          <span>{a.departments.map((d) => tc(`dept.${d}`)).join(', ')}</span>
-                        )}
-                        {isTopMgmt && (
-                          <span>{ta('readBy')}: {a.readBy?.length || 0}</span>
-                        )}
-                        <EditHistory history={a.editHistory} />
-                      </div>
-                    </>
+                      )}
+                    </div>
+                    <p className={`text-xs text-gray-600 leading-relaxed whitespace-pre-wrap mt-1 ${expanded ? '' : 'line-clamp-3'}`}>
+                      {a.content}
+                    </p>
+                  </button>
+
+                  <div className="flex items-center gap-2 mt-1.5 text-[11px] text-gray-400">
+                    <span className="truncate">{a.createdBy?.name} · {fmtDate(a.createdAt)}</span>
+                    <div className="ml-auto flex items-center shrink-0">
+                      {isAuthor && (
+                        <button onClick={() => startEdit(a)} className="p-1 rounded hover:bg-gray-100 hover:text-blue-600" title={tc('edit')}>
+                          <Pencil size={12} />
+                        </button>
+                      )}
+                      {!read && (
+                        <button onClick={() => markRead.mutate(a._id)} className="p-1 rounded hover:bg-gray-100 hover:text-green-600" title={ta('markRead')}>
+                          <Eye size={12} />
+                        </button>
+                      )}
+                      {canPost && (
+                        <button
+                          onClick={() => togglePin.mutate(a._id)}
+                          className={`p-1 rounded hover:bg-gray-100 ${a.pinned ? 'text-amber-500' : 'hover:text-amber-500'}`}
+                          title={a.pinned ? ta('unpin') : ta('pin')}
+                        >
+                          <Pin size={12} />
+                        </button>
+                      )}
+                      {canPost && (
+                        <button
+                          onClick={() => { if (confirm(ta('confirmDelete'))) deleteAnnouncement.mutate(a._id); }}
+                          disabled={deleteAnnouncement.isPending}
+                          className="p-1 rounded hover:bg-gray-100 hover:text-red-500"
+                          title={t('whiteboard.deleteTitle')}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {expanded && (
+                    <div className="flex items-center gap-2 mt-1 text-[11px] text-gray-400 flex-wrap">
+                      {a.departments?.length > 0 && (
+                        <span>{a.departments.map((d) => tc(`dept.${d}`)).join(', ')}</span>
+                      )}
+                      {isTopMgmt && <span>{ta('readBy')}: {a.readBy?.length || 0}</span>}
+                      <EditHistory history={a.editHistory} />
+                    </div>
                   )}
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  {!editing && isAuthor && (
-                    <button
-                      onClick={() => startEdit(a)}
-                      className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-blue-600"
-                      title={tc('edit')}
-                    >
-                      <Pencil size={15} />
-                    </button>
-                  )}
-                  {!read && (
-                    <button
-                      onClick={() => markRead.mutate(a._id)}
-                      className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-green-600"
-                      title={ta('markRead')}
-                    >
-                      <Eye size={15} />
-                    </button>
-                  )}
-                  {canPost && (
-                    <button
-                      onClick={() => togglePin.mutate(a._id)}
-                      className={`p-1.5 rounded hover:bg-gray-100 ${a.pinned ? 'text-amber-500' : 'text-gray-400 hover:text-amber-500'}`}
-                      title={a.pinned ? ta('unpin') : ta('pin')}
-                    >
-                      <Pin size={15} />
-                    </button>
-                  )}
-                  {canPost && (
-                    <button
-                      onClick={() => { if (confirm(ta('confirmDelete'))) deleteAnnouncement.mutate(a._id); }}
-                      disabled={deleteAnnouncement.isPending}
-                      className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-red-500"
-                      title={t('whiteboard.deleteTitle')}
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  )}
-                </div>
-              </div>
+                </>
+              )}
             </div>
           );
         })}

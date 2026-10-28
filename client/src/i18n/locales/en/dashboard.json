@@ -2,26 +2,17 @@
   "bulletin": "Bulletin Board",
 
   "home": {
-    "greeting": "Hi, {{name}}",
-    "subtitle": "A quick overview of your tasks and requests",
-    "myTasks": "My Tasks",
-    "myTasksEmpty": "You have no active tasks",
-    "myRequests": "My Requests",
-    "myRequestsEmpty": "You have no active requests",
     "deadlines": "Upcoming Deadlines",
+    "noDeadlines": "No upcoming deadlines",
     "overdue": "Overdue",
-    "dueToday": "Today",
-    "viewAll": "All"
+    "dueToday": "Today"
   },
 
   "tabs": {
     "terkovi": "Templates",
     "projects": "Projects",
-    "tasks": "Current Tasks",
     "nabavki": "Procurement",
     "dogovori": "Agreements",
-    "vraboteni": "Employees",
-    "procedures": "Procedures",
     "po": "Purchase Order",
     "leads": "Leads",
     "clients": "Clients"
@@ -37,11 +28,7 @@
 
   "nabavkiComingSoon": "Procurement — coming soon",
 
-  "employees": "Employees",
-  "noEmployees": "No registered employees in this department.",
-
   "whiteboard": {
-    "subtitle": "Announcements from management",
     "placeholder": "Write an announcement for all employees…",
     "post": "Post",
     "noAnnouncements": "No announcements yet",
