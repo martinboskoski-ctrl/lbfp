@@ -26,14 +26,14 @@ const KanbanBoard = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch]       = useState('');
-  // Everyone starts on their own cards; the toggle reveals the whole team board.
-  const [onlyMine, setOnlyMine]   = useState(true);
+  // Employees and managers start on their own cards; top management start on the
+  // full company overview. The toggle switches between the two.
+  const [onlyMine, setOnlyMine]   = useState(!isTopMgmt);
 
-  // Top management picks a department via ?dept= (default: their own board;
-  // ALL_DEPTS shows every department). Everyone else is locked to their own
-  // department server-side.
+  // Top management pick a department via ?dept= (default: every department).
+  // Everyone else is locked to their own department server-side.
   const [searchParams, setSearchParams] = useSearchParams();
-  const dept = isTopMgmt ? searchParams.get('dept') || 'top_management' : '';
+  const dept = isTopMgmt ? searchParams.get('dept') || ALL_DEPTS : '';
   const allDepts = dept === ALL_DEPTS;
   const setDept = (value) => {
     const next = new URLSearchParams(searchParams);
