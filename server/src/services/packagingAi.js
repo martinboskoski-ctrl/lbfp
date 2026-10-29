@@ -30,41 +30,61 @@ export const isAiConfigured = () =>
   Boolean(PROVIDERS[providerName()] && process.env.PACKAGING_AI_API_KEY);
 
 const SECTOR_NAMES = {
-  sales: 'Продажба',
-  r_and_d: 'Истражување и развој',
-  nabavki: 'Набавки',
-  quality_assurance: 'Обезбедување квалитет',
+  sales: 'Sales',
+  r_and_d: 'R&D',
+  nabavki: 'Purchasing',
+  quality_assurance: 'Quality Assurance',
 };
 
 const SEVERITIES = ['critical', 'warning', 'info'];
 
-const SYSTEM = `Ти си експерт за означување на прехранбени производи во ЛБФП ДОО Битола.
-Проверуваш дизајн на етикета/амбалажа (слика или PDF) што го испратил клиент.
-Го споредуваш со листата на состојки на производот и со правилата од чеклистата.
-Пријави само реални проблеми или нејаснотии што треба човек да ги потврди — не пофалби.
-Пишувај ги забелешките на македонски, кратко и конкретно (што е погрешно, каде, што треба да стои).
-Одговори ИСКЛУЧИВО со валиден JSON, без друг текст.`;
+// Remarks and the summary are always in English: they go to the client as-is.
+const SYSTEM = `You are a food labelling compliance expert at LBFP DOO Bitola, a food manufacturer
+producing private-label products (mainly for the EU market).
+You review label / packaging artwork (image or PDF) sent by a client, against the product's
+ingredient list and our checklist rules (EU food law: Regulation (EU) 1169/2011, 1924/2006,
+1333/2008, the packaging regulation (EU) 2025/40 and related acts).
 
-const buildPrompt = (rules, ingredientsText) => {
+Write every remark and the summary in clear, professional ENGLISH, whatever language the
+artwork, ingredient list or rules are in. Quote label text in its original language.
+Report only real problems or points a person must verify — no praise, no generic advice.
+Each remark: what is wrong, where on the artwork, and what it should say or how to fix it.
+Reply ONLY with valid JSON, no other text.`;
+
+const buildPrompt = (rules, ingredientsText, markets) => {
   const ruleLines = rules.map((r) =>
     `- [${r._id}] (${SECTOR_NAMES[r.sector]}${r.category ? ` · ${r.category}` : ''}) ${r.text}`
   ).join('\n');
 
-  return `ПРАВИЛА ЗА ПРОВЕРКА (id во загради, сектор одговорен за правилото):
-${ruleLines || '(нема активни правила — провери само усогласеност со листата на состојки)'}
+  return `TARGET MARKETS: ${markets?.trim() || 'EU (countries not specified — flag language requirements as something to confirm with the client)'}
 
-ЛИСТА НА СОСТОЈКИ НА ПРОИЗВОДОТ:
-${ingredientsText?.trim() || '(види прикачен документ)'}
+CHECKLIST RULES (id in brackets, then the sector responsible for the rule):
+${ruleLines || '(no active rules — check consistency with the ingredient list only)'}
 
-Задача: провери го прикачениот дизајн. За секоја прекршена или неможна за потврдување
-точка врати забелешка. Ако забелешката се однесува на правило, наведи го неговиот id.
-Ако не се однесува на правило, избери сектор: ${PACKAGING_SECTORS.join(', ')}
-(r_and_d = рецептура/состојки/нутритивни вредности, quality_assurance = законско
-означување/алергени/фонт/јазик, nabavki = амбалажен материјал/добавувач, sales = договор со клиент).
+PRODUCT INGREDIENT LIST / RECIPE:
+${ingredientsText?.trim() || '(see the attached document)'}
 
-Формат:
-{"summary": "краток преглед од 1-3 реченици",
- "remarks": [{"ruleId": "<id или null>", "sector": "<сектор>", "severity": "critical|warning|info", "text": "забелешка"}]}`;
+TASK: review the attached artwork against the ingredient list and the rules.
+- Raise one remark per distinct issue. Never raise the same issue twice under different rules.
+- If the artwork clearly shows only part of the pack (e.g. only the front panel) and several
+  mandatory particulars are therefore absent, raise ONE remark per responsible sector that lists
+  the missing particulars, instead of one remark per particular. Each missing particular belongs
+  to exactly one sector's list (the sector of its rule), and must not appear in any other remark.
+- Judge language requirements against the target markets above.
+- If a rule cannot be verified from the artwork and documents (e.g. supplier certificates,
+  lab results), raise it only when it matters for this product, as severity "info", phrased as
+  something to confirm.
+- If the remark relates to a rule, give its id. Otherwise choose the sector:
+  r_and_d = recipe, ingredients, additives, nutrition values, claims;
+  quality_assurance = legal labelling, allergen emphasis, dates, legibility, language;
+  nabavki = packaging material, print specification, food-contact and packaging compliance;
+  sales = client agreements, markets, business operator details, barcode.
+- severity: "critical" = non-compliant / must be fixed before printing; "warning" = should be
+  fixed or confirmed; "info" = suggestion or point to confirm.
+
+Format:
+{"summary": "2-4 sentence overview in English of the overall state of the artwork",
+ "remarks": [{"ruleId": "<id or null>", "sector": "<sector>", "severity": "critical|warning|info", "text": "remark in English"}]}`;
 };
 
 // Pulls the first JSON object out of the reply and normalises every remark.
@@ -106,10 +126,10 @@ export const docxToText = (buffer) => {
 
 /**
  * @param {{ artwork: {buffer, mimeType}, ingredientsText: string,
- *           ingredientsFile?: {buffer, mimeType}, rules: Array }} input
+ *           ingredientsFile?: {buffer, mimeType}, markets?: string, rules: Array }} input
  * @returns {Promise<{ summary: string, remarks: Array, model: string }>}
  */
-export const reviewArtwork = async ({ artwork, ingredientsText, ingredientsFile, rules }) => {
+export const reviewArtwork = async ({ artwork, ingredientsText, ingredientsFile, markets, rules }) => {
   if (!isAiConfigured()) throw new AiNotConfiguredError();
 
   const attachments = [{ mimeType: artwork.mimeType, base64: artwork.buffer.toString('base64'), label: 'artwork' }];
@@ -122,7 +142,7 @@ export const reviewArtwork = async ({ artwork, ingredientsText, ingredientsFile,
     apiKey: process.env.PACKAGING_AI_API_KEY,
     model,
     system: SYSTEM,
-    prompt: buildPrompt(rules, ingredientsText),
+    prompt: buildPrompt(rules, ingredientsText, markets),
     attachments,
   });
   return { ...parseResponse(raw, rules), model };

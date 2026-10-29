@@ -16,6 +16,7 @@ const PackagingCheckNew = () => {
   const create = useCreatePackagingCheck();
   const [client, setClient] = useState('');
   const [product, setProduct] = useState('');
+  const [markets, setMarkets] = useState('');
   const [round, setRound] = useState(emptyRound());
   const [errors, setErrors] = useState({});
 
@@ -32,6 +33,7 @@ const PackagingCheckNew = () => {
     const form = new FormData();
     form.append('client', client.trim());
     form.append('product', product.trim());
+    form.append('markets', markets.trim());
     appendRound(form, round);
     create.mutate(form, { onSuccess: (data) => navigate(`/tools/packaging/${data.check._id}`) });
   };
@@ -57,6 +59,12 @@ const PackagingCheckNew = () => {
               <input className={`input ${errors.product ? 'border-red-400' : ''}`} value={product} onChange={(e) => setProduct(e.target.value)} placeholder={t('form.productPlaceholder')} />
               {errors.product && <p className="text-red-500 text-xs mt-1">{errors.product}</p>}
             </div>
+          </div>
+
+          <div>
+            <label className="label">{t('form.markets')}</label>
+            <input className="input" value={markets} onChange={(e) => setMarkets(e.target.value)} placeholder={t('form.marketsPlaceholder')} />
+            <p className="text-xs text-slate-400 mt-1">{t('form.marketsHint')}</p>
           </div>
 
           <RoundInputs value={round} onChange={setRound} errors={errors} />

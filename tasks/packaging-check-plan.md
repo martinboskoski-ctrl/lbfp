@@ -131,7 +131,12 @@ on the server host. Never commit the key (`.env` is gitignored).
 ### Later / ideas
 - [x] OpenAI adapter written and tested against a mocked API (10/10)
 - [ ] Paste the API key + first real check with a real label
-- [x] Starter checklist seeded (20 rules, EU 1169/2011 + 1924/2006) — **Quality to review**
+- [x] EU checklist: 47 English rules (1169/2011, 1924/2006, 432/2012, 1333/2008, 1334/2008, 828/2014,
+      2018/848, 2018/775, 2019/649, 1935/2004, 10/2011, PPWR 2025/40, Dir 76/211, Dir 2011/91)
+      replaced the 20 Macedonian starter rules — **Quality to review**
+- [x] AI writes remarks + summary in English; target markets per check; one remark per issue,
+      missing particulars grouped per sector; temperature 0.2
+- [x] "Email to client" (English, confirmed remarks only, grouped by severity, copy button)
 - [ ] ~~Seed a starter checklist with Quality~~ (food-labelling basics: name, ingredients
       in descending order, allergens emphasised, net quantity, best-before, storage,
       producer, nutrition table order, min. font size, Macedonian language)
@@ -139,6 +144,8 @@ on the server host. Never commit the key (`.env` is gitignored).
 - [ ] Annotate remarks on the artwork (pin a remark to a spot on the image)
 
 ## 9. Open questions
+- Manual remarks are typed by staff — only a placeholder asks for English. Auto-translate them?
+- Should the client email also go out from the app (send button), or stay copy-paste?
 - ~~Which AI provider/model?~~ → OpenAI (model configurable)
 - Who writes the first version of the checklist, and from which regulation/standard?
 - Should the client-facing summary be in Macedonian, English, or both?

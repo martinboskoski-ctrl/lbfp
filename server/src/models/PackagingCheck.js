@@ -66,6 +66,7 @@ const packagingCheckSchema = new mongoose.Schema(
     code:      { type: String, required: true, unique: true }, // e.g. "ПА-0007"
     client:    { type: String, required: true, trim: true },
     product:   { type: String, required: true, trim: true },
+    markets:   { type: String, default: '', trim: true }, // target countries, e.g. "Sweden, Finland"
     // in_review → current round open; approved / changes_required → last round closed
     status:    { type: String, enum: ['in_review', 'approved', 'changes_required'], default: 'in_review' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

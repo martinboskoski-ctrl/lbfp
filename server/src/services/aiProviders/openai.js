@@ -44,6 +44,7 @@ export const openaiAdapter = async ({ apiKey, model, system, prompt, attachments
     signal: AbortSignal.timeout(TIMEOUT_MS),
     body: JSON.stringify({
       model,
+      temperature: 0.2, // consistent, repeatable reviews
       instructions: system,
       input: [{ role: 'user', content: [...attachments.map(toContentPart), { type: 'input_text', text: prompt }] }],
       text: { format: { type: 'json_schema', name: 'packaging_review', strict: true, schema: REMARKS_SCHEMA } },

@@ -112,6 +112,7 @@ const PackagingChecks = () => {
                   <p className="text-sm font-semibold text-slate-900 mt-1 truncate">
                     {c.client} <span className="font-normal text-slate-500">· {c.product}</span>
                   </p>
+                  {c.markets && <p className="text-xs text-slate-400 truncate">{c.markets}</p>}
                 </div>
                 <div className="basis-56">
                   {c.status === 'in_review' ? (

@@ -54,7 +54,10 @@
     "ingredientsRequired": "Внесете ја листата на состојки или прикачете документ",
     "artworkRequired": "Прикачете го дизајнот",
     "replace": "Замени",
-    "remove": "Отстрани"
+    "remove": "Отстрани",
+    "markets": "Целни пазари",
+    "marketsPlaceholder": "пр. Шведска, Финска, Германија",
+    "marketsHint": "AI го проверува јазикот и националните барања според пазарите."
   },
   "detail": {
     "back": "Сите проверки",
@@ -74,7 +77,7 @@
     "noRemarks": "Нема забелешки во оваа рунда.",
     "addRemark": "Додај забелешка",
     "remarkText": "Забелешка",
-    "remarkPlaceholder": "Што не е во ред и што треба да стои…",
+    "remarkPlaceholder": "Write the remark in English — it goes to the client as-is…",
     "sector": "Одговорен сектор",
     "severityLabel": "Важност",
     "ruleLabel": "Правило (опционално)",
@@ -99,13 +102,14 @@
     "confirmDeleteRemark": "Да се избрише забелешката?",
     "outcome": "Одлука",
     "readOnly": "Рундата е затворена — само за читање.",
-    "yourSector": "твој сектор"
+    "yourSector": "твој сектор",
+    "markets": "Пазари"
   },
   "close": {
     "title": "Затвори рунда {{n}}",
     "decision": "Одлука",
     "summary": "Резиме за клиентот",
-    "summaryPlaceholder": "Кратко што треба да се коригира или потврда дека е во ред…",
+    "summaryPlaceholder": "Optional note for the client, in English — added to the email…",
     "pendingWarning_one": "Има {{count}} неодговорена забелешка.",
     "pendingWarning_other": "Има {{count}} неодговорени забелешки.",
     "pendingBlocked": "Сите сектори треба да одговорат пред да се затвори рундата.",
@@ -143,5 +147,13 @@
     "deleted": "Проверката е избришана",
     "ruleSaved": "Правилото е зачувано",
     "ruleDeleted": "Правилото е избришано"
+  },
+  "email": {
+    "title": "Е-пошта до клиентот",
+    "copy": "Копирај",
+    "copied": "Копирано",
+    "pendingNote_one": "{{count}} забелешка сè уште чека потврда — ќе се вклучи откако секторот ќе ја потврди.",
+    "pendingNote_other": "{{count}} забелешки сè уште чекаат потврда — ќе се вклучат откако секторите ќе ги потврдат.",
+    "hint": "На англиски, само со потврдените забелешки. Забелешките „Не е проблем“ не се вклучуваат."
   }
 }

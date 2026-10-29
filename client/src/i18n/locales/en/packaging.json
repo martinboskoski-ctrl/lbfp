@@ -54,7 +54,10 @@
     "ingredientsRequired": "Enter the ingredient list or attach a document",
     "artworkRequired": "Attach the artwork",
     "replace": "Replace",
-    "remove": "Remove"
+    "remove": "Remove",
+    "markets": "Target markets",
+    "marketsPlaceholder": "e.g. Sweden, Finland, Germany",
+    "marketsHint": "The AI checks language and national requirements against these markets."
   },
   "detail": {
     "back": "All checks",
@@ -74,7 +77,7 @@
     "noRemarks": "No remarks in this round.",
     "addRemark": "Add remark",
     "remarkText": "Remark",
-    "remarkPlaceholder": "What is wrong and what it should say…",
+    "remarkPlaceholder": "Write the remark in English — it goes to the client as-is…",
     "sector": "Responsible sector",
     "severityLabel": "Severity",
     "ruleLabel": "Rule (optional)",
@@ -99,13 +102,14 @@
     "confirmDeleteRemark": "Delete this remark?",
     "outcome": "Decision",
     "readOnly": "This round is closed — read only.",
-    "yourSector": "your sector"
+    "yourSector": "your sector",
+    "markets": "Markets"
   },
   "close": {
     "title": "Close round {{n}}",
     "decision": "Decision",
     "summary": "Summary for the client",
-    "summaryPlaceholder": "Briefly what must be corrected, or confirmation it is fine…",
+    "summaryPlaceholder": "Optional note for the client, in English — added to the email…",
     "pendingWarning_one": "{{count}} remark is still unanswered.",
     "pendingWarning_other": "{{count}} remarks are still unanswered.",
     "pendingBlocked": "All sectors must answer before the round can be closed.",
@@ -143,5 +147,13 @@
     "deleted": "Check deleted",
     "ruleSaved": "Rule saved",
     "ruleDeleted": "Rule deleted"
+  },
+  "email": {
+    "title": "Email to client",
+    "copy": "Copy",
+    "copied": "Copied",
+    "pendingNote_one": "{{count}} remark is still awaiting confirmation — it is included once the sector confirms it.",
+    "pendingNote_other": "{{count}} remarks are still awaiting confirmation — they are included once the sectors confirm them.",
+    "hint": "In English, confirmed remarks only. Remarks marked \"Not an issue\" are left out."
   }
 }

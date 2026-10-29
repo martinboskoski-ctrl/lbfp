@@ -73,9 +73,10 @@ const buildRound = async (req, number, checkId) => {
   };
 };
 
-// Runs the AI review on a round. Pending AI remarks are replaced; answered ones stay.
-// Returns the remarks it added.
-const runAi = async (round) => {
+// Runs the AI review on the check's current round. Pending AI remarks are replaced;
+// answered ones stay. Returns the remarks it added.
+const runAi = async (check) => {
+  const round = currentRound(check);
   const rules = await PackagingRule.find({ active: true }).lean();
   try {
     const artworkBuffer = await readFile(round.artwork.fileId);
@@ -96,6 +97,7 @@ const runAi = async (round) => {
       artwork: { buffer: artworkBuffer, mimeType: round.artwork.mimeType },
       ingredientsText,
       ingredientsFile,
+      markets: check.markets,
       rules,
     });
 
@@ -148,7 +150,7 @@ const respondWithCheck = async (res, check, status = 200) => {
 export const list = async (req, res) => {
   assertTool(req.user);
   const checks = await PackagingCheck.find()
-    .select('code client product status createdBy rounds.number rounds.remarks.sector rounds.remarks.status updatedAt createdAt')
+    .select('code client product markets status createdBy rounds.number rounds.remarks.sector rounds.remarks.status updatedAt createdAt')
     .populate('createdBy', USER_FIELDS)
     .sort({ updatedAt: -1 })
     .lean();
@@ -182,9 +184,10 @@ export const create = async (req, res) => {
   const product = (req.body.product || '').trim();
   if (!client || !product) throw httpError(400, 'Внесете клиент и производ');
 
-  const check = new PackagingCheck({ code: await nextCode(), client, product, createdBy: req.user._id });
+  const markets = (req.body.markets || '').trim();
+  const check = new PackagingCheck({ code: await nextCode(), client, product, markets, createdBy: req.user._id });
   check.rounds.push(await buildRound(req, 1, check._id));
-  const added = await runAi(currentRound(check));
+  const added = await runAi(check);
   await check.save();
 
   await notifySectors(REVIEWER_SECTORS, req.user, {
@@ -204,7 +207,7 @@ export const addRound = async (req, res) => {
 
   check.rounds.push(await buildRound(req, check.rounds.length + 1, check._id));
   check.status = 'in_review';
-  const added = await runAi(currentRound(check));
+  const added = await runAi(check);
   await check.save();
 
   await notifySectors(REVIEWER_SECTORS, req.user, {
@@ -224,7 +227,7 @@ export const rerunAi = async (req, res) => {
   if (!isAiConfigured()) throw httpError(503, 'AI не е поврзан');
   const check = await loadCheck(req.params.id);
   assertOpen(check);
-  const added = await runAi(currentRound(check));
+  const added = await runAi(check);
   await check.save();
   await notifyNewRemarks(check, added, req.user);
   await respondWithCheck(res, check);

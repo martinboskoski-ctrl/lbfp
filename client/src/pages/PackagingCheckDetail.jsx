@@ -7,6 +7,7 @@ import ArtworkPreview from '../components/packaging/ArtworkPreview.jsx';
 import RemarkCard from '../components/packaging/RemarkCard.jsx';
 import AddRemarkForm from '../components/packaging/AddRemarkForm.jsx';
 import { CloseRoundModal, NewRoundModal } from '../components/packaging/RoundModals.jsx';
+import ClientEmail from '../components/packaging/ClientEmail.jsx';
 import { CheckStatusBadge } from '../components/packaging/badges.jsx';
 import {
   usePackagingCheck, usePackagingRules, useRerunPackagingAi, useDeletePackagingCheck,
@@ -102,6 +103,7 @@ const PackagingCheckDetail = () => {
               {check.client} <span className="font-normal text-slate-500">· {check.product}</span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
+              {check.markets && <span className="text-slate-600">{t('detail.markets')}: {check.markets} · </span>}
               {t('detail.startedBy')} {check.createdBy?.name} · {fmtDate(check.createdAt)}
             </p>
           </div>
@@ -249,6 +251,10 @@ const PackagingCheckDetail = () => {
                 {open && <AddRemarkForm checkId={check._id} rules={rules} defaultSector={mySector || 'quality_assurance'} />}
               </div>
             </section>
+
+            {(round.remarks.length > 0 || round.outcome?.decision) && (
+              <ClientEmail check={check} round={round} senderName={user.name} />
+            )}
           </div>
         </div>
       </div>
