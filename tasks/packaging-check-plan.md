@@ -106,6 +106,19 @@ then restart the server. Any vision-capable model on your account works; change
 `PACKAGING_AI_MODEL` to use another. For production, set the same three variables
 on the server host. Never commit the key (`.env` is gitignored).
 
+## 7b. Following the real conversation (2026-10-29)
+
+A check follows the client conversation instead of a fixed form:
+- **Nothing is mandatory** — client, product, files, ingredients, message are all optional.
+- **A round = one client message**: a question, new images, corrected artwork, or any mix.
+  New rounds can be added any time; the latest round is active, earlier ones are history.
+- **Up to 10 files per round** (JPG/PNG/WebP/PDF, 15 MB each), shown as a gallery.
+- The AI uses the **latest artwork and ingredient list given anywhere** in the conversation,
+  plus a text history of earlier rounds (client messages, confirmed / dismissed points,
+  earlier answers, closing decisions), and **answers the client's question** (`ai.answer`).
+- The client email includes that answer and is **editable** before copying (with reset).
+- Existing data migrated: `round.artwork` → `round.attachments[0]`.
+
 ## 8. Progress
 
 ### Backend
@@ -137,6 +150,12 @@ on the server host. Never commit the key (`.env` is gitignored).
 - [x] AI writes remarks + summary in English; target markets per check; one remark per issue,
       missing particulars grouped per sector; temperature 0.2
 - [x] "Email to client" (English, confirmed remarks only, grouped by severity, copy button)
+- [x] Proofreading & consistency: 13 more rules (spelling, grammar, diacritics, language-version
+      parity, terminology, number formats, placeholders; name/weight/flavour consistency; claim
+      numbers vs nutrition table, Annex XIV energy factors; print-technical) → 60 rules total;
+      AI proofreads all visible text and quotes "wrong → correct"
+- [x] AI reply has a structured `missing` list → the server turns it into ONE critical remark per
+      sector ("Mandatory information not visible on the artwork: …") — no per-item duplicates
 - [ ] ~~Seed a starter checklist with Quality~~ (food-labelling basics: name, ingredients
       in descending order, allergens emphasised, net quantity, best-before, storage,
       producer, nutrition table order, min. font size, Macedonian language)
@@ -144,6 +163,8 @@ on the server host. Never commit the key (`.env` is gitignored).
 - [ ] Annotate remarks on the artwork (pin a remark to a spot on the image)
 
 ## 9. Open questions
+- AI still sometimes adds "cannot be assessed because missing" remarks on partial artwork; a newer
+  model (change `PACKAGING_AI_MODEL`) may follow instructions more strictly — try on real labels.
 - Manual remarks are typed by staff — only a placeholder asks for English. Auto-translate them?
 - Should the client email also go out from the app (send button), or stay copy-paste?
 - ~~Which AI provider/model?~~ → OpenAI (model configurable)

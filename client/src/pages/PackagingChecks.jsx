@@ -110,7 +110,9 @@ const PackagingChecks = () => {
                     <span className="text-[11px] text-slate-400">{t('round', { n: c.round })}</span>
                   </div>
                   <p className="text-sm font-semibold text-slate-900 mt-1 truncate">
-                    {c.client} <span className="font-normal text-slate-500">· {c.product}</span>
+                    {c.client || c.product ? (
+                      <>{c.client || '—'} <span className="font-normal text-slate-500">· {c.product || '—'}</span></>
+                    ) : <span className="font-normal text-slate-500">{t('untitled')}</span>}
                   </p>
                   {c.markets && <p className="text-xs text-slate-400 truncate">{c.markets}</p>}
                 </div>

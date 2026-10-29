@@ -35,17 +35,22 @@ const remarkSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// A round = one step of the conversation with the client: a question, new artwork,
+// corrected artwork, or any mix. Nothing is mandatory; the latest round is active.
 const roundSchema = new mongoose.Schema(
   {
     number:          { type: Number, required: true },
-    artwork:         { type: fileRefSchema, required: true },
+    clientMessage:   { type: String, default: '' }, // what the client asked / wrote
+    attachments:     [fileRefSchema],                // artwork images / PDFs (0..n)
     ingredientsText: { type: String, default: '' },
     ingredientsFile: { type: fileRefSchema },
     note:            { type: String, default: '' },
     createdBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     ai: {
-      status:  { type: String, enum: ['not_configured', 'done', 'failed'], default: 'not_configured' },
+      // skipped → nothing to review (no artwork anywhere and no client message)
+      status:  { type: String, enum: ['not_configured', 'skipped', 'done', 'failed'], default: 'not_configured' },
       summary: { type: String, default: '' },
+      answer:  { type: String, default: '' }, // reply to the client's question, in English
       error:   { type: String, default: '' },
       model:   { type: String, default: '' },
       ranAt:   { type: Date },
@@ -64,8 +69,8 @@ const roundSchema = new mongoose.Schema(
 const packagingCheckSchema = new mongoose.Schema(
   {
     code:      { type: String, required: true, unique: true }, // e.g. "ПА-0007"
-    client:    { type: String, required: true, trim: true },
-    product:   { type: String, required: true, trim: true },
+    client:    { type: String, default: '', trim: true },
+    product:   { type: String, default: '', trim: true },
     markets:   { type: String, default: '', trim: true }, // target countries, e.g. "Sweden, Finland"
     // in_review → current round open; approved / changes_required → last round closed
     status:    { type: String, enum: ['in_review', 'approved', 'changes_required'], default: 'in_review' },

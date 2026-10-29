@@ -1,29 +1,45 @@
 import { useTranslation } from 'react-i18next';
 import FileDrop from './FileDrop.jsx';
+import MultiFileDrop from './MultiFileDrop.jsx';
 import { ARTWORK_ACCEPT, INGREDIENTS_ACCEPT } from './roundForm.js';
 
-// Artwork + ingredient list + note — shared by "new check" and "new round".
-const RoundInputs = ({ value, onChange, errors = {} }) => {
+const Optional = () => {
+  const { t } = useTranslation('packaging');
+  return <span className="ml-1 font-normal text-slate-400">({t('form.optional')})</span>;
+};
+
+// One step of the conversation with the client — every field is optional.
+// Shared by "new check" and "new round".
+const RoundInputs = ({ value, onChange }) => {
   const { t } = useTranslation('packaging');
   const set = (patch) => onChange({ ...value, ...patch });
 
   return (
     <div className="space-y-5">
       <div>
-        <label className="label">{t('form.artwork')}</label>
-        <FileDrop
-          file={value.artwork}
-          onChange={(artwork) => set({ artwork })}
-          accept={ARTWORK_ACCEPT}
-          hint={t('form.artworkHint')}
-          error={errors.artwork}
+        <label className="label">{t('form.clientMessage')}<Optional /></label>
+        <textarea
+          className="input min-h-[90px]"
+          value={value.clientMessage}
+          onChange={(e) => set({ clientMessage: e.target.value })}
+          placeholder={t('form.clientMessagePlaceholder')}
         />
       </div>
 
       <div>
-        <label className="label">{t('form.ingredients')}</label>
+        <label className="label">{t('form.attachments')}<Optional /></label>
+        <MultiFileDrop
+          files={value.attachments}
+          onChange={(attachments) => set({ attachments })}
+          accept={ARTWORK_ACCEPT}
+          hint={t('form.attachmentsHint')}
+        />
+      </div>
+
+      <div>
+        <label className="label">{t('form.ingredients')}<Optional /></label>
         <textarea
-          className={`input min-h-[120px] ${errors.ingredients ? 'border-red-400' : ''}`}
+          className="input min-h-[100px]"
           value={value.ingredientsText}
           onChange={(e) => set({ ingredientsText: e.target.value })}
           placeholder={t('form.ingredientsPlaceholder')}
@@ -36,11 +52,10 @@ const RoundInputs = ({ value, onChange, errors = {} }) => {
           hint={t('form.ingredientsFileHint')}
           compact
         />
-        {errors.ingredients && <p className="text-red-500 text-xs mt-1">{errors.ingredients}</p>}
       </div>
 
       <div>
-        <label className="label">{t('form.note')}</label>
+        <label className="label">{t('form.note')}<Optional /></label>
         <textarea
           className="input min-h-[60px]"
           value={value.note}

@@ -13,19 +13,20 @@ const INGREDIENT_TYPES = /^(image\/(jpeg|png|webp)|application\/pdf|text\/plain|
 // Files are kept in memory only until they are written to GridFS.
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 15 * 1024 * 1024, files: 2 },
+  limits: { fileSize: 15 * 1024 * 1024, files: 11 },
   fileFilter: (_req, file, cb) => {
-    const ok = file.fieldname === 'artwork'
+    const ok = file.fieldname === 'attachments'
       ? ARTWORK_TYPES.test(file.mimetype)
       : INGREDIENT_TYPES.test(file.mimetype);
     cb(ok ? null : Object.assign(new Error('Неподдржан тип на датотека'), { status: 400 }), ok);
   },
-}).fields([{ name: 'artwork', maxCount: 1 }, { name: 'ingredientsFile', maxCount: 1 }]);
+}).fields([{ name: 'attachments', maxCount: 10 }, { name: 'ingredientsFile', maxCount: 1 }]);
 
 // multer's own errors (e.g. LIMIT_FILE_SIZE) carry no HTTP status.
 const uploadFiles = (req, res, next) =>
   upload(req, res, (err) => {
     if (err?.code === 'LIMIT_FILE_SIZE') return next(Object.assign(new Error('Датотеката е поголема од 15 MB'), { status: 400 }));
+    if (err?.code === 'LIMIT_FILE_COUNT' || err?.code === 'LIMIT_UNEXPECTED_FILE') return next(Object.assign(new Error('Најмногу 10 датотеки по рунда'), { status: 400 }));
     next(err);
   });
 

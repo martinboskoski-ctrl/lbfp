@@ -11,6 +11,19 @@ const REMARKS_SCHEMA = {
   type: 'object',
   properties: {
     summary: { type: 'string' },
+    answer:  { type: 'string' },
+    missing: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          sector: { type: 'string', enum: PACKAGING_SECTORS },
+          items:  { type: 'array', items: { type: 'string' } },
+        },
+        required: ['sector', 'items'],
+        additionalProperties: false,
+      },
+    },
     remarks: {
       type: 'array',
       items: {
@@ -26,7 +39,7 @@ const REMARKS_SCHEMA = {
       },
     },
   },
-  required: ['summary', 'remarks'],
+  required: ['summary', 'answer', 'missing', 'remarks'],
   additionalProperties: false,
 };
 

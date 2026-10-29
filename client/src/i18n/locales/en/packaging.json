@@ -48,7 +48,7 @@
     "ingredientsFileHint": "PDF, image, DOCX or TXT — optional",
     "note": "Note",
     "notePlaceholder": "What the client asked, deadline, special requests… (optional)",
-    "submit": "Start check",
+    "submit": "Start",
     "submitting": "Saving and checking…",
     "required": "Required",
     "ingredientsRequired": "Enter the ingredient list or attach a document",
@@ -57,7 +57,13 @@
     "remove": "Remove",
     "markets": "Target markets",
     "marketsPlaceholder": "e.g. Sweden, Finland, Germany",
-    "marketsHint": "The AI checks language and national requirements against these markets."
+    "marketsHint": "The AI checks language and national requirements against these markets.",
+    "optional": "optional",
+    "clientMessage": "Client's message / question",
+    "clientMessagePlaceholder": "Paste what the client wrote — question, request, comment…",
+    "attachments": "Artwork / images",
+    "attachmentsHint": "Drag one or more files here or click — JPG, PNG, WebP, PDF, up to 10 × 15 MB",
+    "filesRejected": "Some files were not added (allowed: JPG, PNG, WebP, PDF up to 15 MB, at most {{max}})."
   },
   "detail": {
     "back": "All checks",
@@ -96,14 +102,21 @@
     "rule": "Rule",
     "answeredBy": "Answered by",
     "closeRound": "Close round",
-    "newRound": "New round",
+    "newRound": "New message / round",
     "deleteCheck": "Delete check",
     "confirmDelete": "Delete this check with all rounds and files?",
     "confirmDeleteRemark": "Delete this remark?",
     "outcome": "Decision",
     "readOnly": "This round is closed — read only.",
     "yourSector": "your sector",
-    "markets": "Markets"
+    "markets": "Markets",
+    "clientMessage": "Client's message",
+    "noAttachments": "No files in this round.",
+    "usesEarlierArtwork": "The AI uses the artwork from",
+    "usesEarlierIngredients": "Using the list from",
+    "noIngredients": "No ingredient list given yet.",
+    "aiAnswer": "Answer for the client",
+    "aiSkipped": "Nothing to review — no artwork and no client message. Add remarks manually."
   },
   "close": {
     "title": "Close round {{n}}",
@@ -118,8 +131,8 @@
   },
   "newRound": {
     "title": "New round {{n}}",
-    "hint": "Upload the client's corrected artwork. Earlier rounds stay in the history.",
-    "submit": "Start round"
+    "hint": "Each new message from the client is a new round — a question, new images or corrected artwork. Nothing is mandatory; the AI uses the latest images and ingredient list given.",
+    "submit": "Add round"
   },
   "rulesPage": {
     "subtitle": "AI checks the artwork against these rules. Each rule has a responsible sector.",
@@ -154,6 +167,10 @@
     "copied": "Copied",
     "pendingNote_one": "{{count}} remark is still awaiting confirmation — it is included once the sector confirms it.",
     "pendingNote_other": "{{count}} remarks are still awaiting confirmation — they are included once the sectors confirm them.",
-    "hint": "In English, confirmed remarks only. Remarks marked \"Not an issue\" are left out."
-  }
+    "hint": "In English: the answer to the question and the confirmed remarks. You can edit it before copying.",
+    "reset": "Reset",
+    "resetHint": "Back to the generated text",
+    "editedHint": "Edited manually — it will not update automatically until you click “Reset”."
+  },
+  "untitled": "No client / product"
 }

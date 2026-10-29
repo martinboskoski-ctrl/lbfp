@@ -54,67 +54,106 @@ const nextCode = async () => {
   return `ПА-${String(n).padStart(4, '0')}`;
 };
 
-// Stores the uploaded artwork / ingredient file for a new round.
+// Stores whatever the client sent for this round — nothing is mandatory.
 const buildRound = async (req, number, checkId) => {
-  const artwork = req.files?.artwork?.[0];
-  if (!artwork) throw httpError(400, 'Прикачете го дизајнот на амбалажата');
-  const ingredientsFile = req.files?.ingredientsFile?.[0];
-  const ingredientsText = (req.body.ingredientsText || '').trim();
-  if (!ingredientsText && !ingredientsFile) throw httpError(400, 'Внесете ја листата на состојки');
-
   const meta = { checkId, round: number };
+  const attachments = [];
+  for (const file of req.files?.attachments || []) attachments.push(await saveFile(file, meta));
+  const ingredientsFile = req.files?.ingredientsFile?.[0];
   return {
     number,
-    artwork: await saveFile(artwork, meta),
+    clientMessage: (req.body.clientMessage || '').trim(),
+    attachments,
     ingredientsFile: ingredientsFile ? await saveFile(ingredientsFile, meta) : undefined,
-    ingredientsText,
+    ingredientsText: (req.body.ingredientsText || '').trim(),
     note: (req.body.note || '').trim(),
     createdBy: req.user._id,
   };
 };
 
-// Runs the AI review on the check's current round. Pending AI remarks are replaced;
-// answered ones stay. Returns the remarks it added.
+const latestRound = (check, has) => [...check.rounds].reverse().find(has);
+
+// DOCX / TXT ingredient files are sent as text; images and PDFs as attachments.
+const loadIngredients = async (round) => {
+  if (!round) return { text: '', file: undefined };
+  let text = round.ingredientsText;
+  let file;
+  if (round.ingredientsFile) {
+    const buffer = await readFile(round.ingredientsFile.fileId);
+    if (round.ingredientsFile.mimeType === DOCX) text = [text, docxToText(buffer)].filter(Boolean).join('\n\n');
+    else if (round.ingredientsFile.mimeType === 'text/plain') text = [text, buffer.toString('utf8')].filter(Boolean).join('\n\n');
+    else file = { buffer, mimeType: round.ingredientsFile.mimeType };
+  }
+  return { text, file };
+};
+
+const DECISION_TEXT = { approved: 'approved', changes_required: 'changes required' };
+
+// Earlier rounds as plain text, so the AI can follow the conversation.
+const conversationHistory = (rounds) => rounds.map((r) => {
+  const parts = [`Round ${r.number}:`];
+  if (r.clientMessage) parts.push(`Client wrote: ${r.clientMessage}`);
+  parts.push(r.attachments?.length ? `Client sent ${r.attachments.length} artwork file(s).` : 'No artwork in this round.');
+  const confirmed = r.remarks.filter((m) => m.status === 'confirmed').map((m) => `- ${m.text}`);
+  const disputed = r.remarks.filter((m) => m.status === 'disputed').map((m) => `- ${m.text} (our team: not an issue — ${m.response?.comment || ''})`);
+  if (confirmed.length) parts.push('Points we raised (confirmed by our team):', ...confirmed);
+  if (disputed.length) parts.push('Points dismissed by our team:', ...disputed);
+  if (r.ai?.answer) parts.push(`Our answer: ${r.ai.answer}`);
+  if (r.outcome?.decision) parts.push(`Round closed: ${DECISION_TEXT[r.outcome.decision]}. ${r.outcome.summary || ''}`);
+  return parts.join('\n');
+}).join('\n\n');
+
+// Runs the AI on the check's current round, using the latest artwork and ingredient
+// list given anywhere in the conversation. Pending AI remarks are replaced; answered
+// ones stay. Returns the remarks it added.
 const runAi = async (check) => {
   const round = currentRound(check);
+  const artworkRound = latestRound(check, (r) => r.attachments?.length);
+  const ingredientsRound = latestRound(check, (r) => r.ingredientsText || r.ingredientsFile);
+
+  if (!artworkRound && !round.clientMessage) {
+    round.ai = { status: 'skipped', summary: '', answer: '', error: '', model: '', ranAt: undefined };
+    return [];
+  }
+
   const rules = await PackagingRule.find({ active: true }).lean();
   try {
-    const artworkBuffer = await readFile(round.artwork.fileId);
-    let ingredientsText = round.ingredientsText;
-    let ingredientsFile;
-    if (round.ingredientsFile) {
-      const buffer = await readFile(round.ingredientsFile.fileId);
-      if (round.ingredientsFile.mimeType === DOCX) {
-        ingredientsText = [ingredientsText, docxToText(buffer)].filter(Boolean).join('\n\n');
-      } else if (round.ingredientsFile.mimeType === 'text/plain') {
-        ingredientsText = [ingredientsText, buffer.toString('utf8')].filter(Boolean).join('\n\n');
-      } else {
-        ingredientsFile = { buffer, mimeType: round.ingredientsFile.mimeType };
-      }
-    }
+    const attachments = artworkRound
+      ? await Promise.all(artworkRound.attachments.map(async (f, i) => ({
+          buffer: await readFile(f.fileId), mimeType: f.mimeType, label: `artwork-${i + 1}`,
+        })))
+      : [];
+    const ingredients = await loadIngredients(ingredientsRound);
 
     const result = await reviewArtwork({
-      artwork: { buffer: artworkBuffer, mimeType: round.artwork.mimeType },
-      ingredientsText,
-      ingredientsFile,
+      attachments,
+      artworkFromRound: artworkRound && artworkRound.number !== round.number ? artworkRound.number : null,
+      ingredientsText: ingredients.text,
+      ingredientsFile: ingredients.file,
+      clientMessage: round.clientMessage,
+      history: conversationHistory(check.rounds.slice(0, -1)),
       markets: check.markets,
       rules,
     });
 
     round.remarks = round.remarks.filter((r) => !(r.source === 'ai' && r.status === 'pending'));
     round.remarks.push(...result.remarks);
-    round.ai = { status: 'done', summary: result.summary, error: '', model: result.model, ranAt: new Date() };
+    round.ai = {
+      status: 'done', summary: result.summary, answer: result.answer, error: '', model: result.model, ranAt: new Date(),
+    };
     return result.remarks.length ? round.remarks.slice(-result.remarks.length) : [];
   } catch (err) {
     if (err instanceof AiNotConfiguredError) {
-      round.ai = { status: 'not_configured', summary: '', error: '', model: '', ranAt: undefined };
+      round.ai = { status: 'not_configured', summary: '', answer: '', error: '', model: '', ranAt: undefined };
     } else {
       console.error('Packaging AI review failed:', err);
-      round.ai = { status: 'failed', summary: '', error: err.message, model: '', ranAt: new Date() };
+      round.ai = { status: 'failed', summary: '', answer: '', error: err.message, model: '', ranAt: new Date() };
     }
     return [];
   }
 };
+
+const label = (check) => [check.client, check.product].filter(Boolean).join(' · ') || check.code;
 
 const notifyNewRemarks = (check, remarks, actor) => {
   const sectors = [...new Set(remarks.filter((r) => r.status === 'pending').map((r) => r.sector))];
@@ -122,7 +161,7 @@ const notifyNewRemarks = (check, remarks, actor) => {
   return notifySectors(sectors, actor, {
     type: 'packaging_remarks',
     title: `Забелешки за потврда: ${check.code}`,
-    message: `${check.client} · ${check.product}`,
+    message: label(check),
     link: link(check),
   });
 };
@@ -135,7 +174,7 @@ const notifyIfAllAnswered = async (check, actor) => {
   await notifyMany([check.createdBy], {
     type: 'packaging_answered',
     title: `Сите забелешки се одговорени: ${check.code}`,
-    message: `${check.client} · ${check.product} — рунда ${round.number}`,
+    message: `${label(check)} — рунда ${round.number}`,
     link: link(check),
   });
 };
@@ -182,8 +221,6 @@ export const create = async (req, res) => {
   if (!isLead(req.user)) throw httpError(403, 'Само продажба може да започне проверка');
   const client = (req.body.client || '').trim();
   const product = (req.body.product || '').trim();
-  if (!client || !product) throw httpError(400, 'Внесете клиент и производ');
-
   const markets = (req.body.markets || '').trim();
   const check = new PackagingCheck({ code: await nextCode(), client, product, markets, createdBy: req.user._id });
   check.rounds.push(await buildRound(req, 1, check._id));
@@ -193,7 +230,7 @@ export const create = async (req, res) => {
   await notifySectors(REVIEWER_SECTORS, req.user, {
     type: 'packaging_new',
     title: `Нова проверка на амбалажа: ${check.code}`,
-    message: `${client} · ${product}`,
+    message: label(check),
     link: link(check),
   });
   await notifyNewRemarks(check, added, req.user);
@@ -203,8 +240,8 @@ export const create = async (req, res) => {
 export const addRound = async (req, res) => {
   if (!isLead(req.user)) throw httpError(403, 'Само продажба може да додаде нова рунда');
   const check = await loadCheck(req.params.id);
-  if (check.status === 'in_review') throw httpError(409, 'Прво затворете ја тековната рунда');
 
+  // Any time: each new client message starts a round; earlier rounds become history.
   check.rounds.push(await buildRound(req, check.rounds.length + 1, check._id));
   check.status = 'in_review';
   const added = await runAi(check);
@@ -213,7 +250,7 @@ export const addRound = async (req, res) => {
   await notifySectors(REVIEWER_SECTORS, req.user, {
     type: 'packaging_new',
     title: `Нова рунда (${check.rounds.length}): ${check.code}`,
-    message: `${check.client} · ${check.product}`,
+    message: label(check),
     link: link(check),
   });
   await notifyNewRemarks(check, added, req.user);
@@ -255,7 +292,7 @@ export const close = async (req, res) => {
     await notifySectors(sectors, req.user, {
       type: 'packaging_closed',
       title: `${decision === 'approved' ? 'Одобрено' : 'Потребни корекции'}: ${check.code}`,
-      message: `${check.client} · ${check.product} — рунда ${round.number}`,
+      message: `${label(check)} — рунда ${round.number}`,
       link: link(check),
     });
   }
@@ -268,7 +305,7 @@ export const remove = async (req, res) => {
   if (!isTopMgmt(req.user) && !isCreator) throw httpError(403, 'Немате дозвола');
 
   for (const round of check.rounds) {
-    await deleteFile(round.artwork.fileId);
+    for (const f of round.attachments) await deleteFile(f.fileId);
     if (round.ingredientsFile) await deleteFile(round.ingredientsFile.fileId);
   }
   await check.deleteOne();
@@ -359,7 +396,7 @@ export const downloadFile = async (req, res) => {
   assertTool(req.user);
   const check = await loadCheck(req.params.id);
   const ref = check.rounds
-    .flatMap((r) => [r.artwork, r.ingredientsFile])
+    .flatMap((r) => [...r.attachments, r.ingredientsFile])
     .find((f) => f && String(f.fileId) === req.params.fileId);
   if (!ref) throw httpError(404, 'Датотеката не е пронајдена');
 

@@ -51,7 +51,7 @@ Report only real problems or points a person must verify — no praise, no gener
 Each remark: what is wrong, where on the artwork, and what it should say or how to fix it.
 Reply ONLY with valid JSON, no other text.`;
 
-const buildPrompt = (rules, ingredientsText, markets) => {
+const buildPrompt = ({ rules, ingredientsText, markets, clientMessage, history, artworkCount, artworkFromRound }) => {
   const ruleLines = rules.map((r) =>
     `- [${r._id}] (${SECTOR_NAMES[r.sector]}${r.category ? ` · ${r.category}` : ''}) ${r.text}`
   ).join('\n');
@@ -62,28 +62,52 @@ CHECKLIST RULES (id in brackets, then the sector responsible for the rule):
 ${ruleLines || '(no active rules — check consistency with the ingredient list only)'}
 
 PRODUCT INGREDIENT LIST / RECIPE:
-${ingredientsText?.trim() || '(see the attached document)'}
+${ingredientsText?.trim() || '(not provided — see an attached document if any, otherwise do not invent one)'}
 
-TASK: review the attached artwork against the ingredient list and the rules.
+CONVERSATION SO FAR WITH THE CLIENT:
+${history?.trim() || '(this is the first round)'}
+
+CLIENT'S MESSAGE IN THIS ROUND:
+${clientMessage?.trim() || '(no message — the client only sent files)'}
+
+ARTWORK: ${artworkCount
+    ? `${artworkCount} file(s) attached${artworkFromRound ? ` — sent by the client in round ${artworkFromRound}; no new artwork in this round` : ', sent in this round'}. Treat multiple files as panels/versions of the same pack.`
+    : 'none available — answer the client\'s message from the conversation, rules and your expertise; do not review artwork.'}
+
+TASK:
+- If the client asked something, answer it in "answer": a short, clear reply in English that Sales
+  can paste into an email to the client (no greeting or signature). Otherwise leave "answer" empty.
+- Do not repeat points from earlier rounds that our team dismissed, and only re-raise earlier
+  confirmed points if they are still not fixed in the current artwork.
+- If there is artwork, review it against the ingredient list and the rules:
 - Raise one remark per distinct issue. Never raise the same issue twice under different rules.
-- If the artwork clearly shows only part of the pack (e.g. only the front panel) and several
-  mandatory particulars are therefore absent, raise ONE remark per responsible sector that lists
-  the missing particulars, instead of one remark per particular. Each missing particular belongs
-  to exactly one sector's list (the sector of its rule), and must not appear in any other remark.
+- Mandatory information that is NOT VISIBLE on the artwork at all (e.g. no ingredient list, no
+  nutrition table, no date, no lot space) goes ONLY into "missing", as short item names grouped
+  by the responsible sector (each item in exactly one sector). Never also raise a remark for it,
+  and never raise a remark about something being unverifiable because it is missing.
+- "remarks" are for problems in what IS on the artwork: wrong, incomplete, misleading,
+  misspelled, inconsistent or badly placed content, and points to confirm.
 - Judge language requirements against the target markets above.
+- Proofread ALL visible text in every language, even where no rule applies: spelling, grammar,
+  punctuation, diacritics, typos, inconsistent names/numbers between panels and language
+  versions, and mismatches with the ingredient list. For each error quote the exact wrong text
+  in its original language and give the correction (e.g. 'Ingredents' → 'Ingredients').
+  Group several small typos of the same panel into one remark.
 - If a rule cannot be verified from the artwork and documents (e.g. supplier certificates,
   lab results), raise it only when it matters for this product, as severity "info", phrased as
   something to confirm.
 - If the remark relates to a rule, give its id. Otherwise choose the sector:
   r_and_d = recipe, ingredients, additives, nutrition values, claims;
-  quality_assurance = legal labelling, allergen emphasis, dates, legibility, language;
-  nabavki = packaging material, print specification, food-contact and packaging compliance;
+  quality_assurance = legal labelling, allergen emphasis, dates, legibility, language, proofreading;
+  nabavki = packaging material, print specification and print-technical issues, food-contact and packaging compliance;
   sales = client agreements, markets, business operator details, barcode.
 - severity: "critical" = non-compliant / must be fixed before printing; "warning" = should be
   fixed or confirmed; "info" = suggestion or point to confirm.
 
 Format:
-{"summary": "2-4 sentence overview in English of the overall state of the artwork",
+{"summary": "2-4 sentence overview in English for our team (state of the artwork and/or what the client asked)",
+ "answer": "reply to the client's question in English, or empty string",
+ "missing": [{"sector": "<sector>", "items": ["short name of missing particular", ...]}],
  "remarks": [{"ruleId": "<id or null>", "sector": "<sector>", "severity": "critical|warning|info", "text": "remark in English"}]}`;
 };
 
@@ -110,7 +134,32 @@ const parseResponse = (raw, rules) => {
       };
     });
 
-  return { summary: typeof data.summary === 'string' ? data.summary.trim() : '', remarks };
+  // Everything not visible on the artwork becomes ONE critical remark per sector.
+  const missingRemarks = (Array.isArray(data.missing) ? data.missing : [])
+    .map((m) => ({
+      sector: PACKAGING_SECTORS.includes(m?.sector) ? m.sector : 'quality_assurance',
+      items: [...new Set((Array.isArray(m?.items) ? m.items : []).map((i) => String(i).trim()).filter(Boolean))],
+    }))
+    .filter((m) => m.items.length)
+    .reduce((acc, m) => {
+      const existing = acc.find((a) => a.sector === m.sector);
+      if (existing) existing.items.push(...m.items.filter((i) => !existing.items.includes(i)));
+      else acc.push(m);
+      return acc;
+    }, [])
+    .map((m) => ({
+      text: `Not visible on the artwork: ${m.items.join('; ')}.`,
+      severity: 'critical',
+      sector: m.sector,
+      ruleText: '',
+      source: 'ai',
+    }));
+
+  return {
+    summary: typeof data.summary === 'string' ? data.summary.trim() : '',
+    answer: typeof data.answer === 'string' ? data.answer.trim() : '',
+    remarks: [...missingRemarks, ...remarks],
+  };
 };
 
 // Word ingredient lists are sent as text; images/PDFs are attached as-is.
@@ -125,14 +174,18 @@ export const docxToText = (buffer) => {
 };
 
 /**
- * @param {{ artwork: {buffer, mimeType}, ingredientsText: string,
- *           ingredientsFile?: {buffer, mimeType}, markets?: string, rules: Array }} input
- * @returns {Promise<{ summary: string, remarks: Array, model: string }>}
+ * @param {{ attachments: Array<{buffer, mimeType, label}>, artworkFromRound?: number|null,
+ *           ingredientsText: string, ingredientsFile?: {buffer, mimeType}, clientMessage?: string,
+ *           history?: string, markets?: string, rules: Array }} input
+ * @returns {Promise<{ summary: string, answer: string, remarks: Array, model: string }>}
  */
-export const reviewArtwork = async ({ artwork, ingredientsText, ingredientsFile, markets, rules }) => {
+export const reviewArtwork = async ({
+  attachments: artwork = [], artworkFromRound = null, ingredientsText, ingredientsFile,
+  clientMessage = '', history = '', markets, rules,
+}) => {
   if (!isAiConfigured()) throw new AiNotConfiguredError();
 
-  const attachments = [{ mimeType: artwork.mimeType, base64: artwork.buffer.toString('base64'), label: 'artwork' }];
+  const attachments = artwork.map((a) => ({ mimeType: a.mimeType, base64: a.buffer.toString('base64'), label: a.label }));
   if (ingredientsFile && /^(image\/|application\/pdf)/.test(ingredientsFile.mimeType)) {
     attachments.push({ mimeType: ingredientsFile.mimeType, base64: ingredientsFile.buffer.toString('base64'), label: 'ingredients' });
   }
@@ -142,7 +195,9 @@ export const reviewArtwork = async ({ artwork, ingredientsText, ingredientsFile,
     apiKey: process.env.PACKAGING_AI_API_KEY,
     model,
     system: SYSTEM,
-    prompt: buildPrompt(rules, ingredientsText, markets),
+    prompt: buildPrompt({
+      rules, ingredientsText, markets, clientMessage, history, artworkCount: artwork.length, artworkFromRound,
+    }),
     attachments,
   });
   return { ...parseResponse(raw, rules), model };

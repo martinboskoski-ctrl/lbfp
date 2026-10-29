@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
 import RoundInputs from './RoundInputs.jsx';
-import { emptyRound, validateRound, appendRound } from './roundForm.js';
+import { emptyRound, appendRound } from './roundForm.js';
 import { useClosePackagingRound, useAddPackagingRound } from '../../hooks/usePackaging.js';
 
 const Modal = ({ title, onClose, children }) => (
@@ -73,14 +73,10 @@ export const CloseRoundModal = ({ check, round, isTopMgmt, onClose }) => {
 export const NewRoundModal = ({ check, onClose }) => {
   const { t } = useTranslation('packaging');
   const addRound = useAddPackagingRound();
-  const last = check.rounds[check.rounds.length - 1];
-  const [round, setRound] = useState(emptyRound(last?.ingredientsText || ''));
-  const [errors, setErrors] = useState({});
+  // Ingredients start empty: the AI falls back to the latest list given in the conversation.
+  const [round, setRound] = useState(emptyRound());
 
   const submit = () => {
-    const errs = validateRound(round, t);
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
     const form = new FormData();
     appendRound(form, round);
     addRound.mutate({ id: check._id, form }, { onSuccess: onClose });
@@ -89,7 +85,7 @@ export const NewRoundModal = ({ check, onClose }) => {
   return (
     <Modal title={t('newRound.title', { n: check.rounds.length + 1 })} onClose={onClose}>
       <p className="text-sm text-slate-500 mb-4">{t('newRound.hint')}</p>
-      <RoundInputs value={round} onChange={setRound} errors={errors} />
+      <RoundInputs value={round} onChange={setRound} />
       <div className="flex justify-end gap-2 mt-5">
         <button onClick={onClose} className="btn-secondary">{t('detail.cancel')}</button>
         <button onClick={submit} disabled={addRound.isPending} className="btn-primary flex items-center gap-2">
