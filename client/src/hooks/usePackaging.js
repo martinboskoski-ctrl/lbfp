@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   listPackagingChecksApi, getPackagingCheckApi, createPackagingCheckApi, deletePackagingCheckApi,
   addPackagingRoundApi, rerunPackagingAiApi, closePackagingRoundApi, packagingFileApi,
-  addPackagingRemarkApi, updatePackagingRemarkApi, deletePackagingRemarkApi, respondPackagingRemarkApi,
+  updatePackagingEmailApi, updatePackagingSectionApi, approvePackagingSectionApi, addPackagingCommentApi, deletePackagingCommentApi,
   listPackagingRulesApi, createPackagingRuleApi, updatePackagingRuleApi, deletePackagingRuleApi,
 } from '../api/packaging.api.js';
 import toast from 'react-hot-toast';
@@ -43,10 +43,11 @@ export const useCreatePackagingCheck = () => useCheckMutation(createPackagingChe
 export const useAddPackagingRound = () => useCheckMutation(({ id, form }) => addPackagingRoundApi(id, form), 'toast.roundAdded');
 export const useRerunPackagingAi = () => useCheckMutation((id) => rerunPackagingAiApi(id), 'toast.aiDone');
 export const useClosePackagingRound = () => useCheckMutation(({ id, ...body }) => closePackagingRoundApi(id, body), 'toast.closed');
-export const useAddPackagingRemark = () => useCheckMutation(({ id, ...body }) => addPackagingRemarkApi(id, body), 'toast.remarkAdded');
-export const useUpdatePackagingRemark = () => useCheckMutation(({ id, remarkId, ...body }) => updatePackagingRemarkApi(id, remarkId, body));
-export const useDeletePackagingRemark = () => useCheckMutation(({ id, remarkId }) => deletePackagingRemarkApi(id, remarkId));
-export const useRespondPackagingRemark = () => useCheckMutation(({ id, remarkId, ...body }) => respondPackagingRemarkApi(id, remarkId, body));
+export const useUpdatePackagingEmail = () => useCheckMutation(({ id, ...body }) => updatePackagingEmailApi(id, body), 'toast.saved');
+export const useUpdatePackagingSection = () => useCheckMutation(({ id, key, ...body }) => updatePackagingSectionApi(id, key, body), 'toast.saved');
+export const useApprovePackagingSection = () => useCheckMutation(({ id, key, ...body }) => approvePackagingSectionApi(id, key, body));
+export const useAddPackagingComment = () => useCheckMutation(({ id, key, ...body }) => addPackagingCommentApi(id, key, body));
+export const useDeletePackagingComment = () => useCheckMutation(({ id, key, commentId }) => deletePackagingCommentApi(id, key, commentId));
 
 export const useDeletePackagingCheck = () => {
   const qc = useQueryClient();

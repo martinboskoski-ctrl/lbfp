@@ -1,3 +1,96 @@
+# Packaging check v2 — one shared client email instead of remark cards (2026-10-30)
+
+## Goal
+Replace the per-remark Потврди / Не е проблем cards with ONE draft email per round,
+grouped into department paragraphs. Departments edit/comment/approve their paragraph
+in the app; Sales (lead) sends the finished email.
+
+## Decisions (confirmed 2026-10-30)
+| Paragraph | Owner (edits + approves) | Covers |
+|---|---|---|
+| R&D | r_and_d | nutrition facts, recipe, ingredients, additives, claims |
+| Graphics | nabavki | dimensions, sizes, x-height, legibility, print/technical, material marks |
+| Quality | quality_assurance | compliance, legal particulars, allergens, dates, language, wording vs nutrition facts |
+| General | quality_assurance | grammar, spelling, wording, consistency, other technical |
+- Paragraph with no remarks → left out of the email (owner still approves "nothing from us").
+- Owner dept (+ top mgmt) edits/approves its paragraph; everyone else comments/suggests.
+- Sales edits the opening (incl. AI answer to the client's question) and closing.
+- Per-remark cards removed — email only.
+
+## Email shape (English, goes to the client)
+```
+Dear <client> team,
+Thank you for sending the artwork for <product> (target markets: …). Our feedback:
+
+The remarks from our R&D department are:
+- QUID for peanuts is missing; state it in the ingredient list, e.g. "peanuts (18%)".
+- Nutrition is given per portion only; add values per 100 g (EN + AR).
+
+The remarks from our Graphics department are:
+- …
+The remarks from our Quality department are: …
+General remarks (grammar, wording): …
+
+Once updated, please send the revised artwork and we will review it again.
+Kind regards, <sales user> · LBFP DOO Bitola
+```
+
+## Data model — `round.email` replaces `round.remarks`
+```
+email: {
+  opening, closing: String,                   // Sales
+  sections: [{ key: 'rnd'|'graphics'|'quality'|'general', sector,
+               items: [String],                // one short sentence each
+               edited: Boolean,                // a person changed it → AI re-run keeps it
+               approval: { by, at },           // cleared by any later edit
+               comments: [{ text, by, at }] }],
+  sent: { text, by, at }                       // snapshot of what Sales sent
+}
+```
+All four sections always exist (so a dept can add what the AI missed).
+
+## Backend
+- [x] `PackagingCheck.js`: add `email` subdoc, drop `remarks`; `EMAIL_SECTIONS` constant (key → sector)
+- [x] `packagingAi.js`: prompt returns `{summary, answer, sections: {rnd:[], graphics:[], quality:[], general:[]}}`
+      — one short, clear sentence per remark; "missing" particulars become sentences in the right section;
+      rules keep their sector → section hint
+- [x] `runAi`: fills opening (+answer) and sections; re-run only replaces sections that are not `edited`/approved
+- [x] Routes (replace remark routes):
+      `PATCH /:id/email` (opening/closing, Sales) · `PATCH /:id/email/sections/:key` (items, owner; clears approval)
+      `POST /:id/email/sections/:key/approve|unapprove` (owner) · `POST /:id/email/sections/:key/comments` (anyone in tool)
+- [x] `close` → "send": requires every section approved (top mgmt may override), stores `sent` snapshot + decision
+- [x] Conversation history for the AI = previous rounds' sent email (instead of confirmed/disputed remarks)
+- [x] Notifications: draft ready → R&D/Набавки/Quality; comment → section owner; all approved → Sales
+- [x] List rows: `pendingBySector` = sectors that have not approved yet
+- [x] One-off migration script: existing rounds' non-disputed remarks → sections (by sector), approval if confirmed
+
+## Frontend
+- [x] New `EmailDraft` component: opening, 4 section cards (owner: edit textarea one-remark-per-line,
+      Одобри/Повлечи; others: comment box; comments thread under each), closing, live preview,
+      approval chips per dept, Copy + Испрати (close round) for Sales
+- [x] Delete `RemarkCard`, `AddRemarkForm`, `clientEmail.js`/`ClientEmail` (logic moves into EmailDraft builder), SectorProgress → approval chips
+- [x] Hooks/API for the new endpoints; i18n mk/en; `CloseRoundModal` gated on approvals
+- [x] Rules page unchanged (sector still routes AI remarks)
+
+## Verification
+- [x] Server: throwaway-DB script — create check with fake AI → sections filled; owner edit clears approval;
+      non-owner edit 403; comment notifies; send blocked until all approved; re-run keeps edited sections
+- [ ] Browser click-through on check 6ae44c7f… as Sales, R&D, Набавки, Quality (Chrome extension was not connected)
+
+## Review (2026-10-30)
+- Server: throwaway-DB test (guarded `dbName`, drops only its own DB) — 23/23 checks of the workflow
+  (AI fills paragraphs, empty paragraph left out, owner-only edit, edit clears approval, comments +
+  notifications, opening/closing, re-run keeps edited, send blocked until approved, sent snapshot,
+  history to the next AI round). Script: scratchpad `email-flow.test.mjs`.
+- Client: eslint clean on packaging files, `npm run build` OK, every `t('…')` key resolves in mk + en.
+- Migration ran on the dev DB: ПА-0001 → R&D 6 / Graphics 3 / Quality 10 / General 0, all awaiting
+  approval; old `remarks` left in the DB. Migrated texts are the old long AI remarks — "Пушти AI
+  проверка" rewrites untouched paragraphs in the new short, regrouped form.
+- Not verified: visual click-through in the browser.
+- Removed: RemarkCard, AddRemarkForm, ClientEmail, clientEmail.js, styles.js, /remarks routes.
+
+---
+
 > **Working plan:** `tasks/packaging-check-plan.md` — progress and decisions are
 > tracked there; this section is the short summary.
 

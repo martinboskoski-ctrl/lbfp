@@ -9,10 +9,11 @@ export const rerunPackagingAiApi    = (id)       => api.post(`/packaging/${id}/a
 export const closePackagingRoundApi = (id, body) => api.post(`/packaging/${id}/close`, body);
 export const packagingFileApi       = (id, fileId) => api.get(`/packaging/${id}/files/${fileId}`, { responseType: 'blob' });
 
-export const addPackagingRemarkApi     = (id, body)            => api.post(`/packaging/${id}/remarks`, body);
-export const updatePackagingRemarkApi  = (id, remarkId, body)  => api.patch(`/packaging/${id}/remarks/${remarkId}`, body);
-export const deletePackagingRemarkApi  = (id, remarkId)        => api.delete(`/packaging/${id}/remarks/${remarkId}`);
-export const respondPackagingRemarkApi = (id, remarkId, body)  => api.post(`/packaging/${id}/remarks/${remarkId}/respond`, body);
+export const updatePackagingEmailApi   = (id, body)              => api.patch(`/packaging/${id}/email`, body);
+export const updatePackagingSectionApi = (id, key, body)         => api.patch(`/packaging/${id}/email/sections/${key}`, body);
+export const approvePackagingSectionApi = (id, key, body)        => api.post(`/packaging/${id}/email/sections/${key}/approve`, body);
+export const addPackagingCommentApi    = (id, key, body)         => api.post(`/packaging/${id}/email/sections/${key}/comments`, body);
+export const deletePackagingCommentApi = (id, key, commentId)    => api.delete(`/packaging/${id}/email/sections/${key}/comments/${commentId}`);
 
 export const listPackagingRulesApi  = ()               => api.get('/packaging/rules');
 export const createPackagingRuleApi = (body)           => api.post('/packaging/rules', body);

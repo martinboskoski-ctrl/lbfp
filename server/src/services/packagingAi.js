@@ -1,5 +1,5 @@
 import PizZip from 'pizzip';
-import { PACKAGING_SECTORS } from '../models/PackagingCheck.js';
+import { EMAIL_SECTION_KEYS } from '../models/PackagingCheck.js';
 import { openaiAdapter } from './aiProviders/openai.js';
 
 // AI review of packaging artwork against the product's ingredient list and the
@@ -29,14 +29,8 @@ const providerName = () => process.env.PACKAGING_AI_PROVIDER || '';
 export const isAiConfigured = () =>
   Boolean(PROVIDERS[providerName()] && process.env.PACKAGING_AI_API_KEY);
 
-const SECTOR_NAMES = {
-  sales: 'Sales',
-  r_and_d: 'R&D',
-  nabavki: 'Purchasing',
-  quality_assurance: 'Quality Assurance',
-};
-
-const SEVERITIES = ['critical', 'warning', 'info'];
+// Which email paragraph a rule's remarks go to by default.
+const RULE_SECTION = { r_and_d: 'rnd', nabavki: 'graphics', quality_assurance: 'quality', sales: 'quality' };
 
 // Remarks and the summary are always in English: they go to the client as-is.
 const SYSTEM = `You are a food labelling compliance expert at LBFP DOO Bitola, a food manufacturer
@@ -45,20 +39,21 @@ You review label / packaging artwork (image or PDF) sent by a client, against th
 ingredient list and our checklist rules (EU food law: Regulation (EU) 1169/2011, 1924/2006,
 1333/2008, the packaging regulation (EU) 2025/40 and related acts).
 
-Write every remark and the summary in clear, professional ENGLISH, whatever language the
+Write every remark, the answer and the summary in clear, professional ENGLISH, whatever language the
 artwork, ingredient list or rules are in. Quote label text in its original language.
 Report only real problems or points a person must verify — no praise, no generic advice.
-Each remark: what is wrong, where on the artwork, and what it should say or how to fix it.
+Each remark is ONE short, clear sentence (at most ~30 words) saying what is wrong and how to
+fix it. The remarks go straight into an email to the client, grouped by our department.
 Reply ONLY with valid JSON, no other text.`;
 
 const buildPrompt = ({ rules, ingredientsText, markets, clientMessage, history, artworkCount, artworkFromRound }) => {
   const ruleLines = rules.map((r) =>
-    `- [${r._id}] (${SECTOR_NAMES[r.sector]}${r.category ? ` · ${r.category}` : ''}) ${r.text}`
+    `- (${RULE_SECTION[r.sector]}${r.category ? ` · ${r.category}` : ''}) ${r.text}`
   ).join('\n');
 
   return `TARGET MARKETS: ${markets?.trim() || 'EU (countries not specified — flag language requirements as something to confirm with the client)'}
 
-CHECKLIST RULES (id in brackets, then the sector responsible for the rule):
+CHECKLIST RULES (the email paragraph a remark under the rule normally goes to, in brackets):
 ${ruleLines || '(no active rules — check consistency with the ingredient list only)'}
 
 PRODUCT INGREDIENT LIST / RECIPE:
@@ -77,88 +72,46 @@ ARTWORK: ${artworkCount
 TASK:
 - If the client asked something, answer it in "answer": a short, clear reply in English that Sales
   can paste into an email to the client (no greeting or signature). Otherwise leave "answer" empty.
-- Do not repeat points from earlier rounds that our team dismissed, and only re-raise earlier
-  confirmed points if they are still not fixed in the current artwork.
-- If there is artwork, review it against the ingredient list and the rules:
-- Raise one remark per distinct issue. Never raise the same issue twice under different rules.
-- Mandatory information that is NOT VISIBLE on the artwork at all (e.g. no ingredient list, no
-  nutrition table, no date, no lot space) goes ONLY into "missing", as short item names grouped
-  by the responsible sector (each item in exactly one sector). Never also raise a remark for it,
-  and never raise a remark about something being unverifiable because it is missing.
-- "remarks" are for problems in what IS on the artwork: wrong, incomplete, misleading,
-  misspelled, inconsistent or badly placed content, and points to confirm.
+- Points from the emails we already sent: re-raise one only if it is still not fixed in the current
+  artwork.
+- If there is artwork, review it against the ingredient list and the rules.
+- One remark per distinct issue; never raise the same issue twice. Put each remark in exactly
+  one paragraph, most important (must be fixed before printing) first:
+  rnd      = nutrition facts and their values, recipe, ingredients and QUID, additives, claims;
+  graphics = dimensions, sizes, x-height / font size, legibility and contrast, placement, print and
+             technical issues, packaging material and recycling marks;
+  quality  = legal labelling and compliance, mandatory particulars, allergens, dates, lot, language
+             versions, business operator, wording that does not match the nutrition facts or recipe;
+  general  = spelling, grammar, punctuation, typos, inconsistent terminology.
+- Mandatory particulars that are NOT VISIBLE on the artwork at all go into ONE sentence in the
+  right paragraph, e.g. "The nutrition declaration per 100 g is missing; please add it."
 - Judge language requirements against the target markets above.
-- Proofread ALL visible text in every language, even where no rule applies: spelling, grammar,
-  punctuation, diacritics, typos, inconsistent names/numbers between panels and language
-  versions, and mismatches with the ingredient list. For each error quote the exact wrong text
-  in its original language and give the correction (e.g. 'Ingredents' → 'Ingredients').
-  Group several small typos of the same panel into one remark.
-- If a rule cannot be verified from the artwork and documents (e.g. supplier certificates,
-  lab results), raise it only when it matters for this product, as severity "info", phrased as
-  something to confirm.
-- If the remark relates to a rule, give its id. Otherwise choose the sector:
-  r_and_d = recipe, ingredients, additives, nutrition values, claims;
-  quality_assurance = legal labelling, allergen emphasis, dates, legibility, language, proofreading;
-  nabavki = packaging material, print specification and print-technical issues, food-contact and packaging compliance;
-  sales = client agreements, markets, business operator details, barcode.
-- severity: "critical" = non-compliant / must be fixed before printing; "warning" = should be
-  fixed or confirmed; "info" = suggestion or point to confirm.
+- Proofread ALL visible text in every language, even where no rule applies. Quote the wrong text
+  in its original language with the correction (e.g. 'Ingredents' → 'Ingredients'); several small
+  typos may share one sentence.
+- If a rule cannot be verified from the artwork and documents (e.g. supplier certificates, lab
+  results), raise it only when it matters for this product, phrased as "Please confirm that …".
+- A paragraph with nothing to say is an empty list.
 
 Format:
 {"summary": "2-4 sentence overview in English for our team (state of the artwork and/or what the client asked)",
  "answer": "reply to the client's question in English, or empty string",
- "missing": [{"sector": "<sector>", "items": ["short name of missing particular", ...]}],
- "remarks": [{"ruleId": "<id or null>", "sector": "<sector>", "severity": "critical|warning|info", "text": "remark in English"}]}`;
+ "sections": {"rnd": ["sentence", ...], "graphics": [...], "quality": [...], "general": [...]}}`;
 };
 
-// Pulls the first JSON object out of the reply and normalises every remark.
-const parseResponse = (raw, rules) => {
+// Pulls the first JSON object out of the reply and normalises the paragraphs.
+const parseResponse = (raw) => {
   const match = String(raw).match(/\{[\s\S]*\}/);
   if (!match) throw new Error('AI response did not contain JSON');
   const data = JSON.parse(match[0]);
-  const byId = new Map(rules.map((r) => [String(r._id), r]));
-
-  const remarks = (Array.isArray(data.remarks) ? data.remarks : [])
-    .filter((r) => r && typeof r.text === 'string' && r.text.trim())
-    .map((r) => {
-      const rule = r.ruleId ? byId.get(String(r.ruleId)) : null;
-      const sector = rule?.sector
-        || (PACKAGING_SECTORS.includes(r.sector) ? r.sector : 'quality_assurance');
-      return {
-        text: r.text.trim(),
-        severity: SEVERITIES.includes(r.severity) ? r.severity : 'warning',
-        sector,
-        rule: rule?._id,
-        ruleText: rule?.text || '',
-        source: 'ai',
-      };
-    });
-
-  // Everything not visible on the artwork becomes ONE critical remark per sector.
-  const missingRemarks = (Array.isArray(data.missing) ? data.missing : [])
-    .map((m) => ({
-      sector: PACKAGING_SECTORS.includes(m?.sector) ? m.sector : 'quality_assurance',
-      items: [...new Set((Array.isArray(m?.items) ? m.items : []).map((i) => String(i).trim()).filter(Boolean))],
-    }))
-    .filter((m) => m.items.length)
-    .reduce((acc, m) => {
-      const existing = acc.find((a) => a.sector === m.sector);
-      if (existing) existing.items.push(...m.items.filter((i) => !existing.items.includes(i)));
-      else acc.push(m);
-      return acc;
-    }, [])
-    .map((m) => ({
-      text: `Not visible on the artwork: ${m.items.join('; ')}.`,
-      severity: 'critical',
-      sector: m.sector,
-      ruleText: '',
-      source: 'ai',
-    }));
-
+  const sections = Object.fromEntries(EMAIL_SECTION_KEYS.map((key) => {
+    const items = Array.isArray(data.sections?.[key]) ? data.sections[key] : [];
+    return [key, [...new Set(items.map((i) => String(i).trim()).filter(Boolean))]];
+  }));
   return {
     summary: typeof data.summary === 'string' ? data.summary.trim() : '',
     answer: typeof data.answer === 'string' ? data.answer.trim() : '',
-    remarks: [...missingRemarks, ...remarks],
+    sections,
   };
 };
 
@@ -177,7 +130,7 @@ export const docxToText = (buffer) => {
  * @param {{ attachments: Array<{buffer, mimeType, label}>, artworkFromRound?: number|null,
  *           ingredientsText: string, ingredientsFile?: {buffer, mimeType}, clientMessage?: string,
  *           history?: string, markets?: string, rules: Array }} input
- * @returns {Promise<{ summary: string, answer: string, remarks: Array, model: string }>}
+ * @returns {Promise<{ summary: string, answer: string, sections: Record<string, string[]>, model: string }>}
  */
 export const reviewArtwork = async ({
   attachments: artwork = [], artworkFromRound = null, ingredientsText, ingredientsFile,
@@ -200,5 +153,5 @@ export const reviewArtwork = async ({
     }),
     attachments,
   });
-  return { ...parseResponse(raw, rules), model };
+  return { ...parseResponse(raw), model };
 };

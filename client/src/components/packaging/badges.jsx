@@ -17,13 +17,12 @@ export const CheckStatusBadge = ({ status }) => {
   );
 };
 
-// Per-sector pending counts; `pendingBySector` = { sector: n }.
-export const SectorPending = ({ pendingBySector, total, highlight }) => {
+// Sectors that have not approved their part of the email yet; `pendingBySector` = { sector: n }.
+export const SectorPending = ({ pendingBySector, highlight }) => {
   const { t } = useTranslation('packaging');
   const { t: tc } = useTranslation('common');
   const sectors = PACKAGING_SECTORS.filter((s) => pendingBySector[s]);
 
-  if (!total) return <span className="text-xs text-slate-400">{t('noRemarks')}</span>;
   if (!sectors.length) {
     return (
       <span className="inline-flex items-center gap-1 text-xs text-green-700">

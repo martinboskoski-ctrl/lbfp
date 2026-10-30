@@ -13,27 +13,56 @@ const fileRefSchema = new mongoose.Schema(
   { _id: false }
 );
 
-const remarkSchema = new mongoose.Schema(
+// The client email is written in department paragraphs. Each paragraph has one
+// owning sector that edits and approves it; Quality owns two.
+export const EMAIL_SECTIONS = [
+  { key: 'rnd',      sector: 'r_and_d' },           // nutrition facts, recipe, claims
+  { key: 'graphics', sector: 'nabavki' },           // dimensions, sizes, print / technical
+  { key: 'quality',  sector: 'quality_assurance' }, // compliance, legal, wording vs nutrition facts
+  { key: 'general',  sector: 'quality_assurance' }, // grammar, spelling, wording
+];
+export const EMAIL_SECTION_KEYS = EMAIL_SECTIONS.map((s) => s.key);
+
+const commentSchema = new mongoose.Schema(
   {
-    text:      { type: String, required: true, trim: true },
-    severity:  { type: String, enum: ['critical', 'warning', 'info'], default: 'warning' },
-    sector:    { type: String, enum: PACKAGING_SECTORS, required: true },
-    rule:      { type: mongoose.Schema.Types.ObjectId, ref: 'PackagingRule' },
-    ruleText:  { type: String, default: '' }, // snapshot — rules can change later
-    source:    { type: String, enum: ['ai', 'manual'], required: true },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // empty for AI remarks
-    // pending → the responsible sector has not answered yet
-    // confirmed → valid remark, artwork needs a correction
-    // disputed → not an issue (comment required)
-    status:    { type: String, enum: ['pending', 'confirmed', 'disputed'], default: 'pending' },
-    response: {
-      comment: { type: String, default: '' },
-      by:      { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-      at:      { type: Date },
+    text: { type: String, required: true, trim: true },
+    by:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    at:   { type: Date, default: Date.now },
+  }
+);
+
+const sectionSchema = new mongoose.Schema(
+  {
+    key:      { type: String, enum: EMAIL_SECTION_KEYS, required: true },
+    sector:   { type: String, enum: PACKAGING_SECTORS, required: true },
+    items:    [{ type: String, trim: true }], // one short sentence per remark
+    edited:   { type: Boolean, default: false }, // changed by a person → an AI re-run keeps it
+    approval: {
+      by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      at: { type: Date },
+    },
+    comments: [commentSchema],
+  },
+  { _id: false }
+);
+
+const emailSchema = new mongoose.Schema(
+  {
+    opening:  { type: String, default: '' }, // empty → generated text (see packagingEmail.js)
+    closing:  { type: String, default: '' },
+    sections: [sectionSchema],
+    sent: {
+      text: { type: String, default: '' },
+      by:   { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      at:   { type: Date },
     },
   },
-  { timestamps: true }
+  { _id: false }
 );
+
+export const emptyEmail = () => ({
+  opening: '', closing: '', sections: EMAIL_SECTIONS.map((s) => ({ ...s, items: [], comments: [] })),
+});
 
 // A round = one step of the conversation with the client: a question, new artwork,
 // corrected artwork, or any mix. Nothing is mandatory; the latest round is active.
@@ -55,7 +84,7 @@ const roundSchema = new mongoose.Schema(
       model:   { type: String, default: '' },
       ranAt:   { type: Date },
     },
-    remarks: [remarkSchema],
+    email:   { type: emailSchema, default: emptyEmail },
     outcome: {
       decision: { type: String, enum: ['approved', 'changes_required'] },
       summary:  { type: String, default: '' },

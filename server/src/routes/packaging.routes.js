@@ -3,7 +3,7 @@ import multer from 'multer';
 import authenticate from '../middleware/auth.js';
 import {
   list, getOne, create, addRound, rerunAi, close, remove,
-  addRemark, updateRemark, deleteRemark, respondRemark,
+  updateEmail, updateSection, approveSection, addComment, deleteComment,
   downloadFile, listRules, createRule, updateRule, deleteRule,
 } from '../controllers/packaging.controller.js';
 
@@ -48,9 +48,10 @@ router.post('/:id/ai',     rerunAi);
 router.post('/:id/close',  close);
 router.get('/:id/files/:fileId', downloadFile);
 
-router.post('/:id/remarks',                      addRemark);
-router.patch('/:id/remarks/:remarkId',           updateRemark);
-router.delete('/:id/remarks/:remarkId',          deleteRemark);
-router.post('/:id/remarks/:remarkId/respond',    respondRemark);
+router.patch('/:id/email',                                    updateEmail);
+router.patch('/:id/email/sections/:key',                       updateSection);
+router.post('/:id/email/sections/:key/approve',                approveSection);
+router.post('/:id/email/sections/:key/comments',               addComment);
+router.delete('/:id/email/sections/:key/comments/:commentId',  deleteComment);
 
 export default router;

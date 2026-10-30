@@ -1,45 +1,27 @@
 // OpenAI adapter for the packaging AI review — Responses API over plain fetch.
 // Images go in as `input_image` data URLs, PDFs as `input_file` (vision models
 // such as gpt-4o and later; 50 MB total per request). The reply is forced into
-// the remark schema with Structured Outputs.
-import { PACKAGING_SECTORS } from '../../models/PackagingCheck.js';
+// the review schema with Structured Outputs.
+import { EMAIL_SECTION_KEYS } from '../../models/PackagingCheck.js';
 
 const ENDPOINT = 'https://api.openai.com/v1/responses';
 const TIMEOUT_MS = 120_000;
 
-const REMARKS_SCHEMA = {
+const sentences = { type: 'array', items: { type: 'string' } };
+
+const REVIEW_SCHEMA = {
   type: 'object',
   properties: {
-    summary: { type: 'string' },
-    answer:  { type: 'string' },
-    missing: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          sector: { type: 'string', enum: PACKAGING_SECTORS },
-          items:  { type: 'array', items: { type: 'string' } },
-        },
-        required: ['sector', 'items'],
-        additionalProperties: false,
-      },
-    },
-    remarks: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          ruleId:   { type: ['string', 'null'] },
-          sector:   { type: 'string', enum: PACKAGING_SECTORS },
-          severity: { type: 'string', enum: ['critical', 'warning', 'info'] },
-          text:     { type: 'string' },
-        },
-        required: ['ruleId', 'sector', 'severity', 'text'],
-        additionalProperties: false,
-      },
+    summary:  { type: 'string' },
+    answer:   { type: 'string' },
+    sections: {
+      type: 'object',
+      properties: Object.fromEntries(EMAIL_SECTION_KEYS.map((k) => [k, sentences])),
+      required: EMAIL_SECTION_KEYS,
+      additionalProperties: false,
     },
   },
-  required: ['summary', 'answer', 'missing', 'remarks'],
+  required: ['summary', 'answer', 'sections'],
   additionalProperties: false,
 };
 
@@ -60,7 +42,7 @@ export const openaiAdapter = async ({ apiKey, model, system, prompt, attachments
       temperature: 0.2, // consistent, repeatable reviews
       instructions: system,
       input: [{ role: 'user', content: [...attachments.map(toContentPart), { type: 'input_text', text: prompt }] }],
-      text: { format: { type: 'json_schema', name: 'packaging_review', strict: true, schema: REMARKS_SCHEMA } },
+      text: { format: { type: 'json_schema', name: 'packaging_review', strict: true, schema: REVIEW_SCHEMA } },
     }),
   });
 

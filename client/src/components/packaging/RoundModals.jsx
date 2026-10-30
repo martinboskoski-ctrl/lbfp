@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
+import { X, AlertTriangle, CheckCircle2, Loader2, Send } from 'lucide-react';
 import RoundInputs from './RoundInputs.jsx';
 import { emptyRound, appendRound } from './roundForm.js';
 import { useClosePackagingRound, useAddPackagingRound } from '../../hooks/usePackaging.js';
@@ -17,25 +17,31 @@ const Modal = ({ title, onClose, children }) => (
   </div>
 );
 
-export const CloseRoundModal = ({ check, round, isTopMgmt, onClose }) => {
+// Sales sends the email: the text is copied for pasting into the mail client and
+// the round is closed with the decision.
+export const SendEmailModal = ({ check, round, isTopMgmt, onClose }) => {
   const { t } = useTranslation('packaging');
+  const { t: tc } = useTranslation('common');
   const close = useClosePackagingRound();
-  const pending = round.remarks.filter((r) => r.status === 'pending').length;
-  const confirmed = round.remarks.some((r) => r.status === 'confirmed');
-  const [decision, setDecision] = useState(confirmed ? 'changes_required' : 'approved');
-  const [summary, setSummary] = useState('');
-  const blocked = pending > 0 && !isTopMgmt;
+  const { sections } = round.email;
+  const waiting = sections.filter((s) => !s.approval?.at);
+  const hasRemarks = sections.some((s) => s.items.length);
+  const [decision, setDecision] = useState(hasRemarks ? 'changes_required' : 'approved');
+  const blocked = waiting.length > 0 && !isTopMgmt;
 
-  const submit = () => close.mutate({ id: check._id, decision, summary }, { onSuccess: onClose });
+  const submit = async () => {
+    await navigator.clipboard.writeText(round.emailPreview.text);
+    close.mutate({ id: check._id, decision }, { onSuccess: onClose });
+  };
 
   return (
     <Modal title={t('close.title', { n: round.number })} onClose={onClose}>
-      {pending > 0 && (
+      {waiting.length > 0 && (
         <div className="flex items-start gap-2 mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
           <AlertTriangle size={16} className="mt-0.5 shrink-0" />
           <div>
-            {t('close.pendingWarning', { count: pending })}{' '}
-            {isTopMgmt ? t('close.pendingOverride') : t('close.pendingBlocked')}
+            {t('close.waiting', { list: waiting.map((s) => `${t(`email.section.${s.key}`)} (${tc(`dept.${s.sector}`)})`).join(', ') })}{' '}
+            {isTopMgmt ? t('close.override') : t('close.blocked')}
           </div>
         </div>
       )}
@@ -60,11 +66,16 @@ export const CloseRoundModal = ({ check, round, isTopMgmt, onClose }) => {
           );
         })}
       </div>
-      <label className="label">{t('close.summary')}</label>
-      <textarea className="input min-h-[100px]" value={summary} onChange={(e) => setSummary(e.target.value)} placeholder={t('close.summaryPlaceholder')} />
+      <label className="label">{t('email.preview')}</label>
+      <pre className="max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-[12px] leading-relaxed text-slate-700 whitespace-pre-wrap font-mono">
+        {round.emailPreview.text}
+      </pre>
+      <p className="text-xs text-slate-500 mt-2">{t('close.hint')}</p>
       <div className="flex justify-end gap-2 mt-5">
         <button onClick={onClose} className="btn-secondary">{t('detail.cancel')}</button>
-        <button onClick={submit} disabled={blocked || close.isPending} className="btn-primary">{t('close.submit')}</button>
+        <button onClick={submit} disabled={blocked || close.isPending} className="btn-primary flex items-center gap-1.5">
+          <Send size={15} /> {t('close.submit')}
+        </button>
       </div>
     </Modal>
   );

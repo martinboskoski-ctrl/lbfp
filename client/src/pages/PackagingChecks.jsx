@@ -118,7 +118,7 @@ const PackagingChecks = () => {
                 </div>
                 <div className="basis-56">
                   {c.status === 'in_review' ? (
-                    <SectorPending pendingBySector={c.pendingBySector || {}} total={c.remarksTotal} highlight={mySector} />
+                    <SectorPending pendingBySector={c.pendingBySector || {}} highlight={mySector} />
                   ) : (
                     <span className="text-xs text-slate-400">{t('remarksCount', { count: c.remarksTotal })}</span>
                   )}

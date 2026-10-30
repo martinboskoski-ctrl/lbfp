@@ -1,48 +1,17 @@
 import { useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Bot, Loader2, Lock, Trash2, RefreshCw, FilePlus2, CheckSquare, AlertTriangle, MessageSquare, ImageOff, Reply } from 'lucide-react';
+import { ArrowLeft, Bot, Loader2, Lock, Trash2, RefreshCw, FilePlus2, Send, AlertTriangle, MessageSquare, ImageOff, Reply } from 'lucide-react';
 import PageShell from '../components/layout/PageShell.jsx';
 import ArtworkPreview from '../components/packaging/ArtworkPreview.jsx';
 import AttachmentsGallery from '../components/packaging/AttachmentsGallery.jsx';
-import RemarkCard from '../components/packaging/RemarkCard.jsx';
-import AddRemarkForm from '../components/packaging/AddRemarkForm.jsx';
-import { CloseRoundModal, NewRoundModal } from '../components/packaging/RoundModals.jsx';
-import ClientEmail from '../components/packaging/ClientEmail.jsx';
+import EmailDraft from '../components/packaging/EmailDraft.jsx';
+import { SendEmailModal, NewRoundModal } from '../components/packaging/RoundModals.jsx';
 import { CheckStatusBadge } from '../components/packaging/badges.jsx';
-import {
-  usePackagingCheck, usePackagingRules, useRerunPackagingAi, useDeletePackagingCheck,
-} from '../hooks/usePackaging.js';
+import { usePackagingCheck, useRerunPackagingAi, useDeletePackagingCheck } from '../hooks/usePackaging.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import {
-  canUsePackagingTool, isPackagingLead, isTopManagement, PACKAGING_SECTORS,
-} from '../utils/userTier.js';
+import { canUsePackagingTool, isPackagingLead, isTopManagement } from '../utils/userTier.js';
 import { fmtDate, fmtDateTime } from '../utils/formatDate.js';
-
-const SectorProgress = ({ remarks, mySector }) => {
-  const { t: tc } = useTranslation('common');
-  const sectors = PACKAGING_SECTORS.filter((s) => remarks.some((r) => r.sector === s));
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      {sectors.map((s) => {
-        const all = remarks.filter((r) => r.sector === s);
-        const done = all.filter((r) => r.status !== 'pending').length;
-        const complete = done === all.length;
-        return (
-          <div key={s} className={`rounded-lg border px-2.5 py-2 ${s === mySector ? 'border-amber-300 bg-amber-50/50' : 'border-slate-200'}`}>
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-medium text-slate-700 truncate">{tc(`dept.${s}`)}</span>
-              <span className={complete ? 'text-green-700 font-semibold' : 'text-slate-500'}>{done}/{all.length}</span>
-            </div>
-            <div className="mt-1.5 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-              <div className={`h-full rounded-full ${complete ? 'bg-green-500' : 'bg-amber-400'}`} style={{ width: `${(done / all.length) * 100}%` }} />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
 
 const PackagingCheckDetail = () => {
   const { t } = useTranslation('packaging');
@@ -51,11 +20,10 @@ const PackagingCheckDetail = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data, isLoading } = usePackagingCheck(id);
-  const { data: rules = [] } = usePackagingRules();
   const rerunAi = useRerunPackagingAi();
   const deleteCheck = useDeletePackagingCheck();
   const [roundNo, setRoundNo] = useState(null);
-  const [modal, setModal] = useState(null); // 'close' | 'round'
+  const [modal, setModal] = useState(null); // 'send' | 'round'
 
   if (!canUsePackagingTool(user)) return <Navigate to="/dashboard" replace />;
 
@@ -81,15 +49,8 @@ const PackagingCheckDetail = () => {
   const open = isLatest && check.status === 'in_review';
   const lead = isPackagingLead(user);
   const topMgmt = isTopManagement(user);
-  const mySector = PACKAGING_SECTORS.includes(user.department) ? user.department : null;
   const canDelete = topMgmt || String(check.createdBy?._id) === String(user._id);
   const canRunAi = data.aiConfigured && open && (lead || user.department === 'quality_assurance');
-
-  // Own sector first, then the usual order.
-  const sectorOrder = [...PACKAGING_SECTORS].sort((a, b) => (b === mySector) - (a === mySector));
-  const groups = sectorOrder
-    .map((s) => ({ sector: s, remarks: round.remarks.filter((r) => r.sector === s) }))
-    .filter((g) => g.remarks.length);
 
   return (
     <PageShell title={t('title')}>
@@ -123,8 +84,8 @@ const PackagingCheckDetail = () => {
               </button>
             )}
             {lead && open && (
-              <button onClick={() => setModal('close')} className="btn-primary flex items-center gap-1.5">
-                <CheckSquare size={15} /> {t('detail.closeRound')}
+              <button onClick={() => setModal('send')} className="btn-primary flex items-center gap-1.5">
+                <Send size={15} /> {t('detail.closeRound')}
               </button>
             )}
             {lead && (
@@ -235,7 +196,7 @@ const PackagingCheckDetail = () => {
             )}
           </div>
 
-          {/* Right — AI, progress, remarks */}
+          {/* Right — AI, client email */}
           <div className="lg:col-span-2 space-y-4">
             {round.outcome?.decision && (
               <section className={`card p-4 border-l-4 ${round.outcome.decision === 'approved' ? 'border-l-green-500' : 'border-l-amber-500'}`}>
@@ -274,51 +235,21 @@ const PackagingCheckDetail = () => {
               )}
             </section>
 
-            {round.remarks.length > 0 && (
-              <section className="card p-4">
-                <h3 className="text-sm font-semibold text-slate-800 mb-3">{t('detail.progress')}</h3>
-                <SectorProgress remarks={round.remarks} mySector={mySector} />
-              </section>
-            )}
-
-            <section className="card p-4">
-              <h3 className="text-sm font-semibold text-slate-800 mb-3">
-                {t('detail.remarks')} <span className="font-normal text-slate-400">· {round.remarks.length}</span>
-              </h3>
-
-              {!open && (
-                <p className="flex items-center gap-1.5 text-xs text-slate-500 mb-3">
-                  <Lock size={12} /> {t('detail.readOnly')}
-                </p>
-              )}
-
-              <div className="space-y-4">
-                {groups.length === 0 && <p className="text-sm text-slate-400">{t('detail.noRemarks')}</p>}
-                {groups.map((g) => (
-                  <div key={g.sector}>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                      {tc(`dept.${g.sector}`)}
-                      {g.sector === mySector && <span className="ml-1.5 normal-case tracking-normal font-medium text-amber-600">· {t('detail.yourSector')}</span>}
-                    </p>
-                    <div className="space-y-2">
-                      {g.remarks.map((r) => (
-                        <RemarkCard key={r._id} checkId={check._id} remark={r} open={open} user={user} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-                {open && <AddRemarkForm checkId={check._id} rules={rules} defaultSector={mySector || 'quality_assurance'} />}
-              </div>
-            </section>
-
-            {(round.remarks.length > 0 || round.outcome?.decision || round.ai.answer) && (
-              <ClientEmail key={round.number} check={check} round={round} senderName={user.name} />
-            )}
           </div>
+        </div>
+
+        {/* Full width — the client email, approvals on the right */}
+        <div className="mt-5 space-y-2">
+          {!open && (
+            <p className="flex items-center gap-1.5 text-xs text-slate-500">
+              <Lock size={12} /> {t('detail.readOnly')}
+            </p>
+          )}
+          <EmailDraft key={round.number} check={check} round={round} open={open} user={user} />
         </div>
       </div>
 
-      {modal === 'close' && <CloseRoundModal check={check} round={latest} isTopMgmt={topMgmt} onClose={() => setModal(null)} />}
+      {modal === 'send' && <SendEmailModal check={check} round={latest} isTopMgmt={topMgmt} onClose={() => setModal(null)} />}
       {modal === 'round' && <NewRoundModal check={check} onClose={() => { setModal(null); setRoundNo(null); }} />}
     </PageShell>
   );
