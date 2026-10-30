@@ -16,15 +16,9 @@ export const isHRManager = (user) => isHR(user) && user?.isManager === true;
 // True for HR managers + top management (full read/write across all employees)
 export const isHRAdmin = (user) => isHRManager(user) || isTopManagement(user);
 
-// Can the viewer see the HR file of `target`? Self, own-dept manager, HR, top mgmt.
-export const canViewHRFile = (viewer, target) => {
-  if (!viewer || !target) return false;
-  if (String(viewer._id) === String(target._id || target.user?._id || target.user)) return true;
-  if (isHRAdmin(viewer)) return true;
-  const targetDept = target.department || target.user?.department;
-  if (viewer.isManager && viewer.department === targetDept) return true;
-  return false;
-};
+// Employee cards and the employee directory — top management + HR only (not the
+// employee themselves, not department managers). Mirrors server/src/utils/hrAccess.js.
+export const canViewEmployeeCards = (user) => isTopManagement(user) || isHR(user);
 
 // Can edit the file (most fields). Salary uses canViewSalary instead.
 export const canEditHRFile = (viewer) => isHRAdmin(viewer);

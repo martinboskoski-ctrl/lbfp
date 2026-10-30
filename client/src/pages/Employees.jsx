@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Search, AlertTriangle, ShieldAlert, Calendar, Building2 } from 'lucide-react';
 import Sidebar from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
 import { useEmployees } from '../hooks/useEmployees.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { isHRAdmin } from '../utils/userTier.js';
+import { canViewEmployeeCards } from '../utils/userTier.js';
 import { DEPARTMENTS } from '../components/layout/Sidebar.jsx';
 
 const StatusBadge = ({ status, t }) => {
@@ -30,10 +30,9 @@ const SanitaryBadge = ({ status, t }) => {
   return <span className={`text-xs px-2 py-0.5 rounded inline-flex items-center gap-1 ${cls[status]}`}><AlertTriangle size={12} />{t(`sanitaryBadge.${status}`)}</span>;
 };
 
-const Employees = () => {
+const EmployeesList = () => {
   const { t } = useTranslation('employees');
   const { t: tc } = useTranslation('common');
-  const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [deptFilter, setDeptFilter] = useState('');
 
@@ -58,8 +57,6 @@ const Employees = () => {
     return g;
   }, [filtered]);
 
-  const showAll = isHRAdmin(user);
-
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -71,7 +68,7 @@ const Employees = () => {
               <div>
                 <h2 className="text-lg sm:text-xl font-semibold text-slate-900">{t('list.heading')}</h2>
                 <p className="text-sm text-slate-500 mt-0.5">
-                  {showAll ? t('list.subtitleAll') : t('list.subtitleDept')}
+                  {t('list.subtitleAll')}
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-2">
@@ -84,20 +81,18 @@ const Employees = () => {
                     className="input pl-9"
                   />
                 </div>
-                {showAll && (
-                  <select
-                    value={deptFilter}
-                    onChange={(e) => setDeptFilter(e.target.value)}
-                    className="input sm:w-56"
-                  >
-                    <option value="">{t('list.allSectors')}</option>
-                    {DEPARTMENTS.map((d) => (
-                      <option key={d.value} value={d.value}>
-                        {tc(`dept.${d.value}`, { defaultValue: d.value })}
-                      </option>
-                    ))}
-                  </select>
-                )}
+                <select
+                  value={deptFilter}
+                  onChange={(e) => setDeptFilter(e.target.value)}
+                  className="input sm:w-56"
+                >
+                  <option value="">{t('list.allSectors')}</option>
+                  {DEPARTMENTS.map((d) => (
+                    <option key={d.value} value={d.value}>
+                      {tc(`dept.${d.value}`, { defaultValue: d.value })}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -163,8 +158,7 @@ const Employees = () => {
             <div className="mt-8 flex items-start gap-2 text-xs text-slate-500">
               <ShieldAlert size={14} className="flex-shrink-0 mt-0.5" />
               <span>
-                {t('list.visibilityPrefix')} {showAll ? t('list.visibilityAll') : t('list.visibilityDept')}{' '}
-                {t('list.salaryHidden')}
+                {t('list.visibilityPrefix')} {t('list.visibilityAll')}
               </span>
             </div>
           </div>
@@ -172,6 +166,12 @@ const Employees = () => {
       </div>
     </div>
   );
+};
+
+// Top management + HR only; everyone else is sent back before anything is fetched.
+const Employees = () => {
+  const { user } = useAuth();
+  return canViewEmployeeCards(user) ? <EmployeesList /> : <Navigate to="/dashboard" replace />;
 };
 
 export default Employees;

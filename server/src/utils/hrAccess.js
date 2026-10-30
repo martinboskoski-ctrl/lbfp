@@ -5,17 +5,18 @@ export const isTopManagement = (u) => u?.department === 'top_management';
 export const isHRAdmin = (u) =>
   isTopManagement(u) || (u?.department === 'hr' && u?.isManager === true);
 
-// Can the viewer see the HR file of `target`?
-// `target` should be a User-shaped object (department, _id).
-export const canViewHRFile = (viewer, target) => {
-  if (!viewer || !target) return false;
-  if (String(viewer._id) === String(target._id)) return true;
-  if (isHRAdmin(viewer)) return true;
-  if (viewer.isManager && viewer.department === target.department) return true;
-  return false;
-};
+// Employee cards (the directory, each HR file and its edits) are for top management
+// and HR only — not the employee themselves, not department managers. The AI
+// assistant's employee tools apply the same flag.
+export const canViewEmployeeCards = (u) => isTopManagement(u) || u?.department === 'hr';
+
+export const canViewHRFile = (viewer, target) => Boolean(target) && canViewEmployeeCards(viewer);
 
 export const canEditHRFile = (viewer) => isHRAdmin(viewer);
+
+// Leave entries and discipline records: anyone who may see the card. Entitlements and
+// deleting discipline records stay with HR admins.
+export const canManageEmployee = (viewer, target) => canViewHRFile(viewer, target);
 
 export const canViewSalary = (viewer, target, profile) => {
   if (!viewer || !target) return false;

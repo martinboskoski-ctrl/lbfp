@@ -1,3 +1,45 @@
+# Employee card — simplified to one page (2026-10-30)
+
+## Decisions (confirmed 2026-10-30)
+- Tabs: **Преглед** (one page) + **Задачи**. All other tabs removed from the card (data stays in DB).
+  Requests tab: skipped for now.
+- Annual leave is granted per calendar year and usable until **30.06 of the next year**.
+  Leave taken Jan–Jun uses the **previous year's remaining days first**.
+- Leave entries (from–to, working days, note) are added/deleted by top mgmt + HR; only HR admins change a year's entitlement. Existing `LeaveBalance.usedDays` is kept as
+  "recorded earlier" days for that year.
+- **Access (added 2026-10-30):** employee cards, the directory and their edits — top management + HR only
+  (not the employee, not managers). Same flag (`canViewEmployeeCards`) in the AI assistant's employee tools.
+- Discipline: short list on the same page (date, type, reason, active/expired) + simple add form
+  (top mgmt + HR); delete — HR admin.
+
+## Backend
+- [x] `models/LeaveEntry.js` — user, from, to, days, note, createdBy
+- [x] `services/leave.js` — per-year buckets: total, usedInYear, usedNextYear (Jan–Jun), remaining,
+      validUntil; FIFO allocation of each entry
+- [x] `employeeFile.js` — include `leave` summary + entries; permissions canManageLeave / canEditEntitlement / canAddDiscipline
+- [x] Routes: POST/DELETE `/employees/:id/leave[/:entryId]`, PUT `/employees/:id/leave/entitlement/:year`,
+      POST/DELETE `/employees/:id/discipline[/:actionId]`
+
+## Frontend
+- [x] `EmployeeDetail.jsx` — header + 2 tabs; overview = profile, leave, discipline
+- [x] `components/employee/LeaveCard.jsx`, `DisciplineCard.jsx`; hooks + API; i18n mk/en
+
+## Verification
+- [x] Unit check of the leave allocation (carry-over, expiry, legacy usedDays)
+- [x] Throwaway-DB test of the endpoints + permissions; client lint + build
+
+## Review (2026-10-30)
+- Leave rules: 9/9 unit cases (carry-over Jan–Jun, expiry after 30.06, legacy usedDays, default 20, overdraw).
+- Endpoints + access: 25/25 on a guarded throwaway DB — employee / same-dept manager get 403 on card,
+  list and edits; HR staff open + manage; only HR managers / top mgmt change entitlement or delete
+  discipline; AI `search_employees` / `get_employee_file` denied, `company_overview` headcount null
+  for non-HR; HR gets the leave summary through the AI.
+- Client: lint clean on changed files (EmployeeTasksTab / Sidebar errors pre-exist on main), build OK,
+  all i18n keys present mk + en. Not verified visually (Chrome extension not connected).
+- Tasks tab shown to top management only: the task API scopes non-top-mgmt to their own department.
+
+---
+
 # Packaging check v2 — one shared client email instead of remark cards (2026-10-30)
 
 ## Goal

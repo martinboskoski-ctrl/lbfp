@@ -6,24 +6,24 @@ import EmployeeAsset from '../models/EmployeeAsset.js';
 import EmployeeDocument from '../models/EmployeeDocument.js';
 import IncidentReport from '../models/IncidentReport.js';
 import LeaveBalance from '../models/LeaveBalance.js';
+import LeaveEntry from '../models/LeaveEntry.js';
+import { summarizeLeave } from './leave.js';
 import {
   isHRAdmin,
   canViewHRFile,
   canViewSalary,
   canViewConfidential,
+  canManageEmployee,
+  canViewEmployeeCards,
   projectHRFile,
 } from '../utils/hrAccess.js';
 
 // Employee directory + HR file assembly, shared by the employees API and the AI assistant
 // so both apply exactly the same scope and field projection.
 
-// Build the list of users an authenticated viewer can see in /employees.
-export const buildScopeFilter = (viewer) => {
-  if (isHRAdmin(viewer)) return {};
-  if (viewer.isManager) return { department: viewer.department };
-  // Regular employee — only themselves.
-  return { _id: viewer._id };
-};
+// Users an authenticated viewer can see in /employees: everyone for top management
+// and HR, no one for anybody else (the filter matches nothing).
+export const buildScopeFilter = (viewer) => (canViewEmployeeCards(viewer) ? {} : { _id: null });
 
 const DAY_MS = 86_400_000;
 
@@ -56,13 +56,22 @@ export const decorateUserAlerts = async (users) => {
   const profiles = await EmployeeProfile.find({ user: { $in: userIds } }).lean();
   const profileByUser = new Map(profiles.map((p) => [String(p.user), p]));
 
+  // Last year's days stay usable until 30.06, so both years feed the balance.
   const year = new Date().getFullYear();
-  const balances = await LeaveBalance.find({ user: { $in: userIds }, year }).lean();
-  const balanceByUser = new Map(balances.map((b) => [String(b.user), b]));
+  const [balances, entries] = await Promise.all([
+    LeaveBalance.find({ user: { $in: userIds }, year: { $gte: year - 1 } }).lean(),
+    LeaveEntry.find({ user: { $in: userIds }, from: { $gte: new Date(Date.UTC(year - 1, 0, 1)) } }).lean(),
+  ]);
+  const group = (rows) => rows.reduce((m, r) => m.set(String(r.user), [...(m.get(String(r.user)) || []), r]), new Map());
+  const balancesByUser = group(balances);
+  const entriesByUser = group(entries);
 
   return users.map((u) => {
     const p = profileByUser.get(String(u._id));
-    const b = balanceByUser.get(String(u._id));
+    const leave = summarizeLeave({
+      balances: balancesByUser.get(String(u._id)) || [],
+      entries: entriesByUser.get(String(u._id)) || [],
+    });
     return {
       _id: u._id,
       name: u.name,
@@ -77,8 +86,8 @@ export const decorateUserAlerts = async (users) => {
       contractEnd: p?.contractEnd || null,
       sanitaryCheckStatus: computeSanitaryStatus(p),
       seniorityYears: computeSeniority(p),
-      leaveRemaining: b ? b.totalDays - b.usedDays : null,
-      leaveTotal: b?.totalDays ?? null,
+      leaveRemaining: leave.remaining,
+      leaveTotal: leave.years[0].total,
     };
   });
 };
@@ -93,15 +102,16 @@ export const buildEmployeeFile = async (viewer, targetId) => {
   if (!canViewHRFile(viewer, target)) return { error: 403 };
 
 
-  const [profile, salary, discipline, assets, documents, incidents, balances, manager] =
+  const [profile, salary, discipline, assets, documents, incidents, balances, leaveEntries, manager] =
     await Promise.all([
       EmployeeProfile.findOne({ user: target._id }).lean(),
       SalaryHistory.find({ user: target._id }).sort({ effectiveDate: -1 }).lean(),
-      DisciplinaryAction.find({ user: target._id }).sort({ issuedDate: -1 }).lean(),
+      DisciplinaryAction.find({ user: target._id }).sort({ issuedDate: -1 }).populate('issuedBy', 'name').lean(),
       EmployeeAsset.find({ user: target._id }).sort({ issuedDate: -1 }).lean(),
       EmployeeDocument.find({ user: target._id }).sort({ createdAt: -1 }).lean(),
       IncidentReport.find({ user: target._id }).sort({ occurredAt: -1 }).lean(),
       LeaveBalance.find({ user: target._id }).sort({ year: -1 }).lean(),
+      LeaveEntry.find({ user: target._id }).populate('createdBy', 'name').lean(),
       target.manager ? User.findById(target.manager).select('name department').lean() : null,
     ]);
 
@@ -157,6 +167,7 @@ export const buildEmployeeFile = async (viewer, targetId) => {
     documents,
     incidents,
     leaveBalances: balances,
+    leave: summarizeLeave({ balances, entries: leaveEntries }),
   };
 
   // Include hrNotes only for HR admins.
@@ -176,6 +187,7 @@ export const buildEmployeeFile = async (viewer, targetId) => {
     file: projected,
     permissions: {
       canEdit: isHRAdmin(viewer),
+      canManage: canManageEmployee(viewer, target),
       canViewSalary: canViewSalary(viewer, target, profile),
       canViewConfidential: canViewConfidential(viewer),
       isSelf: String(viewer._id) === String(target._id),
