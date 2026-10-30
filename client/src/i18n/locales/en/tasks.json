@@ -56,5 +56,18 @@
     "deadlineLabel": "Deadline",
     "projectLabel": "Related project (optional)",
     "submitButton": "Add Task"
+  },
+
+  "time": {
+    "nudge": "How long?",
+    "question": "Done! How long did it take?",
+    "skip": "Skip",
+    "custom": "h",
+    "save": "Save",
+    "clear": "Remove",
+    "spent": "Time spent",
+    "tooltip": "Log how long the task took (optional)",
+    "h": "{{count}}h",
+    "m": "{{count}}m"
   }
 }

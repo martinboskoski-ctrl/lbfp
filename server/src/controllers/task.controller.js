@@ -183,6 +183,31 @@ export const updateStatus = async (req, res) => {
   res.json({ task });
 };
 
+// Record how long the task took (optional; `minutes: null` clears it).
+// Allowed: the assignee, or a manager / top management.
+export const setTimeSpent = async (req, res) => {
+  const u    = req.user;
+  const task = await Task.findById(req.params.id);
+  if (!task) return res.status(404).json({ message: 'Task not found' });
+
+  const isAssignee = String(task.assignedTo) === String(u._id);
+  if (!isAssignee && !isManager(u)) return res.status(403).json({ message: 'Немате дозвола' });
+
+  const { minutes } = req.body;
+  if (minutes === null) {
+    task.timeSpentMinutes = undefined;
+  } else {
+    const m = Math.round(Number(minutes));
+    if (!Number.isFinite(m) || m <= 0 || m > 60 * 24 * 365) {
+      return res.status(400).json({ message: 'Невалидно време' });
+    }
+    task.timeSpentMinutes = m;
+  }
+  await task.save();
+  await task.populate(POPULATE_FIELDS);
+  res.json({ task });
+};
+
 export const approveTask = async (req, res) => {
   const u = req.user;
   if (!isManager(u)) return res.status(403).json({ message: 'Само менаџери можат да одобруваат задачи' });

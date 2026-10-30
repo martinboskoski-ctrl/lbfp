@@ -6,6 +6,7 @@ import { useDeleteTask } from '../../hooks/useTasks.js';
 import { fmtDateShort } from '../../utils/formatDate.js';
 import TaskDetailModal from './TaskDetailModal.jsx';
 import EditHistory from '../common/EditHistory.jsx';
+import { TimeChip } from './TimeSpent.jsx';
 
 const PRIORITY_CLS = {
   low:    'bg-gray-100 text-gray-500',
@@ -96,6 +97,8 @@ const TaskCard = ({ task, index, currentUser, isManager, showDept }) => {
               </span>
             </span>
           </div>
+
+          <TimeChip task={task} canLog={isAssignee || isManager} isAssignee={isAssignee} />
 
           {showDetail && (
             <TaskDetailModal task={task} onClose={() => setShowDetail(false)} />

@@ -4,12 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Plus, Search, User as UserIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useTasks, useSetTaskStatus } from '../../hooks/useTasks.js';
+import { useTasks, useSetTaskStatus, useSetTaskTime } from '../../hooks/useTasks.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { canManage, isTopManagement } from '../../utils/userTier.js';
 import { DEPARTMENTS } from '../layout/Sidebar.jsx';
 import KanbanColumn from './KanbanColumn.jsx';
 import AddTaskModal from './AddTaskModal.jsx';
+import { TimeToast } from './TimeSpent.jsx';
 
 const STATUSES = ['todo', 'in_progress', 'done', 'approved'];
 
@@ -43,6 +44,7 @@ const KanbanBoard = () => {
 
   const { data: tasks = [], isLoading, error } = useTasks(dept && !allDepts ? dept : undefined);
   const setStatus = useSetTaskStatus();
+  const setTime   = useSetTaskTime();
 
   if (isLoading) {
     return (
@@ -81,6 +83,17 @@ const KanbanBoard = () => {
       return;
     }
     setStatus.mutate({ id: task._id, status: target });
+
+    // Finished your own task without a time yet → a small, skippable prompt.
+    if (target === 'done' && ownerId(task) === String(user._id) && !task.timeSpentMinutes) {
+      toast.custom((tt) => (
+        <TimeToast
+          visible={tt.visible}
+          onPick={(minutes) => { setTime.mutate({ id: task._id, minutes }); toast.dismiss(tt.id); }}
+          onDismiss={() => toast.dismiss(tt.id)}
+        />
+      ), { id: `time-${task._id}`, duration: 12000 });
+    }
   };
 
   return (

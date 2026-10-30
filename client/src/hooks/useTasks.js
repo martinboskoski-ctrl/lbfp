@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   listTasksApi, listTasksForUserApi, createTaskApi, updateTaskApi,
-  updateStatusApi, approveTaskApi, deleteTaskApi,
+  updateStatusApi, setTaskTimeApi, approveTaskApi, deleteTaskApi,
   requestTaskChangeApi, resolveTaskChangeApi,
 } from '../api/tasks.api.js';
 import toast from 'react-hot-toast';
@@ -63,6 +63,28 @@ export const useSetTaskStatus = () => {
       snapshots.forEach(([key, tasks]) => {
         if (!Array.isArray(tasks)) return;
         qc.setQueryData(key, tasks.map((t) => (t._id === id ? { ...t, status } : t)));
+      });
+      return { snapshots };
+    },
+    onError: (e, _vars, ctx) => {
+      ctx?.snapshots?.forEach(([key, data]) => qc.setQueryData(key, data));
+      onErr(e);
+    },
+    onSettled: () => invalidateAll(qc),
+  });
+};
+
+// Optimistic, so the time chip updates instantly on the card.
+export const useSetTaskTime = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, minutes }) => setTaskTimeApi(id, minutes),
+    onMutate: async ({ id, minutes }) => {
+      await qc.cancelQueries({ queryKey: ['tasks'] });
+      const snapshots = qc.getQueriesData({ queryKey: ['tasks'] });
+      snapshots.forEach(([key, tasks]) => {
+        if (!Array.isArray(tasks)) return;
+        qc.setQueryData(key, tasks.map((t) => (t._id === id ? { ...t, timeSpentMinutes: minutes ?? undefined } : t)));
       });
       return { snapshots };
     },

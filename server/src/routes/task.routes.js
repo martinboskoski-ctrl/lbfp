@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import authenticate from '../middleware/auth.js';
 import {
-  listTasks, createTask, updateTask, updateStatus, approveTask, deleteTask,
+  listTasks, createTask, updateTask, updateStatus, setTimeSpent, approveTask, deleteTask,
   requestChange, resolveChangeRequest,
 } from '../controllers/task.controller.js';
 
@@ -12,6 +12,7 @@ router.get('/',              listTasks);
 router.post('/',             createTask);
 router.patch('/:id',         updateTask);
 router.patch('/:id/status',  updateStatus);
+router.patch('/:id/time',    setTimeSpent);
 router.patch('/:id/approve', approveTask);
 router.post('/:id/change-requests',               requestChange);
 router.patch('/:id/change-requests/:crId/resolve', resolveChangeRequest);

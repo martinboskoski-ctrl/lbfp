@@ -32,6 +32,8 @@ const taskSchema = new mongoose.Schema(
     status:      { type: String, enum: ['todo','in_progress','done','approved'], default: 'todo' },
     approvedBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     approvedAt:  { type: Date },
+    // Time it took, reported (optionally) by the assignee once the task is done.
+    timeSpentMinutes: { type: Number, min: 0 },
     editHistory: [editVersionSchema],
     changeRequests: [changeRequestSchema],
   },
