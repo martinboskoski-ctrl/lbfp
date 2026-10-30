@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { clearChats } from '../components/assistant/chatStorage.js';
 import { getMeApi, loginApi, registerApi } from '../api/auth.api.js';
 import i18next from 'i18next';
 
@@ -13,6 +15,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const token = localStorage.getItem('packflow_token');
@@ -31,6 +34,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = useCallback(async (email, password) => {
     const { data } = await loginApi({ email, password });
+    clearChats(); // a fresh login never inherits a previous session's assistant chat
     localStorage.setItem('packflow_token', data.token);
     setUser(data.user);
     syncLang(data.user.language);
@@ -48,7 +52,10 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(() => {
     localStorage.removeItem('packflow_token');
     setUser(null);
-  }, []);
+    clearChats();
+    // Drop cached data so the next user never sees the previous user's answers.
+    queryClient.clear();
+  }, [queryClient]);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout }}>

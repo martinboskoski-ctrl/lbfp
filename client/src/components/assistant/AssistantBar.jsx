@@ -3,30 +3,30 @@ import { useTranslation } from 'react-i18next';
 import { Sparkles, Send, X, RotateCcw, Loader2, AlertTriangle } from 'lucide-react';
 import AssistantMarkdown from './AssistantMarkdown.jsx';
 import { useAssistantStatus, useAssistantChat } from '../../hooks/useAssistant.js';
-
-const STORAGE_KEY = 'packflow_assistant_chat';
-
-const loadChat = () => {
-  try { return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
-};
-const saveChat = (messages) => {
-  try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); } catch { /* storage unavailable */ }
-};
+import { useAuth } from '../../context/AuthContext.jsx';
+import { isTopManagement } from '../../utils/userTier.js';
+import { loadChat, saveChat } from './chatStorage.js';
 
 // Company AI assistant on Почетна: one input bar; the conversation opens in a panel
 // under it. Answers come only from app data, via server-side tools.
+// Keyed by user, so switching accounts always starts from that user's own chat.
 const AssistantBar = () => {
+  const { user } = useAuth();
+  return user ? <AssistantChat key={user._id} user={user} /> : null;
+};
+
+const AssistantChat = ({ user }) => {
   const { t } = useTranslation('assistant');
-  const { data: status } = useAssistantStatus();
+  const { data: status } = useAssistantStatus(user._id);
   const chat = useAssistantChat();
-  const [messages, setMessages] = useState(loadChat);
+  const [messages, setMessages] = useState(() => loadChat(user._id));
   const [input, setInput] = useState('');
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const listRef = useRef(null);
   const rootRef = useRef(null);
 
-  useEffect(() => { saveChat(messages); }, [messages]);
+  useEffect(() => { saveChat(user._id, messages); }, [user._id, messages]);
   useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' }); }, [messages, chat.isPending]);
 
   // Close the panel when clicking outside it.
@@ -37,7 +37,11 @@ const AssistantBar = () => {
     return () => document.removeEventListener('mousedown', onDown);
   }, [open]);
 
-  if (!status?.allowed) return null;
+  // Until the server answers (or if the check fails), fall back to the client-side rule
+  // so the bar never silently disappears for top management; the server still decides.
+  const allowed = status ? status.allowed : isTopManagement(user);
+  const configured = !!status?.configured;
+  if (!allowed) return null;
 
   const ask = (text) => {
     const question = text.trim();
@@ -69,8 +73,8 @@ const AssistantBar = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onFocus={() => setOpen(true)}
-          placeholder={status.configured ? t('placeholder') : t('notConfigured')}
-          disabled={!status.configured}
+          placeholder={configured ? t('placeholder') : t('notConfigured')}
+          disabled={!configured}
           className="flex-1 min-w-0 bg-transparent text-sm outline-none placeholder:text-slate-400 disabled:cursor-not-allowed"
         />
         {messages.length > 0 && !open && (
@@ -80,7 +84,7 @@ const AssistantBar = () => {
         )}
         <button
           type="submit"
-          disabled={!input.trim() || chat.isPending || !status.configured}
+          disabled={!input.trim() || chat.isPending || !configured}
           className="p-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:bg-slate-200 disabled:text-slate-400 shrink-0"
           aria-label={t('send')}
         >
@@ -88,7 +92,7 @@ const AssistantBar = () => {
         </button>
       </form>
 
-      {open && status.configured && (
+      {open && configured && (
         <div className="absolute left-0 right-0 top-full mt-2 z-30 rounded-xl border border-slate-200 bg-white shadow-xl flex flex-col max-h-[60vh]">
           <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100 shrink-0">
             <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">

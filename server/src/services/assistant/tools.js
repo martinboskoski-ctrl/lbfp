@@ -10,6 +10,7 @@ import PackagingCheck, { PACKAGING_SECTORS } from '../../models/PackagingCheck.j
 import Lead from '../../models/Lead.js';
 import Client from '../../models/Client.js';
 import { buildScopeFilter, decorateUserAlerts, buildEmployeeFile } from '../employeeFile.js';
+import { canViewEmployeeCards } from '../../utils/hrAccess.js';
 import { canSeeAgreement } from '../../controllers/agreement.controller.js';
 
 const isTopMgmt = (u) => u.department === 'top_management';
@@ -47,6 +48,7 @@ const taskRow = (t) => ({
   overdue: !!(t.deadline && new Date(t.deadline) < new Date() && !['done', 'approved'].includes(t.status)),
   assignee: t.assignedTo?.name || null,
   department: t.department,
+  timeSpentMinutes: t.timeSpentMinutes ?? null,
 });
 
 // Strip bulky / internal fields from an HR file before it goes to the model.
@@ -71,7 +73,11 @@ export const TOOLS = [
     description: 'Headline numbers for the company (or what the user can see): headcount per department, tasks by status and overdue, active projects, contracts expiring in 60 days, open packaging checks.',
     parameters: { type: 'object', properties: {}, required: [], additionalProperties: false },
     handler: async (user) => {
-      const users = await User.find({ ...buildScopeFilter(user), active: { $ne: false } }).select('department').lean();
+      // Headcount comes from the employee directory: top management + HR only.
+      const seesEmployees = canViewEmployeeCards(user);
+      const users = seesEmployees
+        ? await User.find({ active: { $ne: false } }).select('department').lean()
+        : [];
       const headcount = {};
       for (const u of users) headcount[u.department] = (headcount[u.department] || 0) + 1;
 
@@ -93,7 +99,8 @@ export const TOOLS = [
 
       return {
         today: day(new Date()),
-        headcount, employeesTotal: users.length,
+        headcount: seesEmployees ? headcount : null,
+        employeesTotal: seesEmployees ? users.length : null,
         tasks: { byStatus: taskStatus, overdue, total: tasks.length },
         activeProjects: projects,
         contracts: { total: agreements.length, expiringWithin60Days: expiringSoon },
@@ -103,7 +110,7 @@ export const TOOLS = [
   },
   {
     name: 'search_employees',
-    description: 'Find employees by name and/or department. Returns position, department, manager flag, contract status/end, seniority, remaining leave. Use get_employee_file for full details of one person.',
+    description: 'Find employees by name and/or department (top management and HR only). Returns position, department, manager flag, contract status/end, seniority, leave days remaining today (incl. last year\'s days until 30 June). Use get_employee_file for full details of one person.',
     parameters: {
       type: 'object',
       properties: { name: { ...nullable('string'), description: 'Part of the name, or null' }, department: deptParam },
@@ -111,6 +118,7 @@ export const TOOLS = [
       additionalProperties: false,
     },
     handler: async (user, { name, department }) => {
+      if (!canViewEmployeeCards(user)) return denied('employee records');
       const filter = buildScopeFilter(user);
       if (department) filter.department = department;
       if (name) filter.name = nameRe(name);
@@ -125,7 +133,7 @@ export const TOOLS = [
   },
   {
     name: 'get_employee_file',
-    description: "Full HR file of one employee as the user may see it: profile, contract, manager and direct reports, salary (only if the user may see it), disciplinary actions, leave balances, assets, documents, incidents.",
+    description: "Full HR file of one employee (top management and HR only): profile, contract, manager and direct reports, salary (only if the user may see it), disciplinary actions, assets, documents, incidents, and annual leave. In `leave`, each year's days are usable until 30 June of the next year; `years` has per year total, usedInYear, usedNextYear (Jan–Jun of the next year), remaining, validUntil; `entries` lists each leave taken with the year(s) it counted against.",
     parameters: {
       type: 'object',
       properties: { name: { type: 'string', description: "The employee's name (or part of it)" } },
@@ -133,6 +141,7 @@ export const TOOLS = [
       additionalProperties: false,
     },
     handler: async (user, { name }) => {
+      if (!canViewEmployeeCards(user)) return denied('employee records');
       const people = await findPeople(user, name);
       if (!people.length) return { error: 'no employee with that name is visible to this user' };
       if (people.length > 1) {
@@ -293,7 +302,7 @@ export const TOOLS = [
   },
   {
     name: 'packaging_checks',
-    description: "Packaging artwork checks: client, product, status (in_review, approved, changes_required), current round and remarks still waiting per sector.",
+    description: "Packaging artwork checks: client, product, status (in_review, approved, changes_required), current round, the client email's department paragraphs still waiting for approval per sector, and whether the email was sent.",
     parameters: {
       type: 'object',
       properties: {
@@ -307,16 +316,25 @@ export const TOOLS = [
       if (!canUsePackaging(user)) return denied('packaging checks');
       const checks = await PackagingCheck.find(status ? { status } : {}).sort({ updatedAt: -1 }).lean();
       let rows = checks.map((c) => {
-        const round = c.rounds.at(-1) || { remarks: [] };
+        const round = c.rounds.at(-1) || {};
+        const sections = round.email?.sections || [];
+        const emailSent = !!round.email?.sent?.at;
+        // Paragraphs not yet approved by their owning sector.
         const pending = {};
-        for (const r of round.remarks) if (r.status === 'pending') pending[r.sector] = (pending[r.sector] || 0) + 1;
+        if (!emailSent) {
+          for (const sec of sections) if (!sec.approval?.at) pending[sec.sector] = (pending[sec.sector] || 0) + 1;
+        }
         return {
           code: c.code, client: c.client, product: c.product, markets: c.markets, status: c.status,
-          round: round.number, remarks: round.remarks.length, pendingBySector: pending,
+          round: round.number ?? null,
+          remarks: sections.reduce((n, sec) => n + (sec.items?.length || 0), 0),
+          paragraphsAwaitingApprovalBySector: pending, emailSent,
           updated: day(c.updatedAt), link: `/tools/packaging/${c._id}`,
         };
       });
-      if (waitingOnSector) rows = rows.filter((r) => r.status === 'in_review' && r.pendingBySector[waitingOnSector]);
+      if (waitingOnSector) {
+        rows = rows.filter((r) => r.status === 'in_review' && r.paragraphsAwaitingApprovalBySector[waitingOnSector]);
+      }
       return truncated(rows);
     },
   },

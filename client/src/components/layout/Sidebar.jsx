@@ -10,7 +10,7 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { canManage, hasSalesAccess, isTopManagement, canUsePackagingTool } from '../../utils/userTier.js';
+import { hasSalesAccess, isTopManagement, canUsePackagingTool, canViewEmployeeCards } from '../../utils/userTier.js';
 import { useLhcOverview } from '../../hooks/useLhc.js';
 
 export const DEPARTMENTS = [
@@ -129,7 +129,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     if (onClose) onClose();
   };
 
-  const showEmployeesItem = canManage(user) || user?.department === 'hr';
+  const showEmployeesItem = canViewEmployeeCards(user);
 
   // ── Submenus ───────────────────────────────────────────────────
   const resourceItems = [
@@ -141,6 +141,11 @@ const Sidebar = ({ isOpen, onClose }) => {
           { to: '/leads',   icon: Target,    label: td('tabs.leads') },
         ]
       : []),
+  ];
+
+  const toolItems = [
+    ...(canUsePackagingTool(user) ? [{ to: '/tools/packaging', icon: ScanSearch, label: tp('title') }] : []),
+    ...(isTopManagement(user) ? [{ to: '/lhc', icon: Scale, label: t('compliance'), badge: lhcBadge }] : []),
   ];
 
   return (
@@ -189,11 +194,11 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div onClick={handleNavClick}>
               <NavItem to="/procedures" icon={ClipboardList} label={t('procedures')} />
             </div>
-            {canUsePackagingTool(user) && (
+            {toolItems.length > 0 && (
               <NavGroup
                 icon={ToolsIcon}
                 label={tp('toolsGroup')}
-                items={[{ to: '/tools/packaging', icon: ScanSearch, label: tp('title') }]}
+                items={toolItems}
                 onItemClick={handleNavClick}
               />
             )}
@@ -204,12 +209,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             {showEmployeesItem && (
               <div onClick={handleNavClick}>
                 <NavItem to="/employees" icon={Users2} label={t('employeesNav')} />
-              </div>
-            )}
-
-            {isTopManagement(user) && (
-              <div onClick={handleNavClick}>
-                <NavItem to="/lhc" icon={Scale} label={t('compliance')} badge={lhcBadge} />
               </div>
             )}
           </div>

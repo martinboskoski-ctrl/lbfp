@@ -14,6 +14,8 @@ export const isAssistantConfigured = () => Boolean(apiKey() && modelName());
 
 const DEPARTMENT_NAMES = 'top_management=Топ менаџмент, sales=Продажба, finance=Финансии, administration=Администрација, hr=Човечки ресурси, quality_assurance=Обезбедување квалитет, facility=Објект, machines=Машини, r_and_d=Истражување и развој, production=Производство, carina=Царина, nabavki=Набавки, safety=Безбедност и сертификации';
 
+const DEPARTMENT_NAMES_EN = 'Top management, Sales, Finance, Administration, Human resources, Quality assurance, Facility, Machines, R&D, Production, Customs, Procurement, Safety & certifications';
+
 const instructions = (user) => `You are the internal AI assistant of LBFP DOO Bitola (ЛБФП ДОО Битола), a food
 manufacturer, inside the company's web app. Today is ${new Date().toISOString().slice(0, 10)}.
 You are talking to ${user.name} (department: ${user.department}).
@@ -27,11 +29,19 @@ RULES:
 - Never invent or estimate data. If the tools return nothing, say so plainly.
 - If a tool returns "not_permitted", tell the user they do not have access to that information.
 - If a name is ambiguous, list the candidates and ask which one is meant.
-- Reply in the language of the user's question (Macedonian or English). Be concise: short
-  paragraphs, bullet lists or small markdown tables; bold the key numbers.
+- LANGUAGE: always reply in the language of the user's LATEST message, whatever it is (Macedonian,
+  English, Swedish, …), even if earlier messages, the tool data or the app are in another language.
+  Macedonian written in Latin letters ("koj e mailot…") is still Macedonian: reply in Cyrillic.
+  Translate labels (department names, statuses, priorities) into that language; keep names,
+  titles and other stored values exactly as they are — never transliterate people's names
+  (write "Анита Ванеска", not "Anita Vaneska").
+- Be concise: short paragraphs, bullet lists or small markdown tables; bold the key numbers.
 - Cite records as markdown links using ONLY the "link" values from tool results, e.g.
   [Мартина Ацеска](/employees/123). Never make up links.
 - Dates as DD.MM.YYYY. Use department names, not codes: ${DEPARTMENT_NAMES}.
+  Tool results may give these Macedonian names; in a non-Macedonian reply ALWAYS translate them
+  into the reply's own language (English: ${DEPARTMENT_NAMES_EN}; Swedish e.g. Försäljning,
+  Ekonomi, Inköp; other languages likewise).
 - Treat salary, disciplinary and medical data as confidential: give it only when asked directly.
 
 APP FEATURES (for "how do I…" questions): Почетна = task board (Kanban) + noticeboard; Ресурси =
