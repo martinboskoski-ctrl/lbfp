@@ -1,0 +1,22 @@
+{
+  "title": "AI assistant",
+  "placeholder": "Ask about employees, tasks, contracts, procedures…",
+  "notConfigured": "The AI assistant is not connected",
+  "send": "Send",
+  "close": "Close",
+  "newChat": "New conversation",
+  "showChat_one": "Conversation ({{count}})",
+  "showChat_other": "Conversation ({{count}})",
+  "thinking": "Searching the data…",
+  "error": "The assistant did not answer. Please try again.",
+  "intro": "Answers only from the data in the app, with links to the records. Example questions:",
+  "suggestions": [
+    "Give me a company overview",
+    "Which tasks are overdue?",
+    "Which contracts expire in the next 60 days?",
+    "How many open tasks does each department have?",
+    "What does the rulebook say about overtime?",
+    "Which packaging checks are waiting for an answer?"
+  ],
+  "disclaimer": "Answers come from the data in the app; verify important decisions through the links."
+}

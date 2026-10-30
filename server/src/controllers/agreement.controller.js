@@ -16,7 +16,7 @@ const POPULATE = [
 // Access is sector-scoped: a user may only VIEW agreements from their own
 // department. Only top management sees every sector. Confidential agreements are
 // further restricted within the sector to managers, HR managers, or the owner.
-const canSeeAgreement = (agreement, viewer) => {
+export const canSeeAgreement = (agreement, viewer) => {
   if (isTopMgmt(viewer)) return true;
   if (agreement.department !== viewer.department) return false;
   if (agreement.confidentiality === 'confidential') {
